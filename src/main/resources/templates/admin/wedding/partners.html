@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Partners</title></head>
+<body>
+  <main>
+    <h1>Partners</h1>
+    <p th:if="${param.partnerSaved}">Partner saved.</p>
+    <form method="post" th:action="@{/admin/wedding/partners/swap}">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+      <button type="submit">Swap partner order</button>
+    </form>
+    <section th:each="partner : ${partnerForms}">
+      <h2 th:text="${partner.fullName ?: 'Partner'}">Partner</h2>
+      <form method="post" enctype="multipart/form-data" th:action="@{/admin/wedding/partners/{id}(id=${partner.id})}">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <label>Full name <input name="fullName" th:value="${partner.fullName}" maxlength="160" required></label>
+        <label>Nickname <input name="nickname" th:value="${partner.nickname}" maxlength="80" required></label>
+        <label>Photo <input type="file" name="photo" accept="image/jpeg,image/png,image/webp"></label>
+        <label>Child-of label (Indonesian) <input name="childOfLabelId" th:value="${partner.childOfLabelId}" maxlength="120" required></label>
+        <label>Child-of label (English) <input name="childOfLabelEn" th:value="${partner.childOfLabelEn}" maxlength="120"></label>
+        <label>Parents (Indonesian) <input name="parentsNamesId" th:value="${partner.parentsNamesId}" maxlength="300" required></label>
+        <label>Parents (English) <input name="parentsNamesEn" th:value="${partner.parentsNamesEn}" maxlength="300"></label>
+        <label>Instagram URL <input name="instagramUrl" th:value="${partner.instagramUrl}" maxlength="500" inputmode="url"></label>
+        <button type="submit">Save partner</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

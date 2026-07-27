@@ -9,7 +9,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -18,13 +22,15 @@ public class WeddingContentService {
 	private final PartnerRepository partners;
 	private final EventPartRepository events;
 	private final StoryEntryRepository story;
+	private final PartnerPhotoStorage photoStorage;
 
 	public WeddingContentService(WeddingSettingsRepository settings, PartnerRepository partners,
-			EventPartRepository events, StoryEntryRepository story) {
+			EventPartRepository events, StoryEntryRepository story, PartnerPhotoStorage photoStorage) {
 		this.settings = settings;
 		this.partners = partners;
 		this.events = events;
 		this.story = story;
+		this.photoStorage = photoStorage;
 	}
 
 	@Transactional(readOnly = true)
@@ -59,6 +65,63 @@ public class WeddingContentService {
 	@Transactional
 	public void saveSettings(WeddingSettingsForm form) {
 		weddingSettings().update(form);
+	}
+
+	@Transactional(readOnly = true)
+	public List<PartnerForm> partnerForms() {
+		return partners.findAllByOrderByDisplayOrderAsc().stream().map(partner -> {
+			PartnerForm form = new PartnerForm();
+			form.setId(partner.getId());
+			form.setFullName(partner.getFullName());
+			form.setNickname(partner.getNickname());
+			form.setChildOfLabelId(partner.getChildOfLabelId());
+			form.setChildOfLabelEn(partner.getChildOfLabelEn());
+			form.setParentsNamesId(partner.getParentsNamesId());
+			form.setParentsNamesEn(partner.getParentsNamesEn());
+			form.setInstagramUrl(partner.getInstagramUrl());
+			return form;
+		}).toList();
+	}
+
+	@Transactional
+	public void savePartner(long id, PartnerForm form, MultipartFile photo) {
+		Partner partner = partners.findById(id).orElseThrow();
+		String oldPath = partner.getPhotoPath();
+		String newPath = photo != null && !photo.isEmpty() ? photoStorage.store(photo) : null;
+		try {
+			partner.update(form);
+			if (newPath != null) partner.replacePhoto(newPath);
+			partners.saveAndFlush(partner);
+		} catch (RuntimeException exception) {
+			if (newPath != null) photoStorage.delete(newPath);
+			throw exception;
+		}
+		if (newPath != null) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					if (oldPath != null) photoStorage.delete(oldPath);
+				}
+
+				@Override
+				public void afterCompletion(int status) {
+					if (status != STATUS_COMMITTED) photoStorage.delete(newPath);
+				}
+			});
+		}
+	}
+
+	@Transactional
+	public void swapPartners() {
+		List<Partner> orderedPartners = partners.findAllByOrderByDisplayOrderAsc();
+		Partner first = orderedPartners.getFirst();
+		Partner second = orderedPartners.get(1);
+		first.setDisplayOrder(0);
+		partners.saveAndFlush(first);
+		second.setDisplayOrder(1);
+		partners.saveAndFlush(second);
+		first.setDisplayOrder(2);
+		partners.saveAndFlush(first);
 	}
 
 	@Transactional(readOnly = true)

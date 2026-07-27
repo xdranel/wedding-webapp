@@ -91,4 +91,22 @@ public class Partner {
 	public String getInstagramUrl() {
 		return instagramUrl;
 	}
+
+	void update(PartnerForm form) {
+		fullName = form.getFullName();
+		nickname = form.getNickname();
+		childOfLabelId = form.getChildOfLabelId();
+		childOfLabelEn = form.getChildOfLabelEn();
+		parentsNamesId = form.getParentsNamesId();
+		parentsNamesEn = form.getParentsNamesEn();
+		instagramUrl = form.getInstagramUrl();
+	}
+
+	void replacePhoto(String photoPath) {
+		this.photoPath = photoPath;
+	}
+
+	void setDisplayOrder(int displayOrder) {
+		this.displayOrder = displayOrder;
+	}
 }
