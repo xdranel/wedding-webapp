@@ -106,4 +106,11 @@ public class WeddingSettings {
 		return fontPreset;
 	}
 
+	void publish() {
+		publicationState = PublicationState.PUBLISHED;
+	}
+
+	void returnToDraft() {
+		publicationState = PublicationState.DRAFT;
+	}
 }
