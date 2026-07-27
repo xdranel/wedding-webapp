@@ -18,7 +18,6 @@ do not commit that file.
 cp .env.example .env
 docker compose up -d mysql
 docker compose ps
-set -a && . ./.env && set +a
 ./mvnw spring-boot:run
 ```
 
@@ -26,7 +25,8 @@ set -a && . ./.env && set +a
 and `DB_PASSWORD` for the application, and `ADMIN_USERNAME` and
 `ADMIN_PASSWORD` for bootstrap. The bootstrap password must be at least 12
 characters. `MYSQL_HOST_PORT` defaults to `3307` so it does not conflict with
-a local MySQL/MariaDB on `3306`; keep `DB_URL` on the same host port.
+a local MySQL/MariaDB on `3306`; keep `DB_URL` on the same host port. Spring
+Boot imports `.env` directly, so IDE and Maven runs do not require `source`.
 
 For rootless Podman, start its Docker-compatible socket before running tests:
 

@@ -8,7 +8,6 @@ only in the untracked `.env` file.
 ```bash
 cp .env.example .env
 docker compose up -d mysql
-set -a && . ./.env && set +a
 ./mvnw spring-boot:run
 ```
 

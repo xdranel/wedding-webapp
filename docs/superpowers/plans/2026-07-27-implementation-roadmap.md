@@ -1,8 +1,8 @@
 # Wedding Invitation Implementation Roadmap
 
-Status: Phase 1 implementation and security review are in progress;
-Docker-backed runtime verification remains pending because this environment
-has no Docker socket.
+Status: Phase 1 complete and accepted on 2026-07-28. All 24 tests passed
+against MySQL 8.4 through rootless Podman, the application started
+successfully, and the health endpoint reported `UP`. Phase 2 planning is next.
 
 Detailed plans are written and executed one phase at a time. A phase must pass
 its tests and review before the next phase begins.
@@ -10,7 +10,7 @@ its tests and review before the next phase begins.
 | Phase | Deliverable | Detailed plan |
 |---|---|---|
 | 1 | Bootable MySQL-backed application, Flyway, admin/staff authentication, and three protected web areas | `2026-07-27-foundation.md` |
-| 2 | Wedding settings, bilingual content, partner/event/story sections, and guest invitation shell | Written after Phase 1 |
+| 2 | Wedding settings, bilingual content, partner/event/story sections, and guest invitation shell | Ready to write |
 | 3 | Categories, guest CRUD/archive, CSV import/export, WhatsApp templates, and manual delivery tracking | Written after Phase 2 |
 | 4 | RSVP, PIN protection/rate limits, greetings, private notes, token regeneration, and QR display/save | Written after Phase 3 |
 | 5 | Restricted staff scan/search, atomic check-in, duplicate handling, and administrator corrections | Written after Phase 4 |

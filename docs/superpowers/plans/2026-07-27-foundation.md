@@ -584,7 +584,6 @@ Document exactly:
 ```bash
 cp .env.example .env
 docker compose up -d mysql
-set -a && . ./.env && set +a
 ./mvnw spring-boot:run
 ```
 
@@ -604,7 +603,7 @@ docker compose logs mysql
 curl --fail http://localhost:8080/actuator/health
 ```
 
-- [ ] **Step 3: Verify from a clean Compose state**
+- [x] **Step 3: Verify from a clean Compose state**
 
 Run:
 
@@ -617,7 +616,7 @@ docker compose up -d mysql
 Expected: Compose configuration is valid, MySQL becomes healthy, and all tests
 pass.
 
-- [ ] **Step 4: Verify the application health endpoint**
+- [x] **Step 4: Verify the application health endpoint**
 
 Run the application with non-default bootstrap secrets, then:
 
@@ -627,18 +626,16 @@ curl --fail http://localhost:8080/actuator/health
 
 Expected: HTTP 200 with status `UP`.
 
-> Verification note (2026-07-28): `docker compose config` exited successfully,
-> but this environment has no Docker socket. Testcontainers therefore could not
-> start MySQL, direct application startup could not connect to MySQL, and the
-> health probe could not reach port 8080. Repeat Steps 3 and 4 in a
-> Docker-enabled environment before marking them complete.
+> Verification note (2026-07-28): rootless Podman provided the
+> Docker-compatible socket. All 24 tests passed against MySQL 8.4, the
+> application started successfully, and `/actuator/health` reported `UP`.
 
-- [ ] **Step 5: Update progress**
+- [x] **Step 5: Update progress**
 
 Mark only completed checkboxes in this plan. Add the Phase 1 completion commit
 to `2026-07-27-implementation-roadmap.md`; leave later phases unchanged.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add README.md docs/installation/development.md \
