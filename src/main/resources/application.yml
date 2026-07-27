@@ -2,7 +2,7 @@ spring:
   application:
     name: myweddinginvitation-webapp
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/wedding}
+    url: ${DB_URL:jdbc:mysql://localhost:3307/wedding}
     username: ${DB_USERNAME:wedding}
     password: ${DB_PASSWORD:wedding}
   jpa:
@@ -15,6 +15,8 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
+  config:
+    import: optional:file:.env[.properties]
 app:
   bootstrap-admin:
     username: ${ADMIN_USERNAME}
