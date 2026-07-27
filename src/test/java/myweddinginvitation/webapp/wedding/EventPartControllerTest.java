@@ -76,7 +76,9 @@ class EventPartControllerTest {
 				.param("addressId", "")
 				.param("mapUrl", "javascript:alert(1)"))
 				.andExpect(status().isOk())
-				.andExpect(model().attributeHasFieldErrors("form", "endTime", "venueName", "addressId", "mapUrl"));
+				.andExpect(model().attributeHasFieldErrors("form", "endTime", "venueName", "addressId", "mapUrl"))
+				.andExpect(content().string(containsString("End time must be after start time")))
+				.andExpect(content().string(containsString("javascript:alert(1)")));
 	}
 
 	@Test
@@ -90,6 +92,8 @@ class EventPartControllerTest {
 		EventPart saved = events.findByType(EventType.RECEPTION).orElseThrow();
 		assertThat(saved.isVisible()).isFalse();
 		assertThat(saved.getDate()).isNull();
+		mockMvc.perform(get("/admin/wedding?eventsSaved").session(adminSession))
+				.andExpect(content().string(containsString("Event saved.")));
 	}
 
 	@Test
@@ -112,6 +116,21 @@ class EventPartControllerTest {
 		assertThat(saved.getDate()).isEqualTo(LocalDate.of(2027, 5, 1));
 		assertThat(saved.getStartTime()).isEqualTo(LocalTime.of(10, 0));
 		assertThat(saved.getEndTime()).isEqualTo(LocalTime.of(11, 0));
+
+		mockMvc.perform(post("/admin/wedding/events/CEREMONY")
+				.session(adminSession)
+				.with(csrf())
+				.param("version", "0")
+				.param("visible", "true")
+				.param("eventDate", "2027-05-01")
+				.param("startTime", "10:00")
+				.param("endTime", "11:00")
+				.param("venueName", "Updated Gedung")
+				.param("addressId", "Jakarta")
+				.param("mapUrl", "https://maps.example.test"))
+				.andExpect(redirectedUrl("/admin/wedding?eventsSaved"));
+		assertThat(events.findAll()).hasSize(1);
+		assertThat(events.findByType(EventType.CEREMONY).orElseThrow().getVenueName()).isEqualTo("Updated Gedung");
 
 		mockMvc.perform(post("/admin/wedding/events/CEREMONY")
 				.session(adminSession)
@@ -146,6 +165,67 @@ class EventPartControllerTest {
 				.session(staffSession)
 				.with(csrf()))
 				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	void staleEventEditPreservesCurrentContentAndRendersConflict() throws Exception {
+		mockMvc.perform(post("/admin/wedding/events/CEREMONY")
+				.session(adminSession)
+				.with(csrf())
+				.param("visible", "true")
+				.param("eventDate", "2027-05-01")
+				.param("startTime", "10:00")
+				.param("venueName", "Original Gedung")
+				.param("addressId", "Jakarta")
+				.param("mapUrl", "https://maps.example.test"))
+				.andExpect(redirectedUrl("/admin/wedding?eventsSaved"));
+
+		EventPart newer = events.findByType(EventType.CEREMONY).orElseThrow();
+		newer.update(eventForm("Newer Gedung"));
+		events.saveAndFlush(newer);
+
+		mockMvc.perform(post("/admin/wedding/events/CEREMONY")
+				.session(adminSession)
+				.with(csrf())
+				.param("version", "0")
+				.param("visible", "true")
+				.param("eventDate", "2027-05-01")
+				.param("startTime", "10:00")
+				.param("venueName", "Stale Gedung")
+				.param("addressId", "Jakarta")
+				.param("mapUrl", "https://maps.example.test"))
+				.andExpect(status().isOk())
+				.andExpect(model().attributeHasErrors("form"))
+				.andExpect(content().string(containsString("changed by another administrator")))
+				.andExpect(content().string(containsString("Stale Gedung")));
+
+		assertThat(events.findByType(EventType.CEREMONY).orElseThrow().getVenueName()).isEqualTo("Newer Gedung");
+	}
+
+	@Test
+	void eventPostWithoutCsrfIsForbidden() throws Exception {
+		mockMvc.perform(post("/admin/wedding/events/CEREMONY").session(adminSession))
+				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	void invalidEventTypeIsRejectedWithoutWritingAnEvent() throws Exception {
+		mockMvc.perform(post("/admin/wedding/events/INVALID")
+				.session(adminSession)
+				.with(csrf()))
+				.andExpect(status().isBadRequest());
+		assertThat(events.findAll()).isEmpty();
+	}
+
+	private EventPartForm eventForm(String venueName) {
+		EventPartForm form = new EventPartForm();
+		form.setVisible(true);
+		form.setEventDate(LocalDate.of(2027, 5, 1));
+		form.setStartTime(LocalTime.of(10, 0));
+		form.setVenueName(venueName);
+		form.setAddressId("Jakarta");
+		form.setMapUrl("https://maps.example.test");
+		return form;
 	}
 
 	private MockHttpSession login(String username) throws Exception {

@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "event_part")
@@ -18,6 +19,9 @@ public class EventPart {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@Version
+	private long version;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "event_type", nullable = false, length = 20)
@@ -69,6 +73,10 @@ public class EventPart {
 
 	public Long getId() {
 		return id;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 
 	public EventType getType() {

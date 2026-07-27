@@ -11,6 +11,8 @@
     <section aria-labelledby="ceremony-heading">
       <h2 id="ceremony-heading">Ceremony</h2>
       <form method="post" th:action="@{/admin/wedding/events/CEREMONY}" th:object="${ceremonyForm}">
+        <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Event error</p>
+        <input type="hidden" th:field="*{version}">
         <label><input type="checkbox" th:field="*{visible}"> Show ceremony</label>
         <label for="ceremony-date">Date</label>
         <input id="ceremony-date" type="date" th:field="*{eventDate}">
@@ -38,6 +40,8 @@
     <section aria-labelledby="reception-heading">
       <h2 id="reception-heading">Reception</h2>
       <form method="post" th:action="@{/admin/wedding/events/RECEPTION}" th:object="${receptionForm}">
+        <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Event error</p>
+        <input type="hidden" th:field="*{version}">
         <label><input type="checkbox" th:field="*{visible}"> Show reception</label>
         <label for="reception-date">Date</label>
         <input id="reception-date" type="date" th:field="*{eventDate}">

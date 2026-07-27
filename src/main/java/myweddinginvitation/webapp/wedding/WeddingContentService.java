@@ -12,6 +12,7 @@ import java.util.Locale;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -72,6 +73,7 @@ public class WeddingContentService {
 	public EventPartForm eventForm(EventType type) {
 		EventPartForm form = new EventPartForm();
 		events.findByType(type).ifPresent(event -> {
+			form.setVersion(event.getVersion());
 			form.setVisible(event.isVisible());
 			form.setEventDate(event.getDate());
 			form.setStartTime(event.getStartTime());
@@ -86,9 +88,22 @@ public class WeddingContentService {
 
 	@Transactional
 	public void saveEvent(EventType type, EventPartForm form) {
-		EventPart event = events.findByType(type).orElseGet(() -> EventPart.create(type));
-		event.update(form);
-		events.save(event);
+		EventPart event = events.findByType(type).orElse(null);
+		if (event != null) {
+			if (!java.util.Objects.equals(event.getVersion(), form.getVersion())) {
+				throw new OptimisticLockingFailureException("Event has changed");
+			}
+			event.update(form);
+			events.saveAndFlush(event);
+			return;
+		}
+		try {
+			event = EventPart.create(type);
+			event.update(form);
+			events.saveAndFlush(event);
+		} catch (DataIntegrityViolationException exception) {
+			throw new OptimisticLockingFailureException("Event has changed", exception);
+		}
 	}
 
 	@Transactional(readOnly = true)

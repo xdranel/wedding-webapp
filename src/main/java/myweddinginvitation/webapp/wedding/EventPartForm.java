@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public class EventPartForm {
+	private Long version;
+
 	private boolean visible;
 
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -30,6 +32,8 @@ public class EventPartForm {
 	@Size(max = 1000)
 	private String mapUrl;
 
+	public Long getVersion() { return version; }
+	public void setVersion(Long version) { this.version = version; }
 	public boolean isVisible() { return visible; }
 	public void setVisible(boolean visible) { this.visible = visible; }
 	public LocalDate getEventDate() { return eventDate; }

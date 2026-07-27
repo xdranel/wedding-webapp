@@ -1,13 +1,18 @@
 package myweddinginvitation.webapp.wedding;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Controller
 public class EventPartController {
@@ -26,12 +31,21 @@ public class EventPartController {
 	@PostMapping("/admin/wedding/events/{type}")
 	String saveEvent(@PathVariable EventType type, @Valid @ModelAttribute("form") EventPartForm form, BindingResult result, Model model) {
 		validateVisibleEvent(form, result);
-		if (result.hasErrors()) {
-			forms(model, type, form, result);
-			return "admin/wedding/events";
+		if (!result.hasErrors()) {
+			try {
+				weddingContent.saveEvent(type, form);
+				return "redirect:/admin/wedding?eventsSaved";
+			} catch (OptimisticLockingFailureException exception) {
+				result.reject("event.conflict", "This event changed by another administrator. Reload and try again.");
+			}
 		}
-		weddingContent.saveEvent(type, form);
-		return "redirect:/admin/wedding?eventsSaved";
+		forms(model, type, form, result);
+		return "admin/wedding/events";
+	}
+
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	void invalidEventType() {
 	}
 
 	private void forms(Model model, EventType editedType, EventPartForm submitted, BindingResult result) {

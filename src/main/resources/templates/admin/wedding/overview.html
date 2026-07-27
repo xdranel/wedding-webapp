@@ -10,6 +10,7 @@
     <h1>Wedding content</h1>
     <p role="status" th:text="${overview.publicationState}">DRAFT</p>
     <p th:if="${param.settingsSaved}">Settings saved.</p>
+    <p role="status" th:if="${param.eventsSaved}">Event saved.</p>
     <section>
       <h2>Setup checklist</h2>
       <ul>
