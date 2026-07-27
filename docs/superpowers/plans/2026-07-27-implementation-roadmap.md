@@ -1,6 +1,6 @@
 # Wedding Invitation Implementation Roadmap
 
-Status: approved design awaiting execution
+Status: Phase 1 documentation is complete; Docker-backed runtime verification remains pending because this environment has no Docker socket.
 
 Detailed plans are written and executed one phase at a time. A phase must pass
 its tests and review before the next phase begins.

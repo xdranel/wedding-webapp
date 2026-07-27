@@ -572,7 +572,7 @@ git commit -m "feat: add guest admin and check-in web areas"
 **Interfaces:**
 - Produces: repeatable local startup and test commands for a new contributor.
 
-- [ ] **Step 1: Write the concise README quick start**
+- [x] **Step 1: Write the concise README quick start**
 
 Document exactly:
 
@@ -586,7 +586,7 @@ set -a && . ./.env && set +a
 State that real secrets belong only in `.env`, MySQL 8.4 is required, and the
 first login must change the bootstrap password.
 
-- [ ] **Step 2: Write the development guide**
+- [x] **Step 2: Write the development guide**
 
 Document prerequisites (Java 21, Docker, Docker Compose), environment
 variables, MySQL volume lifecycle, tests, health endpoint, direct Maven
@@ -621,6 +621,12 @@ curl --fail http://localhost:8080/actuator/health
 ```
 
 Expected: HTTP 200 with status `UP`.
+
+> Verification note (2026-07-28): `docker compose config` exited successfully,
+> but this environment has no Docker socket. Testcontainers therefore could not
+> start MySQL, direct application startup could not connect to MySQL, and the
+> health probe could not reach port 8080. Repeat Steps 3 and 4 in a
+> Docker-enabled environment before marking them complete.
 
 - [ ] **Step 5: Update progress**
 
