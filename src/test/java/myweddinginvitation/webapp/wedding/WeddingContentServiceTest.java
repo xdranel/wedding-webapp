@@ -95,6 +95,20 @@ class WeddingContentServiceTest {
 	}
 
 	@Test
+	void publicationRequiresNavigableHttpMapUrl() {
+		completePartners("Rama", "Shinta");
+		visibleEvent(EventType.CEREMONY, LocalDate.of(2027, 5, 1), null);
+
+		assertThat(service.publish()).isEqualTo(new PublicationCheck(true, java.util.List.of()));
+		for (String invalidUrl : java.util.List.of("https:maps.example.test", "https:/maps.example.test", "ftp://maps.example.test")) {
+			jdbc.update("update event_part set map_url = ? where event_type = 'CEREMONY'", invalidUrl);
+
+			assertThat(service.checkPublication().errors())
+					.contains("Ceremony: map URL must use HTTP or HTTPS", "At least one complete event must be visible");
+		}
+	}
+
+	@Test
 	void successfulPublicationCanReturnToDraft() {
 		completePartners("Rama", "Shinta");
 		visibleEvent(EventType.CEREMONY, LocalDate.of(2027, 5, 1), null);

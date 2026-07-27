@@ -195,8 +195,9 @@ public class WeddingContentService {
 	private boolean isHttpUrl(String value) {
 		if (!hasText(value)) return false;
 		try {
-			String scheme = URI.create(value).getScheme();
-			return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
+			URI uri = URI.create(value);
+			return !uri.isOpaque() && hasText(uri.getHost())
+					&& ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme()));
 		} catch (IllegalArgumentException exception) {
 			return false;
 		}
