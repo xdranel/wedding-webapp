@@ -10,7 +10,7 @@ its tests and review before the next phase begins.
 | Phase | Deliverable | Detailed plan |
 |---|---|---|
 | 1 | Bootable MySQL-backed application, Flyway, admin/staff authentication, and three protected web areas | `2026-07-27-foundation.md` |
-| 2 | Wedding settings, bilingual content, partner/event/story sections, and guest invitation shell | Ready to write |
+| 2 | Wedding settings, bilingual content, partner/event/story sections, and guest invitation shell | Design approved: `../specs/2026-07-28-phase-2-wedding-content-design.md` |
 | 3 | Categories, guest CRUD/archive, CSV import/export, WhatsApp templates, and manual delivery tracking | Written after Phase 2 |
 | 4 | RSVP, PIN protection/rate limits, greetings, private notes, token regeneration, and QR display/save | Written after Phase 3 |
 | 5 | Restricted staff scan/search, atomic check-in, duplicate handling, and administrator corrections | Written after Phase 4 |
