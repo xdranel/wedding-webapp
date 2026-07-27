@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "story_entry")
@@ -15,6 +16,9 @@ public class StoryEntry {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@Version
+	private long version;
 
 	@Column(name = "story_date")
 	private LocalDate date;
@@ -37,8 +41,19 @@ public class StoryEntry {
 	protected StoryEntry() {
 	}
 
+	static StoryEntry create(StoryEntryForm form, int displayOrder) {
+		StoryEntry entry = new StoryEntry();
+		entry.displayOrder = displayOrder;
+		entry.update(form);
+		return entry;
+	}
+
 	public Long getId() {
 		return id;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 
 	public LocalDate getDate() {
@@ -63,5 +78,17 @@ public class StoryEntry {
 
 	public int getDisplayOrder() {
 		return displayOrder;
+	}
+
+	void update(StoryEntryForm form) {
+		date = form.getDate();
+		titleId = form.getTitleId();
+		titleEn = form.getTitleEn();
+		bodyId = form.getBodyId();
+		bodyEn = form.getBodyEn();
+	}
+
+	void setDisplayOrder(int displayOrder) {
+		this.displayOrder = displayOrder;
 	}
 }

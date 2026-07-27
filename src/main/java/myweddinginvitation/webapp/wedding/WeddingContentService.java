@@ -123,6 +123,51 @@ public class WeddingContentService {
 		}).toList();
 	}
 
+	@Transactional(readOnly = true)
+	public List<StoryEntryForm> storyForms() {
+		return story.findAllByOrderByDisplayOrderAsc().stream().map(this::storyForm).toList();
+	}
+
+	@Transactional
+	public long addStory(StoryEntryForm form) {
+		List<StoryEntry> orderedStory = story.findAllByOrderByDisplayOrderAscForUpdate();
+		int displayOrder = orderedStory.stream().mapToInt(StoryEntry::getDisplayOrder).max().orElse(0) + 1;
+		return story.saveAndFlush(StoryEntry.create(form, displayOrder)).getId();
+	}
+
+	@Transactional
+	public void updateStory(long id, StoryEntryForm form) {
+		StoryEntry entry = story.findById(id).orElseThrow();
+		if (!java.util.Objects.equals(entry.getVersion(), form.getVersion())) {
+			throw new OptimisticLockingFailureException("Story has changed");
+		}
+		entry.update(form);
+		story.saveAndFlush(entry);
+	}
+
+	@Transactional
+	public void deleteStory(long id) {
+		List<StoryEntry> orderedStory = story.findAllByOrderByDisplayOrderAscForUpdate();
+		StoryEntry deleted = orderedStory.stream().filter(entry -> entry.getId() == id).findFirst().orElseThrow();
+		story.delete(deleted);
+		story.flush();
+		int displayOrder = 1;
+		for (StoryEntry entry : orderedStory) {
+			if (entry != deleted) entry.setDisplayOrder(displayOrder++);
+		}
+		story.flush();
+	}
+
+	@Transactional
+	public void moveStoryUp(long id) {
+		moveStory(id, -1);
+	}
+
+	@Transactional
+	public void moveStoryDown(long id) {
+		moveStory(id, 1);
+	}
+
 	@Transactional
 	public void savePartner(long id, PartnerForm form, MultipartFile photo) {
 		Partner partner = partners.findById(id).orElseThrow();
@@ -165,6 +210,24 @@ public class WeddingContentService {
 		partners.saveAndFlush(second);
 		first.setDisplayOrder(2);
 		partners.saveAndFlush(first);
+	}
+
+	private void moveStory(long id, int direction) {
+		List<StoryEntry> orderedStory = story.findAllByOrderByDisplayOrderAscForUpdate();
+		int index = java.util.stream.IntStream.range(0, orderedStory.size())
+				.filter(candidate -> orderedStory.get(candidate).getId() == id).findFirst().orElseThrow();
+		int adjacent = index + direction;
+		if (adjacent < 0 || adjacent >= orderedStory.size()) return;
+		StoryEntry selected = orderedStory.get(index);
+		StoryEntry neighbor = orderedStory.get(adjacent);
+		int selectedOrder = selected.getDisplayOrder();
+		int neighborOrder = neighbor.getDisplayOrder();
+		selected.setDisplayOrder(0);
+		story.saveAndFlush(selected);
+		neighbor.setDisplayOrder(selectedOrder);
+		story.saveAndFlush(neighbor);
+		selected.setDisplayOrder(neighborOrder);
+		story.saveAndFlush(selected);
 	}
 
 	@Transactional(readOnly = true)
@@ -298,6 +361,18 @@ public class WeddingContentService {
 			if (!hasText(entry.getBodyEn())) warnings.add(label + "English body is missing");
 		}
 		return warnings;
+	}
+
+	private StoryEntryForm storyForm(StoryEntry entry) {
+		StoryEntryForm form = new StoryEntryForm();
+		form.setId(entry.getId());
+		form.setVersion(entry.getVersion());
+		form.setDate(entry.getDate());
+		form.setTitleId(entry.getTitleId());
+		form.setTitleEn(entry.getTitleEn());
+		form.setBodyId(entry.getBodyId());
+		form.setBodyEn(entry.getBodyEn());
+		return form;
 	}
 
 	private String coupleTitle(WeddingSettings weddingSettings, List<Partner> orderedPartners) {
