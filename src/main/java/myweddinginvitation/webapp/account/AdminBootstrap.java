@@ -3,7 +3,6 @@ package myweddinginvitation.webapp.account;
 import myweddinginvitation.webapp.config.AppProperties;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,12 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminBootstrap implements ApplicationRunner {
 	private final UserAccountRepository accounts;
 	private final AppProperties.BootstrapAdmin bootstrapAdmin;
-	private final PasswordEncoder passwordEncoder =
-			PasswordEncoderFactories.createDelegatingPasswordEncoder();
+	private final PasswordEncoder passwordEncoder;
 
-	public AdminBootstrap(UserAccountRepository accounts, AppProperties properties) {
+	public AdminBootstrap(UserAccountRepository accounts, AppProperties properties,
+			PasswordEncoder passwordEncoder) {
 		this.accounts = accounts;
 		this.bootstrapAdmin = properties.bootstrapAdmin();
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override

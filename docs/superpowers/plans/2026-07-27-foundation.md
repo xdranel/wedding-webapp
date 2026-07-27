@@ -4,7 +4,7 @@
 
 **Goal:** Produce a bootable Spring Boot monolith backed by MySQL 8.4 LTS with Flyway-managed accounts, secure administrator/staff sessions, and working guest/admin/check-in route boundaries.
 
-**Architecture:** Keep one server-rendered Spring Boot application organized by feature. MySQL is the only persistence target, Testcontainers supplies the integration database, and Spring Security uses database-backed form login with role-specific session timeouts.
+**Architecture:** Keep one server-rendered Spring Boot application organized by feature. MySQL is the only persistence target, Spring-managed Testcontainers supplies the integration database, and Spring Security uses database-backed form login with a 30-minute administrator inactivity timeout and an absolute 12-hour staff lifetime.
 
 **Tech Stack:** Java 21, Spring Boot 4.1, Spring MVC, Thymeleaf, Spring Data JPA, Spring Security, Bean Validation, Flyway, MySQL 8.4 LTS, Maven, JUnit 5, Testcontainers, Docker Compose.
 
@@ -17,7 +17,13 @@
 - Flyway exclusively owns schema creation and migration.
 - Secrets come from environment variables and must not be committed.
 - Exactly one administrator account is bootstrapped from deployment secrets.
-- Administrator inactivity timeout is 30 minutes; staff session lifetime is 12 hours.
+- Administrator inactivity timeout is 30 minutes; staff session lifetime is
+  an absolute 12 hours.
+- Every authenticated request revalidates account enabled state and session
+  version. Password changes and account disablement revoke existing sessions.
+- Five consecutive failed account logins lock authentication for 15 minutes.
+- A bootstrap administrator must change its password before accessing other
+  authenticated pages.
 - `/admin/**` is administrator-only; `/check-in/**` permits administrator or staff.
 - Keep CSRF protection enabled for state-changing browser requests.
 - Use no Lombok, service interfaces, base repositories, mapping framework, or speculative abstractions.
@@ -51,7 +57,7 @@ src/main/resources/templates/admin/home.html
 src/main/resources/templates/checkin/home.html
 src/main/resources/templates/error/403.html
 src/main/resources/templates/error/500.html
-src/test/java/.../support/MySqlContainerTest.java
+src/test/java/.../support/MySqlTestConfiguration.java
 src/test/java/.../account/AdminBootstrapTest.java
 src/test/java/.../config/SecurityRoutesTest.java
 src/test/java/.../DatabaseMigrationTest.java
@@ -67,12 +73,13 @@ docs/installation/development.md
 - Create: `src/main/resources/application.yml`
 - Create: `compose.yaml`
 - Create: `.env.example`
-- Create: `src/test/java/myweddinginvitation/webapp/support/MySqlContainerTest.java`
+- Create: `src/test/java/myweddinginvitation/webapp/support/MySqlTestConfiguration.java`
 - Modify: `src/test/java/myweddinginvitation/webapp/MyweddinginvitationWebappApplicationTests.java`
 
 **Interfaces:**
 - Produces: MySQL datasource from `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`.
-- Produces: reusable `MySqlContainerTest` base class for later integration tests.
+- Produces: reusable Spring-managed `MySqlTestConfiguration` imported by
+  later integration tests.
 
 - [ ] **Step 1: Replace unsupported dependencies**
 
@@ -80,32 +87,20 @@ In `pom.xml`, replace `org.mariadb.jdbc:mariadb-java-client` with runtime
 `com.mysql:mysql-connector-j`; remove Lombok and its compiler/exclude
 configuration; add `spring-boot-starter-security`,
 `spring-boot-starter-actuator`, test-scoped `spring-boot-testcontainers`,
-`org.testcontainers:junit-jupiter`, `org.testcontainers:mysql`, and
+`org.testcontainers:testcontainers-mysql`, and
 `org.springframework.security:spring-security-test`.
 
 - [ ] **Step 2: Add the failing MySQL context test**
 
-Create `MySqlContainerTest`:
+Create a `@TestConfiguration(proxyBeanMethods = false)` containing a
+`@Bean @ServiceConnection MySQLContainer<?>` using `mysql:8.4.10`. Import that
+configuration into each MySQL-backed Spring test. Spring owns the container
+lifecycle for the lifetime of its cached application context; do not use the
+JUnit `@Testcontainers`/`@Container` static-field lifecycle.
 
-```java
-package myweddinginvitation.webapp.support;
-
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
-@Testcontainers
-public abstract class MySqlContainerTest {
-    @Container
-    @ServiceConnection
-    protected static final MySQLContainer<?> MYSQL =
-            new MySQLContainer<>("mysql:8.4.10");
-}
-```
-
-Make `MyweddinginvitationWebappApplicationTests` extend this class. Keep its
-`contextLoads()` test.
+Keep `contextLoads()` and supply test-only bootstrap properties through test
+annotations or dynamic properties. Do not add a test `application.yml` that
+shadows production configuration.
 
 - [ ] **Step 3: Run the test and verify the old configuration fails**
 
@@ -198,14 +193,15 @@ package myweddinginvitation.webapp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import myweddinginvitation.webapp.support.MySqlContainerTest;
+import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest
-class DatabaseMigrationTest extends MySqlContainerTest {
+@Import(MySqlTestConfiguration.class)
+class DatabaseMigrationTest {
     @Autowired JdbcTemplate jdbc;
 
     @Test
@@ -288,7 +284,6 @@ git commit -m "feat: add Flyway-managed user accounts"
 - Create: `src/main/java/myweddinginvitation/webapp/config/AppProperties.java`
 - Create: `src/main/java/myweddinginvitation/webapp/account/AdminBootstrap.java`
 - Create: `src/test/java/myweddinginvitation/webapp/account/AdminBootstrapTest.java`
-- Create: `src/test/resources/application.yml`
 - Modify: `src/main/java/myweddinginvitation/webapp/MyweddinginvitationWebappApplication.java`
 - Modify: `src/main/resources/application.yml`
 - Modify: `.env.example`
@@ -344,15 +339,9 @@ app:
 ```
 
 Add only variable names and `change-this-before-running` examples to
-`.env.example`. Create `src/test/resources/application.yml` with isolated,
-non-production credentials:
-
-```yaml
-app:
-  bootstrap-admin:
-    username: test-admin
-    password: Test-Only-Password-2026
-```
+`.env.example`. Supply isolated non-production credentials with
+`@SpringBootTest(properties = ...)` or `@DynamicPropertySource`, preserving
+all production configuration in tests.
 
 - [ ] **Step 4: Run the bootstrap test**
 
@@ -368,7 +357,6 @@ Expected: PASS.
 
 ```bash
 git add .env.example src/main/resources/application.yml \
-  src/test/resources/application.yml \
   src/main/java/myweddinginvitation/webapp/MyweddinginvitationWebappApplication.java \
   src/main/java/myweddinginvitation/webapp/config/AppProperties.java \
   src/main/java/myweddinginvitation/webapp/account/AdminBootstrap.java \
@@ -389,7 +377,10 @@ git commit -m "feat: bootstrap the primary administrator"
 **Interfaces:**
 - Produces: `UserDetails DatabaseUserDetailsService.loadUserByUsername(String username)`.
 - Produces: form login at `/login`.
-- Produces: ADMIN session inactivity timeout `1800`; STAFF timeout `43200`.
+- Produces: ADMIN session inactivity timeout `1800`; STAFF session absolute
+  expiry after `43200` seconds.
+- Produces: login failure lockout, login-success failure reset, first-login
+  password change, and per-request enabled/session-version validation.
 
 - [ ] **Step 1: Write failing route-security tests**
 
@@ -450,9 +441,23 @@ http.authorizeHttpRequests(auth -> auth
     .logout(logout -> logout.logoutSuccessUrl("/login?logout"));
 ```
 
-Keep CSRF enabled. The success handler sets the HTTP session timeout to 1800
-seconds for admins or 43200 seconds for staff, then redirects to `/admin` or
+Keep CSRF enabled. The success handler resets login failures, records the
+authenticated account session version and login time, sets the HTTP session
+timeout to 1800 seconds for admins or 43200 seconds for staff, then redirects
+first-login users to password change and other users to `/admin` or
 `/check-in`.
+
+On every authenticated request, reject missing, disabled, or session-version
+mismatched accounts. Reject staff sessions whose recorded authentication time
+is at least 12 hours old. While `password_change_required` is true, allow only
+password change and logout. Five consecutive failed logins lock the known
+account for 15 minutes without disclosing whether the username exists.
+
+The minimum password-change form requires the current password, a new password
+of at least 12 characters, and confirmation. Success clears
+`password_change_required`, increments `session_version`, invalidates the
+current session, and returns to login. Password reset and email flows remain
+out of scope.
 
 - [ ] **Step 4: Add the accessible login template**
 
@@ -657,7 +662,10 @@ Acceptance requires:
 - Flyway owns the account schema.
 - Exactly one bootstrap administrator is created idempotently.
 - Guest route is public; administrator and staff boundaries are enforced.
-- Admin and staff receive the correct session timeout.
+- Admin receives the correct inactivity timeout and staff authentication
+  expires after an absolute 12 hours.
+- Account lockout, first-login password change, disabled-account rejection,
+  and session-version revocation are enforced.
 - CSRF remains enabled.
 - Health endpoint reports `UP`.
 - README and development guide reproduce startup without committed secrets.

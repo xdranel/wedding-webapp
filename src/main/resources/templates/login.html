@@ -11,6 +11,8 @@
     <h1>Sign in</h1>
     <p th:if="${param.error}" role="alert">Invalid username or password.</p>
     <p th:if="${param.logout}" role="status">You have signed out.</p>
+    <p th:if="${param.expired}" role="alert">Your session has expired.</p>
+    <p th:if="${param.passwordChanged}" role="status">Password changed. Sign in again.</p>
     <form method="post" th:action="@{/login}">
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
       <p>

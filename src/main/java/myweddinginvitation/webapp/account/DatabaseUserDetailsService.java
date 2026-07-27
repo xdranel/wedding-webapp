@@ -1,5 +1,7 @@
 package myweddinginvitation.webapp.account;
 
+import java.time.Instant;
+
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,6 +25,7 @@ public class DatabaseUserDetailsService implements UserDetailsService {
 				.password(account.getPasswordHash())
 				.roles(account.getRole().name())
 				.disabled(!account.isEnabled())
+				.accountLocked(account.isLoginLocked(Instant.now()))
 				.build();
 	}
 }

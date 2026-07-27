@@ -1,5 +1,8 @@
 package myweddinginvitation.webapp.account;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -34,6 +37,9 @@ public class UserAccount {
 
 	@Column(name = "failed_login_count", nullable = false)
 	private int failedLoginCount;
+
+	@Column(name = "locked_until")
+	private Instant lockedUntil;
 
 	@Column(name = "session_version", nullable = false)
 	private long sessionVersion;
@@ -75,7 +81,47 @@ public class UserAccount {
 		return failedLoginCount;
 	}
 
+	public Instant getLockedUntil() {
+		return lockedUntil;
+	}
+
 	public long getSessionVersion() {
 		return sessionVersion;
+	}
+
+	boolean isLoginLocked(Instant now) {
+		return lockedUntil != null && now.isBefore(lockedUntil);
+	}
+
+	void loginFailed(Instant now) {
+		if (isLoginLocked(now)) {
+			return;
+		}
+		if (lockedUntil != null) {
+			failedLoginCount = 0;
+			lockedUntil = null;
+		}
+		failedLoginCount++;
+		if (failedLoginCount >= 5) {
+			lockedUntil = now.plus(Duration.ofMinutes(15));
+		}
+	}
+
+	void loginSucceeded() {
+		failedLoginCount = 0;
+		lockedUntil = null;
+	}
+
+	void changePassword(String passwordHash) {
+		this.passwordHash = passwordHash;
+		passwordChangeRequired = false;
+		sessionVersion++;
+	}
+
+	void disable() {
+		if (enabled) {
+			enabled = false;
+			sessionVersion++;
+		}
 	}
 }

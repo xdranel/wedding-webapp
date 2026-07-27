@@ -2,26 +2,27 @@ package myweddinginvitation.webapp.account;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import myweddinginvitation.webapp.support.MySqlContainerTest;
+import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 @SpringBootTest
-class AdminBootstrapTest extends MySqlContainerTest {
-	private static final PasswordEncoder PASSWORD_ENCODER =
-			PasswordEncoderFactories.createDelegatingPasswordEncoder();
-
+@Import(MySqlTestConfiguration.class)
+class AdminBootstrapTest {
 	@Autowired
 	private AdminBootstrap bootstrap;
 
 	@Autowired
 	private UserAccountRepository repository;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@DynamicPropertySource
 	static void bootstrapAdminProperties(DynamicPropertyRegistry registry) {
@@ -41,7 +42,7 @@ class AdminBootstrapTest extends MySqlContainerTest {
 
 		assertThat(repository.countByRole(AccountRole.ADMIN)).isEqualTo(1);
 		UserAccount admin = repository.findByUsernameIgnoreCase("owner").orElseThrow();
-		assertThat(PASSWORD_ENCODER.matches("Correct-Horse-2026", admin.getPasswordHash()))
+		assertThat(passwordEncoder.matches("Correct-Horse-2026", admin.getPasswordHash()))
 				.isTrue();
 		assertThat(admin.isPasswordChangeRequired()).isTrue();
 	}

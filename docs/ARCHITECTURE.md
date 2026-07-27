@@ -113,6 +113,14 @@ directly to web forms.
 
 - Spring Security session authentication protects administrator and staff
   areas.
+- Administrator sessions use a 30-minute inactivity timeout. Staff sessions
+  are revalidated on every authenticated request and have an absolute
+  12-hour lifetime.
+- Disabled accounts, password changes, and account session-version changes
+  invalidate existing authenticated sessions.
+- Five consecutive failed account logins lock authentication for 15 minutes.
+- Bootstrap administrators must replace their deployment password before
+  accessing any authenticated area other than password change and logout.
 - CSRF protection remains enabled for state-changing web requests.
 - Administrator and staff permissions are role-separated.
 - Account passwords use a strong password encoder.

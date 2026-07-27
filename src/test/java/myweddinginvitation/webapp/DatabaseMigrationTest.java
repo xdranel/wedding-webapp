@@ -5,14 +5,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import myweddinginvitation.webapp.account.AccountRole;
 import myweddinginvitation.webapp.account.UserAccount;
 import myweddinginvitation.webapp.account.UserAccountRepository;
-import myweddinginvitation.webapp.support.MySqlContainerTest;
+import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-@SpringBootTest
-class DatabaseMigrationTest extends MySqlContainerTest {
+@SpringBootTest(properties = {
+		"app.bootstrap-admin.username=test-admin",
+		"app.bootstrap-admin.password=Test-Only-Password-2026"
+})
+@Import(MySqlTestConfiguration.class)
+class DatabaseMigrationTest {
 	@Autowired
 	JdbcTemplate jdbc;
 
@@ -27,6 +32,12 @@ class DatabaseMigrationTest extends MySqlContainerTest {
 				Integer.class);
 
 		assertThat(count).isEqualTo(1);
+
+		Integer successfulMigration = jdbc.queryForObject(
+				"select count(*) from flyway_schema_history "
+						+ "where version = '1' and script = 'V1__accounts.sql' and success = true",
+				Integer.class);
+		assertThat(successfulMigration).isEqualTo(1);
 	}
 
 	@Test
