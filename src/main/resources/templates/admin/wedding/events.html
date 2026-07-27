@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wedding events</title>
+</head>
+<body>
+  <main>
+    <h1>Wedding events</h1>
+    <section aria-labelledby="ceremony-heading">
+      <h2 id="ceremony-heading">Ceremony</h2>
+      <form method="post" th:action="@{/admin/wedding/events/CEREMONY}" th:object="${ceremonyForm}">
+        <label><input type="checkbox" th:field="*{visible}"> Show ceremony</label>
+        <label for="ceremony-date">Date</label>
+        <input id="ceremony-date" type="date" th:field="*{eventDate}">
+        <p th:if="${#fields.hasErrors('eventDate')}" th:errors="*{eventDate}" role="alert">Date error</p>
+        <label for="ceremony-start">Start time</label>
+        <input id="ceremony-start" type="time" th:field="*{startTime}">
+        <p th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" role="alert">Start time error</p>
+        <label for="ceremony-end">End time</label>
+        <input id="ceremony-end" type="time" th:field="*{endTime}">
+        <p th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" role="alert">End time error</p>
+        <label for="ceremony-venue">Venue name</label>
+        <input id="ceremony-venue" th:field="*{venueName}" maxlength="200">
+        <p th:if="${#fields.hasErrors('venueName')}" th:errors="*{venueName}" role="alert">Venue error</p>
+        <label for="ceremony-address-id">Address (Indonesian)</label>
+        <textarea id="ceremony-address-id" th:field="*{addressId}" maxlength="1000"></textarea>
+        <p th:if="${#fields.hasErrors('addressId')}" th:errors="*{addressId}" role="alert">Address error</p>
+        <label for="ceremony-address-en">Address (English, falls back to Indonesian)</label>
+        <textarea id="ceremony-address-en" th:field="*{addressEn}" maxlength="1000"></textarea>
+        <label for="ceremony-map">Map URL</label>
+        <input id="ceremony-map" th:field="*{mapUrl}" maxlength="1000" inputmode="url">
+        <p th:if="${#fields.hasErrors('mapUrl')}" th:errors="*{mapUrl}" role="alert">Map URL error</p>
+        <button type="submit">Save ceremony</button>
+      </form>
+    </section>
+    <section aria-labelledby="reception-heading">
+      <h2 id="reception-heading">Reception</h2>
+      <form method="post" th:action="@{/admin/wedding/events/RECEPTION}" th:object="${receptionForm}">
+        <label><input type="checkbox" th:field="*{visible}"> Show reception</label>
+        <label for="reception-date">Date</label>
+        <input id="reception-date" type="date" th:field="*{eventDate}">
+        <p th:if="${#fields.hasErrors('eventDate')}" th:errors="*{eventDate}" role="alert">Date error</p>
+        <label for="reception-start">Start time</label>
+        <input id="reception-start" type="time" th:field="*{startTime}">
+        <p th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" role="alert">Start time error</p>
+        <label for="reception-end">End time</label>
+        <input id="reception-end" type="time" th:field="*{endTime}">
+        <p th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" role="alert">End time error</p>
+        <label for="reception-venue">Venue name</label>
+        <input id="reception-venue" th:field="*{venueName}" maxlength="200">
+        <p th:if="${#fields.hasErrors('venueName')}" th:errors="*{venueName}" role="alert">Venue error</p>
+        <label for="reception-address-id">Address (Indonesian)</label>
+        <textarea id="reception-address-id" th:field="*{addressId}" maxlength="1000"></textarea>
+        <p th:if="${#fields.hasErrors('addressId')}" th:errors="*{addressId}" role="alert">Address error</p>
+        <label for="reception-address-en">Address (English, falls back to Indonesian)</label>
+        <textarea id="reception-address-en" th:field="*{addressEn}" maxlength="1000"></textarea>
+        <label for="reception-map">Map URL</label>
+        <input id="reception-map" th:field="*{mapUrl}" maxlength="1000" inputmode="url">
+        <p th:if="${#fields.hasErrors('mapUrl')}" th:errors="*{mapUrl}" role="alert">Map URL error</p>
+        <button type="submit">Save reception</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

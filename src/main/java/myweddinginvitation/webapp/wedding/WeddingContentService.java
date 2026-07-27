@@ -69,6 +69,29 @@ public class WeddingContentService {
 	}
 
 	@Transactional(readOnly = true)
+	public EventPartForm eventForm(EventType type) {
+		EventPartForm form = new EventPartForm();
+		events.findByType(type).ifPresent(event -> {
+			form.setVisible(event.isVisible());
+			form.setEventDate(event.getDate());
+			form.setStartTime(event.getStartTime());
+			form.setEndTime(event.getEndTime());
+			form.setVenueName(event.getVenueName());
+			form.setAddressId(event.getAddressId());
+			form.setAddressEn(event.getAddressEn());
+			form.setMapUrl(event.getMapUrl());
+		});
+		return form;
+	}
+
+	@Transactional
+	public void saveEvent(EventType type, EventPartForm form) {
+		EventPart event = events.findByType(type).orElseGet(() -> EventPart.create(type));
+		event.update(form);
+		events.save(event);
+	}
+
+	@Transactional(readOnly = true)
 	public List<PartnerForm> partnerForms() {
 		return partners.findAllByOrderByDisplayOrderAsc().stream().map(partner -> {
 			PartnerForm form = new PartnerForm();
@@ -282,7 +305,7 @@ public class WeddingContentService {
 		}
 	}
 
-	private boolean isHttpUrl(String value) {
+	static boolean isHttpUrl(String value) {
 		if (!hasText(value)) return false;
 		try {
 			URI uri = URI.create(value);

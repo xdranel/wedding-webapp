@@ -50,6 +50,23 @@ public class EventPart {
 	protected EventPart() {
 	}
 
+	static EventPart create(EventType type) {
+		EventPart event = new EventPart();
+		event.type = type;
+		return event;
+	}
+
+	void update(EventPartForm form) {
+		visible = form.isVisible();
+		date = form.getEventDate();
+		startTime = form.getStartTime();
+		endTime = form.getEndTime();
+		venueName = form.getVenueName();
+		addressId = form.getAddressId();
+		addressEn = form.getAddressEn();
+		mapUrl = form.getMapUrl();
+	}
+
 	public Long getId() {
 		return id;
 	}
