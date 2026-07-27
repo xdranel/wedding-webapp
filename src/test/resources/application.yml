@@ -1,0 +1,4 @@
+app:
+  bootstrap-admin:
+    username: test-admin
+    password: Test-Only-Password-2026

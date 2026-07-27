@@ -15,6 +15,10 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
+app:
+  bootstrap-admin:
+    username: ${ADMIN_USERNAME}
+    password: ${ADMIN_PASSWORD}
 server:
   forward-headers-strategy: framework
 management:
