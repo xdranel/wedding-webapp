@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: myweddinginvitation-webapp
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/wedding}
+    username: ${DB_USERNAME:wedding}
+    password: ${DB_PASSWORD:wedding}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+server:
+  forward-headers-strategy: framework
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
