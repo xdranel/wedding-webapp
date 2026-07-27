@@ -1,4 +1,5 @@
 .worktrees/
+.env
 
 HELP.md
 target/
