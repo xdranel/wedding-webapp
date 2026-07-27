@@ -24,6 +24,9 @@ class WeddingContentMigrationTest {
 	@Autowired
 	PartnerRepository partners;
 
+	@Autowired
+	WeddingContentBootstrap bootstrap;
+
 	@Test
 	void flywayCreatesWeddingContentAndBootstrapCreatesFixedRows() {
 		assertThat(jdbc.queryForObject("""
@@ -38,5 +41,25 @@ class WeddingContentMigrationTest {
 		assertThat(partners.findAllByOrderByDisplayOrderAsc())
 				.extracting(Partner::getDisplayOrder)
 				.containsExactly(1, 2);
+	}
+
+	@Test
+	void bootstrapRepairsMissingPartnerWithoutOverwritingExistingPartner() {
+		Partner existing = partners.findAllByOrderByDisplayOrderAsc().getFirst();
+		long existingId = existing.getId();
+		jdbc.update("update partner set full_name = ? where id = ?", "Preserved Partner", existingId);
+		partners.deleteById(partners.findAllByOrderByDisplayOrderAsc().get(1).getId());
+
+		bootstrap.run(null);
+		bootstrap.run(null);
+
+		Partner preserved = partners.findById(existingId).orElseThrow();
+		assertThat(preserved)
+				.extracting(Partner::getId, Partner::getDisplayOrder, Partner::getFullName)
+				.containsExactly(existingId, 1, "Preserved Partner");
+		assertThat(partners.findAllByOrderByDisplayOrderAsc())
+				.extracting(Partner::getDisplayOrder)
+				.containsExactly(1, 2);
+		assertThat(partners.count()).isEqualTo(2);
 	}
 }
