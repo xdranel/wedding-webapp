@@ -3,11 +3,10 @@
 ## Prerequisites
 
 - Java 21
-- Docker with a running daemon
-- Docker Compose
+- Docker with Compose, or Podman with a Compose provider
 
-The application uses MySQL 8.4. Docker must be available to both Compose and
-the Testcontainers-based test suite.
+The application uses MySQL 8.4. A Docker-compatible container socket must be
+available to both Compose and the Testcontainers-based test suite.
 
 ## Configure and start
 
@@ -26,7 +25,16 @@ set -a && . ./.env && set +a
 `.env` supplies the `MYSQL_*` variables for Compose, `DB_URL`, `DB_USERNAME`,
 and `DB_PASSWORD` for the application, and `ADMIN_USERNAME` and
 `ADMIN_PASSWORD` for bootstrap. The bootstrap password must be at least 12
-characters.
+characters. `MYSQL_HOST_PORT` defaults to `3307` so it does not conflict with
+a local MySQL/MariaDB on `3306`; keep `DB_URL` on the same host port.
+
+For rootless Podman, start its Docker-compatible socket before running tests:
+
+```bash
+systemctl --user enable --now podman.socket
+export DOCKER_HOST="unix://${XDG_RUNTIME_DIR}/podman/podman.sock"
+export TESTCONTAINERS_RYUK_DISABLED=true
+```
 
 At startup, the application creates one enabled administrator only when no
 administrator exists. Re-running it does not create another administrator or
