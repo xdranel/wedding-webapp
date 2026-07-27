@@ -113,4 +113,17 @@ public class WeddingSettings {
 	void returnToDraft() {
 		publicationState = PublicationState.DRAFT;
 	}
+
+	void update(WeddingSettingsForm form) {
+		coupleTitle = form.getCoupleTitle();
+		openingTextId = form.getOpeningTextId();
+		openingTextEn = form.getOpeningTextEn();
+		closingTextId = form.getClosingTextId();
+		closingTextEn = form.getClosingTextEn();
+		timeZone = form.getTimeZone();
+		rsvpDeadline = form.getRsvpDeadline();
+		defaultPhoneCountry = form.getDefaultPhoneCountry();
+		accentColor = form.getAccentColor();
+		fontPreset = form.getFontPreset();
+	}
 }

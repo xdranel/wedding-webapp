@@ -40,6 +40,28 @@ public class WeddingContentService {
 	}
 
 	@Transactional(readOnly = true)
+	public WeddingSettingsForm settingsForm() {
+		WeddingSettings source = weddingSettings();
+		WeddingSettingsForm form = new WeddingSettingsForm();
+		form.setCoupleTitle(source.getCoupleTitle());
+		form.setOpeningTextId(source.getOpeningTextId());
+		form.setOpeningTextEn(source.getOpeningTextEn());
+		form.setClosingTextId(source.getClosingTextId());
+		form.setClosingTextEn(source.getClosingTextEn());
+		form.setTimeZone(source.getTimeZone());
+		form.setRsvpDeadline(source.getRsvpDeadline());
+		form.setDefaultPhoneCountry(source.getDefaultPhoneCountry());
+		form.setAccentColor(source.getAccentColor());
+		form.setFontPreset(source.getFontPreset());
+		return form;
+	}
+
+	@Transactional
+	public void saveSettings(WeddingSettingsForm form) {
+		weddingSettings().update(form);
+	}
+
+	@Transactional(readOnly = true)
 	public PublicationCheck checkPublication() {
 		WeddingSettings weddingSettings = weddingSettings();
 		return new PublicationCheck(weddingSettings.getPublicationState() == PublicationState.PUBLISHED,
