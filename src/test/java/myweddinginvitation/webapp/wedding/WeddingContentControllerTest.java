@@ -3,6 +3,7 @@ package myweddinginvitation.webapp.wedding;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -85,6 +86,32 @@ class WeddingContentControllerTest {
 				.session(staffSession)
 				.with(csrf()))
 				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	void overviewLinksToEveryWeddingSectionAndShowsPublicationErrors() throws Exception {
+		mockMvc.perform(get("/admin/wedding").session(adminSession))
+				.andExpect(status().isOk())
+				.andExpect(view().name("admin/wedding/overview"))
+				.andExpect(content().string(containsString("/admin/wedding/settings")))
+				.andExpect(content().string(containsString("/admin/wedding/partners")))
+				.andExpect(content().string(containsString("/admin/wedding/events")))
+				.andExpect(content().string(containsString("/admin/wedding/story")))
+				.andExpect(content().string(containsString("/admin/wedding/preview")))
+				.andExpect(content().string(containsString("Partner 1: full name is required")));
+	}
+
+	@Test
+	void failedPublicationReturnsToOverviewWithErrors() throws Exception {
+		mockMvc.perform(post("/admin/wedding/publish")
+				.session(adminSession)
+				.with(csrf()))
+				.andExpect(redirectedUrl("/admin/wedding"));
+
+		assertThat(settings.getSingleton().orElseThrow().getPublicationState())
+				.isEqualTo(PublicationState.DRAFT);
+		mockMvc.perform(get("/admin/wedding").session(adminSession))
+				.andExpect(content().string(containsString("At least one complete event must be visible")));
 	}
 
 	@Test

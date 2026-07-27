@@ -17,12 +17,20 @@
         <li th:text="${publication.errors.empty} ? 'Ready to publish' : 'Publication requirements remain'">Publication status</li>
       </ul>
     </section>
+    <section th:if="${!publication.errors.empty}">
+      <h2>Publication requirements</h2>
+      <ul><li th:each="error : ${publication.errors}" th:text="${error}">Requirement</li></ul>
+    </section>
     <section th:if="${!overview.translationWarnings.empty}">
       <h2>Translation warnings</h2>
       <ul><li th:each="warning : ${overview.translationWarnings}" th:text="${warning}">Warning</li></ul>
     </section>
     <nav aria-label="Wedding content sections">
       <a th:href="@{/admin/wedding/settings}">General settings</a>
+      <a th:href="@{/admin/wedding/partners}">Partners</a>
+      <a th:href="@{/admin/wedding/events}">Events</a>
+      <a th:href="@{/admin/wedding/story}">Story</a>
+      <a th:href="@{/admin/wedding/preview}">Preview</a>
     </nav>
     <form th:if="${overview.publicationState.name() == 'DRAFT'}" method="post" th:action="@{/admin/wedding/publish}">
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
