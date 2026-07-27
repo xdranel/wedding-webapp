@@ -41,6 +41,18 @@ class PartnerPhotoStorageTest {
 				"photo", "large.jpg", "image/jpeg", new byte[10 * 1024 * 1024 + 1])));
 	}
 
+	@Test
+	void acceptsPhotoAtExactTenMiBLimit() {
+		byte[] photo = new byte[10 * 1024 * 1024];
+		photo[0] = (byte) 0xff;
+		photo[1] = (byte) 0xd8;
+		photo[2] = (byte) 0xff;
+
+		String path = new PartnerPhotoStorage(mediaDirectory).store(new MockMultipartFile("photo", "limit.jpg", "image/jpeg", photo));
+
+		assertThat(mediaDirectory.resolve(path)).exists();
+	}
+
 	@ParameterizedTest
 	@MethodSource("validSignatures")
 	void acceptsEveryRequiredPhotoFormat(String filename, byte[] signature) {

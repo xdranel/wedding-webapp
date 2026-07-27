@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,11 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
+	@Bean
+	WebSecurityCustomizer requestRejectedHandler() {
+		return web -> web.requestRejectedHandler((request, response, exception) -> response.sendError(404));
+	}
+
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http,
 			RoleSessionAuthenticationSuccessHandler roleSessionAuthenticationSuccessHandler,

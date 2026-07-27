@@ -4,6 +4,7 @@ import java.net.URI;
 
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class PartnerController {
@@ -35,6 +37,8 @@ public class PartnerController {
 			try {
 				weddingContent.savePartner(id, form, photo);
 				return "redirect:/admin/wedding/partners?partnerSaved";
+			} catch (OptimisticLockingFailureException exception) {
+				result.reject("partner.conflict", "This partner changed by another administrator. Reload and try again.");
 			} catch (IllegalArgumentException exception) {
 				result.rejectValue("photo", "photo.invalid", exception.getMessage());
 			}
@@ -46,9 +50,14 @@ public class PartnerController {
 	}
 
 	@PostMapping("/admin/wedding/partners/swap")
-	String swapPartners() {
-		weddingContent.swapPartners();
-		return "redirect:/admin/wedding/partners?partnersSwapped";
+	String swapPartners(RedirectAttributes redirectAttributes) {
+		try {
+			weddingContent.swapPartners();
+			return "redirect:/admin/wedding/partners?partnersSwapped";
+		} catch (OptimisticLockingFailureException exception) {
+			redirectAttributes.addFlashAttribute("swapError", "Partners changed by another administrator. Reload and try again.");
+			return "redirect:/admin/wedding/partners";
+		}
 	}
 
 	private void validateInstagram(PartnerForm form, BindingResult result) {

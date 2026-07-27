@@ -12,6 +12,7 @@ import java.util.Locale;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.stereotype.Service;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,6 +73,7 @@ public class WeddingContentService {
 		return partners.findAllByOrderByDisplayOrderAsc().stream().map(partner -> {
 			PartnerForm form = new PartnerForm();
 			form.setId(partner.getId());
+			form.setVersion(partner.getVersion());
 			form.setFullName(partner.getFullName());
 			form.setNickname(partner.getNickname());
 			form.setChildOfLabelId(partner.getChildOfLabelId());
@@ -86,6 +88,9 @@ public class WeddingContentService {
 	@Transactional
 	public void savePartner(long id, PartnerForm form, MultipartFile photo) {
 		Partner partner = partners.findById(id).orElseThrow();
+		if (!java.util.Objects.equals(partner.getVersion(), form.getVersion())) {
+			throw new OptimisticLockingFailureException("Partner has changed");
+		}
 		String oldPath = partner.getPhotoPath();
 		String newPath = photo != null && !photo.isEmpty() ? photoStorage.store(photo) : null;
 		try {

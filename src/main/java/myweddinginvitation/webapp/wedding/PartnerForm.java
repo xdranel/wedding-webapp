@@ -1,12 +1,16 @@
 package myweddinginvitation.webapp.wedding;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.web.multipart.MultipartFile;
 
 public class PartnerForm {
 	private Long id;
+
+	@NotNull
+	private Long version;
 
 	@NotBlank @Size(max = 160)
 	private String fullName;
@@ -33,6 +37,8 @@ public class PartnerForm {
 
 	public Long getId() { return id; }
 	public void setId(Long id) { this.id = id; }
+	public Long getVersion() { return version; }
+	public void setVersion(Long version) { this.version = version; }
 	public String getFullName() { return fullName; }
 	public void setFullName(String fullName) { this.fullName = fullName; }
 	public String getNickname() { return nickname; }

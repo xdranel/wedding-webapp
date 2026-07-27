@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "partner")
@@ -13,6 +14,9 @@ public class Partner {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@Version
+	private long version;
 
 	@Column(name = "display_order", nullable = false, columnDefinition = "tinyint")
 	private int displayOrder;
@@ -54,6 +58,10 @@ public class Partner {
 
 	public Long getId() {
 		return id;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 
 	public int getDisplayOrder() {

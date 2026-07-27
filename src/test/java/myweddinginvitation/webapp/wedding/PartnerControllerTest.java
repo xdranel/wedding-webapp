@@ -81,18 +81,21 @@ class PartnerControllerTest {
 	@Test
 	void invalidReplacementPreservesExistingPhoto() throws Exception {
 		String oldPath = saveValidPartnerPhoto();
+		long version = currentVersion();
 
 		mockMvc.perform(multipart("/admin/wedding/partners/{id}", partnerId)
 				.file(new MockMultipartFile("photo", "bad.jpg", "image/jpeg", "bad".getBytes(UTF_8)))
 				.session(adminSession)
 				.with(csrf())
+				.param("version", Long.toString(version))
 				.param("fullName", "Rama")
 				.param("nickname", "Rama")
 				.param("childOfLabelId", "Putra dari")
 				.param("parentsNamesId", "Ayah & Ibu"))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/wedding/partners"))
-				.andExpect(model().attributeHasFieldErrors("form", "photo"));
+				.andExpect(model().attributeHasFieldErrors("form", "photo"))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("Photo must be a JPEG, PNG, or WebP image")));
 
 		assertThat(partners.findById(partnerId).orElseThrow().getPhotoPath()).isEqualTo(oldPath);
 		assertThat(MEDIA_DIRECTORY.resolve(oldPath)).exists();
@@ -101,11 +104,13 @@ class PartnerControllerTest {
 	@Test
 	void successfulReplacementDeletesOldPhotoAfterSavingNewPath() throws Exception {
 		String oldPath = saveValidPartnerPhoto();
+		long version = currentVersion();
 
 		mockMvc.perform(multipart("/admin/wedding/partners/{id}", partnerId)
 				.file(new MockMultipartFile("photo", "new.png", "image/png", png()))
 				.session(adminSession)
 				.with(csrf())
+				.param("version", Long.toString(version))
 				.param("fullName", "Rama")
 				.param("nickname", "Rama")
 				.param("childOfLabelId", "Putra dari")
@@ -128,6 +133,36 @@ class PartnerControllerTest {
 				.andExpect(header().string("X-Content-Type-Options", "nosniff"));
 		mockMvc.perform(get("/admin/wedding/media/{filename}", path).session(staffSession))
 				.andExpect(status().isForbidden());
+		mockMvc.perform(get("/admin/wedding/media/missing.jpg").session(adminSession))
+				.andExpect(status().isNotFound());
+		mockMvc.perform(get("/admin/wedding/media/{filename}", "../outside.jpg").session(adminSession))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	void stalePartnerEditPreservesExistingPhotoAndDoesNotStoreTheSubmittedPhoto() throws Exception {
+		String oldPath = saveValidPartnerPhoto();
+		long staleVersion = currentVersion();
+		Partner newer = partners.findById(partnerId).orElseThrow();
+		newer.update(validForm("Newer Rama"));
+		partners.saveAndFlush(newer);
+
+		mockMvc.perform(multipart("/admin/wedding/partners/{id}", partnerId)
+				.file(new MockMultipartFile("photo", "new.png", "image/png", png()))
+				.session(adminSession)
+				.with(csrf())
+				.param("version", Long.toString(staleVersion))
+				.param("fullName", "Stale Rama")
+				.param("nickname", "Rama")
+				.param("childOfLabelId", "Putra dari")
+				.param("parentsNamesId", "Ayah & Ibu"))
+				.andExpect(status().isOk())
+				.andExpect(model().attributeHasErrors("form"))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("changed by another administrator")));
+
+		assertThat(partners.findById(partnerId).orElseThrow().getPhotoPath()).isEqualTo(oldPath);
+		assertThat(MEDIA_DIRECTORY.resolve(oldPath)).exists();
+		assertThat(Files.list(MEDIA_DIRECTORY).toList()).hasSize(1);
 	}
 
 	@Test
@@ -146,15 +181,24 @@ class PartnerControllerTest {
 	private String saveValidPartnerPhoto() {
 		String path = storage.store(new MockMultipartFile("photo", "old.jpg", "image/jpeg", jpeg()));
 		Partner partner = partners.findById(partnerId).orElseThrow();
-		PartnerForm form = new PartnerForm();
-		form.setFullName("Rama");
-		form.setNickname("Rama");
-		form.setChildOfLabelId("Putra dari");
-		form.setParentsNamesId("Ayah & Ibu");
+		PartnerForm form = validForm("Rama");
 		partner.update(form);
 		partner.replacePhoto(path);
 		partners.saveAndFlush(partner);
 		return path;
+	}
+
+	private PartnerForm validForm(String fullName) {
+		PartnerForm form = new PartnerForm();
+		form.setFullName(fullName);
+		form.setNickname("Rama");
+		form.setChildOfLabelId("Putra dari");
+		form.setParentsNamesId("Ayah & Ibu");
+		return form;
+	}
+
+	private long currentVersion() {
+		return partners.findById(partnerId).orElseThrow().getVersion();
 	}
 
 	private static byte[] jpeg() {
