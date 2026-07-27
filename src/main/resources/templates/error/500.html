@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Something went wrong</title>
+</head>
+<body>
+  <main>
+    <h1>Something went wrong</h1>
+    <p>Please try again later.</p>
+    <p th:if="${reference}" role="status">Reference: <span th:text="${reference}"></span></p>
+  </main>
+</body>
+</html>

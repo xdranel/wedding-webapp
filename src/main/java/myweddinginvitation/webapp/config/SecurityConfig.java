@@ -12,7 +12,8 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http,
-			RoleSessionAuthenticationSuccessHandler roleSessionAuthenticationSuccessHandler)
+			RoleSessionAuthenticationSuccessHandler roleSessionAuthenticationSuccessHandler,
+			WebErrorHandler webErrorHandler)
 			throws Exception {
 		return http
 				.authorizeHttpRequests(auth -> auth
@@ -26,6 +27,7 @@ public class SecurityConfig {
 						.loginPage("/login")
 						.successHandler(roleSessionAuthenticationSuccessHandler)
 						.permitAll())
+				.exceptionHandling(exceptions -> exceptions.accessDeniedHandler(webErrorHandler))
 				.logout(logout -> logout.logoutSuccessUrl("/login?logout"))
 				.build();
 	}

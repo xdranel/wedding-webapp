@@ -1,9 +1,13 @@
 package myweddinginvitation.webapp.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import myweddinginvitation.webapp.account.AccountRole;
 import myweddinginvitation.webapp.account.UserAccount;
@@ -24,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(SecurityRoutesTest.ProbeConfiguration.class)
+@Import(SecurityRoutesTest.ErrorProbeConfiguration.class)
 class SecurityRoutesTest extends MySqlContainerTest {
 
 	@Autowired
@@ -42,23 +46,47 @@ class SecurityRoutesTest extends MySqlContainerTest {
 
 	@Test
 	void anonymousUsersCanOnlyAccessGuestRoutes() throws Exception {
-		mockMvc.perform(get("/admin/probe")).andExpect(status().is3xxRedirection());
-		mockMvc.perform(get("/check-in/probe")).andExpect(status().is3xxRedirection());
-		mockMvc.perform(get("/i/probe")).andExpect(status().isOk());
+		mockMvc.perform(get("/admin")).andExpect(status().is3xxRedirection());
+		mockMvc.perform(get("/check-in")).andExpect(status().is3xxRedirection());
+		mockMvc.perform(get("/i/demo"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("guest/home"))
+				.andExpect(content().string(containsString("Your Invitation")));
 	}
 
 	@Test
 	@WithMockUser(roles = "STAFF")
 	void staffCannotAccessAdministrationButCanAccessCheckIn() throws Exception {
-		mockMvc.perform(get("/admin/probe")).andExpect(status().isForbidden());
-		mockMvc.perform(get("/check-in/probe")).andExpect(status().isOk());
+		mockMvc.perform(get("/admin"))
+				.andExpect(status().isForbidden())
+				.andExpect(content().string(not(containsString("AccessDeniedException"))))
+				.andExpect(content().string(not(containsString("org.springframework"))));
+		mockMvc.perform(get("/check-in"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("checkin/home"))
+				.andExpect(content().string(containsString("Guest Check-in")));
 	}
 
 	@Test
 	@WithMockUser(roles = "ADMIN")
 	void administratorsCanAccessBothProtectedAreas() throws Exception {
-		mockMvc.perform(get("/admin/probe")).andExpect(status().isOk());
-		mockMvc.perform(get("/check-in/probe")).andExpect(status().isOk());
+		mockMvc.perform(get("/admin"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("admin/home"))
+				.andExpect(content().string(containsString("Wedding Overview")));
+		mockMvc.perform(get("/check-in"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("checkin/home"));
+	}
+
+	@Test
+	void unexpectedFailuresRenderNeutralErrorPage() throws Exception {
+		mockMvc.perform(get("/i/failure/probe"))
+				.andExpect(status().isInternalServerError())
+				.andExpect(view().name("error/500"))
+				.andExpect(content().string(containsString("Something went wrong")))
+				.andExpect(content().string(not(containsString("invitation-token-secret"))))
+				.andExpect(content().string(not(containsString("IllegalStateException"))));
 	}
 
 	@Test
@@ -88,23 +116,14 @@ class SecurityRoutesTest extends MySqlContainerTest {
 	}
 
 	@TestConfiguration
-	static class ProbeConfiguration {
+	static class ErrorProbeConfiguration {
 		@RestController
-		static class ProbeController {
-			@GetMapping("/i/probe")
-			String guest() {
-				return "guest";
-			}
-
-			@GetMapping("/admin/probe")
-			String admin() {
-				return "admin";
-			}
-
-			@GetMapping("/check-in/probe")
-			String checkIn() {
-				return "check-in";
+		static class ErrorProbeController {
+			@GetMapping("/i/failure/probe")
+			void fail() {
+				throw new IllegalStateException("invitation-token-secret");
 			}
 		}
 	}
+
 }
