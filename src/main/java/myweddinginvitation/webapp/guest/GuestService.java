@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import jakarta.persistence.criteria.Predicate;
+import myweddinginvitation.webapp.wedding.WeddingSettingsRepository;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,30 +20,33 @@ public class GuestService {
 	private final GuestRepository guests;
 	private final GuestCategoryRepository categories;
 	private final WhatsappNumberService numbers;
+	private final WeddingSettingsRepository settings;
 
-	public GuestService(GuestRepository guests, GuestCategoryRepository categories, WhatsappNumberService numbers) {
+	public GuestService(GuestRepository guests, GuestCategoryRepository categories, WhatsappNumberService numbers,
+			WeddingSettingsRepository settings) {
 		this.guests = guests;
 		this.categories = categories;
 		this.numbers = numbers;
+		this.settings = settings;
 	}
 
 	@Transactional
 	public Guest create(GuestForm form, boolean acceptDuplicate) {
-		String normalizedNumber = numbers.normalize(form.whatsappNumber(), "ID");
+		String normalizedNumber = numbers.normalize(form.whatsappNumber(), defaultPhoneCountry());
 		requireDuplicateAccepted(guests.existsByNormalizedWhatsappNumber(normalizedNumber), acceptDuplicate);
 		return guests.saveAndFlush(Guest.create(form, normalizedNumber, category(form.categoryId())));
 	}
 
 	@Transactional(readOnly = true)
 	public boolean requiresDuplicateConfirmation(GuestForm form) {
-		return guests.existsByNormalizedWhatsappNumber(numbers.normalize(form.whatsappNumber(), "ID"));
+		return guests.existsByNormalizedWhatsappNumber(numbers.normalize(form.whatsappNumber(), defaultPhoneCountry()));
 	}
 
 	@Transactional
 	public Guest update(long id, long version, GuestForm form, boolean acceptDuplicate) {
 		Guest guest = guest(id);
 		requireVersion(guest, version);
-		String normalizedNumber = numbers.normalize(form.whatsappNumber(), "ID");
+		String normalizedNumber = numbers.normalize(form.whatsappNumber(), defaultPhoneCountry());
 		requireDuplicateAccepted(!normalizedNumber.equals(guest.getNormalizedWhatsappNumber())
 				&& guests.existsByNormalizedWhatsappNumber(normalizedNumber), acceptDuplicate);
 		guest.update(form, normalizedNumber, category(form.categoryId()));
@@ -112,6 +116,10 @@ public class GuestService {
 
 	private GuestCategory category(Long categoryId) {
 		return categoryId == null ? null : categories.findById(categoryId).orElseThrow(NoSuchElementException::new);
+	}
+
+	private String defaultPhoneCountry() {
+		return settings.getSingleton().orElseThrow(NoSuchElementException::new).getDefaultPhoneCountry();
 	}
 
 	private void requireDuplicateAccepted(boolean duplicate, boolean acceptDuplicate) {

@@ -31,6 +31,16 @@ class GuestServiceTest {
 	@BeforeEach
 	void clearGuests() {
 		jdbc.update("delete from guest");
+		jdbc.update("update wedding_settings set default_phone_country = 'ID' where id = 1");
+	}
+
+	@Test
+	void normalizesWithConfiguredDefaultPhoneCountry() {
+		jdbc.update("update wedding_settings set default_phone_country = 'GB' where id = 1");
+
+		Guest guest = service.create(form("Ada", "020 7946 0018"), false);
+
+		assertThat(guest.getNormalizedWhatsappNumber()).isEqualTo("+442079460018");
 	}
 
 	@Test
