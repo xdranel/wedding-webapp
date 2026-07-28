@@ -35,6 +35,21 @@ public class GuestCategory {
 	protected GuestCategory() {
 	}
 
+	static GuestCategory create(String displayName, String normalizedName) {
+		GuestCategory category = new GuestCategory();
+		category.displayName = displayName;
+		category.normalizedName = normalizedName;
+		category.createdAt = Instant.now();
+		category.updatedAt = category.createdAt;
+		return category;
+	}
+
+	void rename(String displayName, String normalizedName) {
+		this.displayName = displayName;
+		this.normalizedName = normalizedName;
+		updatedAt = Instant.now();
+	}
+
 	public Long getId() { return id; }
 	public String getDisplayName() { return displayName; }
 	public String getNormalizedName() { return normalizedName; }
