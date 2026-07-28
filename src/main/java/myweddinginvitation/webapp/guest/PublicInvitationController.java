@@ -28,6 +28,7 @@ public class PublicInvitationController {
 	@GetMapping("/i/{publicId}/{version}/{signature}")
 	String invitation(@PathVariable String publicId, @PathVariable String version, @PathVariable String signature,
 			@RequestParam(required = false) String language, Model model, HttpServletResponse response) {
+		response.setHeader("Cache-Control", "no-store");
 		UUID guestPublicId;
 		long tokenVersion;
 		try {

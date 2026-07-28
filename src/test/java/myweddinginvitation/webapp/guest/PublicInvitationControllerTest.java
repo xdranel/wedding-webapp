@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -71,6 +72,7 @@ class PublicInvitationControllerTest {
 
 		mockMvc.perform(get(path(signer.urlFor(guest))).param("language", "ID"))
 				.andExpect(status().isOk())
+				.andExpect(header().string("Cache-Control", "no-store"))
 				.andExpect(view().name("guest/invitation"))
 				.andExpect(content().string(containsString("lang=\"id\"")))
 				.andExpect(content().string(containsString("Ibu Sari")))
@@ -120,6 +122,7 @@ class PublicInvitationControllerTest {
 
 		mockMvc.perform(get(path))
 				.andExpect(status().isNotFound())
+				.andExpect(header().string("Cache-Control", "no-store"))
 				.andExpect(view().name("guest/unavailable"))
 				.andExpect(content().string(containsString("Undangan tidak tersedia")))
 				.andExpect(content().string(containsString("Invitation unavailable")))
