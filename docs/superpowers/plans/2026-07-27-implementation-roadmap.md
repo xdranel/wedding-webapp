@@ -1,8 +1,7 @@
 # Wedding Invitation Implementation Roadmap
 
-Status: Phase 1 complete and accepted on 2026-07-28. Phase 2 implementation
-and automated full verification are complete; only manual browser acceptance
-remains before Phase 2 can be accepted.
+Status: Phases 1 and 2 complete and accepted on 2026-07-28. Phase 3
+requirements and design are next.
 
 Detailed plans are written and executed one phase at a time. A phase must pass
 its tests and review before the next phase begins.

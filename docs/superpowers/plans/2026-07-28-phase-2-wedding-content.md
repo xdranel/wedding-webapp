@@ -1034,14 +1034,13 @@ export TESTCONTAINERS_RYUK_DISABLED=true
 
 Expected: build succeeds and every test passes against MySQL 8.4.
 
-- [ ] **Step 6: Perform manual acceptance**
+- [x] **Step 6: Perform manual acceptance**
 
 An isolated non-default-environment application probe passed
 `/actuator/health` with `UP` using a temporary MySQL 8.4 container and
 non-default ports, without touching the existing development MySQL container.
 Automated coverage cannot establish browser viewport behavior or manual visual
-acceptance. Browser acceptance remains required before this phase is marked
-accepted.
+acceptance. Manual browser acceptance passed on 2026-07-28.
 
 With non-default `.env` values:
 
