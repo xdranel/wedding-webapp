@@ -13,17 +13,23 @@
   const form = document.querySelector('#preview-form');
   const language = document.querySelector('#language');
   if (!form || !language) return;
-  try {
-    const saved = localStorage.getItem('wedding-preview-language');
-    if ((saved === 'ID' || saved === 'EN') && saved !== language.value) {
-      language.value = saved;
-      form.requestSubmit();
-    }
-    language.addEventListener('change', () => {
+  language.addEventListener('change', () => {
+    try {
       localStorage.setItem('wedding-preview-language', language.value);
-      form.requestSubmit();
-    });
+    } catch (_) {
+      // Browser storage is optional for preview.
+    }
+    form.requestSubmit();
+  });
+
+  let saved;
+  try {
+    saved = localStorage.getItem('wedding-preview-language');
   } catch (_) {
     // Browser storage is optional for preview.
+  }
+  if ((saved === 'ID' || saved === 'EN') && saved !== language.value) {
+    language.value = saved;
+    form.requestSubmit();
   }
 })();

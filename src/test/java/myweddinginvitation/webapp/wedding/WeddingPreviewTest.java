@@ -7,6 +7,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -15,6 +16,9 @@ import myweddinginvitation.webapp.account.AccountSecurityService;
 import myweddinginvitation.webapp.account.UserAccount;
 import myweddinginvitation.webapp.account.UserAccountRepository;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +79,9 @@ class WeddingPreviewTest {
 	@Test
 	void previewRendersFallbackAndHidesInvisibleSections() throws Exception {
 		seedCompleteIndonesianContentWithEnglishMissing();
+		Map<String, Object> settingsBefore = jdbc.queryForMap("""
+				select couple_title, opening_text_id, closing_text_id, accent_color, font_preset from wedding_settings where id = 1
+				""");
 
 		String page = mockMvc.perform(get("/admin/wedding/preview/render")
 				.session(adminSession)
@@ -90,12 +97,22 @@ class WeddingPreviewTest {
 				.andReturn().getResponse().getContentAsString();
 
 		assertThat(page.split("<h1", -1)).hasSize(2);
+		assertThat(page).doesNotContain("story-title");
+		assertThat(page.indexOf("<h2 id=\"opening-title\">Welcome"))
+				.isLessThan(page.indexOf("<h2 id=\"partners-title\">The couple"));
+		assertThat(page.indexOf("<h2 id=\"partners-title\">The couple"))
+				.isLessThan(page.indexOf("<h2 id=\"event-CEREMONY\">Ceremony"));
+		assertThat(page.indexOf("<h2 id=\"event-CEREMONY\">Ceremony"))
+				.isLessThan(page.indexOf("<h2 id=\"closing-title\">Closing"));
 		assertThat(page).contains("for=\"salutation\"", "for=\"guest-name\"", "for=\"language\"")
 				.contains("<button type=\"button\" id=\"open-invitation\"")
 				.contains("alt=\"Portrait of Rama Pratama\"")
 				.contains("/admin/wedding/media/rama.jpg")
 				.contains("style=\"--accent: #2E5E4E;\"", "data-font=\"MODERN\"")
 				.doesNotContain("RSVP", "QRCode", "Live stream", "/i/");
+		assertThat(jdbc.queryForMap("""
+				select couple_title, opening_text_id, closing_text_id, accent_color, font_preset from wedding_settings where id = 1
+				""")).isEqualTo(settingsBefore);
 	}
 
 	@Test
@@ -131,6 +148,36 @@ class WeddingPreviewTest {
 				.param("guestName", "Nama Tamu")
 				.param("language", "FR"))
 				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void previewRejectsInvalidGuestFieldsWithoutDiscardingThem() throws Exception {
+		mockMvc.perform(get("/admin/wedding/preview/render").session(adminSession)
+				.param("salutation", "")
+				.param("guestName", "")
+				.param("language", "ID"))
+				.andExpect(status().isBadRequest())
+				.andExpect(view().name("admin/wedding/preview-form"))
+				.andExpect(model().attributeHasFieldErrors("form", "salutation", "guestName"))
+				.andExpect(content().string(containsString("name=\"salutation\" value=\"\"")))
+				.andExpect(content().string(containsString("name=\"guestName\" value=\"\"")));
+
+		String tooLong = "x".repeat(161);
+		mockMvc.perform(get("/admin/wedding/preview/render").session(adminSession)
+				.param("salutation", tooLong)
+				.param("guestName", tooLong)
+				.param("language", "ID"))
+				.andExpect(status().isBadRequest())
+				.andExpect(model().attributeHasFieldErrors("form", "salutation", "guestName"))
+				.andExpect(content().string(containsString(tooLong)));
+	}
+
+	@Test
+	void languageAssetRegistersSubmissionBeforeReadingOptionalStorage() throws Exception {
+		String script = Files.readString(Path.of("src/main/resources/static/js/invitation-preview.js"));
+
+		assertThat(script.indexOf("language.addEventListener")).isLessThan(script.indexOf("localStorage.getItem"));
+		assertThat(script).contains("try {\n      localStorage.setItem", "form.requestSubmit();\n  });", "catch (_) {");
 	}
 
 	private void seedCompleteIndonesianContentWithEnglishMissing() {
