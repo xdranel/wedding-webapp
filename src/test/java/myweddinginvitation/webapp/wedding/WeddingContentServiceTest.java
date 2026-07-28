@@ -1,6 +1,7 @@
 package myweddinginvitation.webapp.wedding;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest(properties = {
@@ -118,6 +120,33 @@ class WeddingContentServiceTest {
 
 		assertThat(settings.getSingleton().orElseThrow().getPublicationState())
 				.isEqualTo(PublicationState.DRAFT);
+	}
+
+	@Test
+	void staleSettingsEditDoesNotOverwriteNewerSettings() {
+		WeddingSettingsForm stale = service.settingsForm();
+		WeddingSettingsForm newer = service.settingsForm();
+		newer.setCoupleTitle("Newer title");
+		service.saveSettings(newer);
+		stale.setCoupleTitle("Stale title");
+
+		assertThatThrownBy(() -> service.saveSettings(stale))
+				.isInstanceOf(OptimisticLockingFailureException.class);
+		assertThat(settings.getSingleton().orElseThrow().getCoupleTitle()).isEqualTo("Newer title");
+	}
+
+	@Test
+	void staleSettingsEditDoesNotUndoPublication() {
+		completePartners("Rama", "Shinta");
+		visibleEvent(EventType.CEREMONY, LocalDate.of(2027, 5, 1), null);
+		WeddingSettingsForm stale = service.settingsForm();
+
+		assertThat(service.publish()).isEqualTo(new PublicationCheck(true, java.util.List.of()));
+		stale.setCoupleTitle("Stale title");
+
+		assertThatThrownBy(() -> service.saveSettings(stale))
+				.isInstanceOf(OptimisticLockingFailureException.class);
+		assertThat(settings.getSingleton().orElseThrow().getPublicationState()).isEqualTo(PublicationState.PUBLISHED);
 	}
 
 	@Test

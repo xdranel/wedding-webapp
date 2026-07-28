@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 import myweddinginvitation.webapp.config.AppProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.http.MediaType;
@@ -14,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Component
 public class PartnerPhotoStorage {
+	private static final Logger logger = LoggerFactory.getLogger(PartnerPhotoStorage.class);
 	private static final long MAX_SIZE = 10L * 1024 * 1024;
 	private final Path mediaDirectory;
 
@@ -46,6 +49,14 @@ public class PartnerPhotoStorage {
 		Path path = mediaDirectory.resolve(relativePath).normalize();
 		if (!path.startsWith(mediaDirectory)) throw new IllegalArgumentException("Invalid photo path");
 		deletePath(path);
+	}
+
+	void deleteAfterCommit(String relativePath) {
+		try {
+			delete(relativePath);
+		} catch (RuntimeException exception) {
+			logger.warn("Could not delete replaced partner photo {} after commit", relativePath, exception);
+		}
 	}
 
 	Path resolve(String relativePath) {

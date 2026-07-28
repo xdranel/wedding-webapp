@@ -6,7 +6,7 @@ body[data-font="MODERN"] { font-family: system-ui, sans-serif; }
 a, button, input, select { font: inherit; }
 a { color: var(--accent); }
 button { background: var(--accent); border: 0; color: white; cursor: pointer; padding: .7rem 1rem; }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+:focus-visible { outline: 3px solid #005fcc; outline-offset: 3px; }
 .preview-controls, main { margin: 0 auto; max-width: 46rem; padding: 1rem; }
 .preview-controls form { display: grid; gap: .5rem; }
 .cover { min-height: 55vh; display: grid; align-content: center; gap: .5rem; text-align: center; }

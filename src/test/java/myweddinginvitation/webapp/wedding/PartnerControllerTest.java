@@ -124,6 +124,36 @@ class PartnerControllerTest {
 	}
 
 	@Test
+	void failedOldPhotoCleanupDoesNotFailCommittedReplacement() throws Exception {
+		Path oldPhoto = Files.createDirectories(MEDIA_DIRECTORY.resolve("old-photo"));
+		Files.writeString(oldPhoto.resolve("blocked"), "kept");
+		Partner partner = partners.findById(partnerId).orElseThrow();
+		partner.replacePhoto("old-photo");
+		partners.saveAndFlush(partner);
+
+		try {
+			mockMvc.perform(multipart("/admin/wedding/partners/{id}", partnerId)
+					.file(new MockMultipartFile("photo", "new.png", "image/png", png()))
+					.session(adminSession)
+					.with(csrf())
+					.param("version", Long.toString(currentVersion()))
+					.param("fullName", "Rama")
+					.param("nickname", "Rama")
+					.param("childOfLabelId", "Putra dari")
+					.param("parentsNamesId", "Ayah & Ibu"))
+					.andExpect(status().is3xxRedirection());
+
+			String newPath = partners.findById(partnerId).orElseThrow().getPhotoPath();
+			assertThat(newPath).isNotEqualTo("old-photo");
+			assertThat(MEDIA_DIRECTORY.resolve(newPath)).exists();
+			assertThat(oldPhoto).exists();
+		} finally {
+			Files.deleteIfExists(oldPhoto.resolve("blocked"));
+			Files.deleteIfExists(oldPhoto);
+		}
+	}
+
+	@Test
 	void storedPhotoIsAvailableOnlyToAdministratorsWithSafeResponseHeaders() throws Exception {
 		String path = saveValidPartnerPhoto();
 

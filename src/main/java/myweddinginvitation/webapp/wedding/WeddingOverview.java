@@ -3,6 +3,7 @@ package myweddinginvitation.webapp.wedding;
 import java.util.List;
 
 public record WeddingOverview(
+		long version,
 		PublicationState publicationState,
 		boolean settingsComplete,
 		List<Boolean> partnerComplete,

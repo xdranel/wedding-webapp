@@ -41,7 +41,7 @@ public class WeddingContentService {
 		List<Partner> orderedPartners = partners.findAllByOrderByDisplayOrderAsc();
 		List<EventPart> orderedEvents = events.findAllByOrderByTypeAsc();
 		List<StoryEntry> orderedStory = story.findAllByOrderByDisplayOrderAsc();
-		return new WeddingOverview(weddingSettings.getPublicationState(), settingsComplete(weddingSettings),
+		return new WeddingOverview(weddingSettings.getVersion(), weddingSettings.getPublicationState(), settingsComplete(weddingSettings),
 				orderedPartners.stream().map(this::isPartnerComplete).toList(),
 				orderedEvents.stream().filter(this::isCompleteVisibleEvent).map(EventPart::getType).toList(),
 				!orderedStory.isEmpty(), translationWarnings(weddingSettings, orderedPartners, orderedEvents, orderedStory));
@@ -51,6 +51,7 @@ public class WeddingContentService {
 	public WeddingSettingsForm settingsForm() {
 		WeddingSettings source = weddingSettings();
 		WeddingSettingsForm form = new WeddingSettingsForm();
+		form.setVersion(source.getVersion());
 		form.setCoupleTitle(source.getCoupleTitle());
 		form.setOpeningTextId(source.getOpeningTextId());
 		form.setOpeningTextEn(source.getOpeningTextEn());
@@ -66,7 +67,12 @@ public class WeddingContentService {
 
 	@Transactional
 	public void saveSettings(WeddingSettingsForm form) {
-		weddingSettings().update(form);
+		WeddingSettings weddingSettings = weddingSettings();
+		if (!java.util.Objects.equals(weddingSettings.getVersion(), form.getVersion())) {
+			throw new OptimisticLockingFailureException("Wedding settings have changed");
+		}
+		weddingSettings.update(form);
+		settings.saveAndFlush(weddingSettings);
 	}
 
 	@Transactional(readOnly = true)
@@ -193,7 +199,7 @@ public class WeddingContentService {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
 				public void afterCommit() {
-					if (oldPath != null) photoStorage.delete(oldPath);
+					if (oldPath != null) photoStorage.deleteAfterCommit(oldPath);
 				}
 
 				@Override
@@ -244,11 +250,18 @@ public class WeddingContentService {
 
 	@Transactional
 	public PublicationCheck publish() {
+		return publish(weddingSettings().getVersion());
+	}
+
+	@Transactional
+	public PublicationCheck publish(long expectedVersion) {
 		WeddingSettings weddingSettings = weddingSettings();
+		requireVersion(weddingSettings, expectedVersion);
 		List<String> errors = publicationErrors(weddingSettings, partners.findAllByOrderByDisplayOrderAsc(),
 				events.findAllByOrderByTypeAsc());
 		if (errors.isEmpty()) {
 			weddingSettings.publish();
+			settings.saveAndFlush(weddingSettings);
 			return new PublicationCheck(true, errors);
 		}
 		return new PublicationCheck(false, errors);
@@ -256,7 +269,15 @@ public class WeddingContentService {
 
 	@Transactional
 	public void returnToDraft() {
-		weddingSettings().returnToDraft();
+		returnToDraft(weddingSettings().getVersion());
+	}
+
+	@Transactional
+	public void returnToDraft(long expectedVersion) {
+		WeddingSettings weddingSettings = weddingSettings();
+		requireVersion(weddingSettings, expectedVersion);
+		weddingSettings.returnToDraft();
+		settings.saveAndFlush(weddingSettings);
 	}
 
 	@Transactional(readOnly = true)
@@ -284,6 +305,12 @@ public class WeddingContentService {
 
 	private WeddingSettings weddingSettings() {
 		return settings.getSingleton().orElseThrow();
+	}
+
+	private void requireVersion(WeddingSettings weddingSettings, long expectedVersion) {
+		if (weddingSettings.getVersion() != expectedVersion) {
+			throw new OptimisticLockingFailureException("Wedding settings have changed");
+		}
 	}
 
 	private List<String> publicationErrors(WeddingSettings weddingSettings, List<Partner> orderedPartners, List<EventPart> orderedEvents) {

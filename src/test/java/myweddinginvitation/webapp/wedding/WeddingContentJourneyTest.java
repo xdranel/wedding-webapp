@@ -96,6 +96,7 @@ class WeddingContentJourneyTest {
 
 	private void saveSettings(String openingId, String openingEn) throws Exception {
 		mockMvc.perform(post("/admin/wedding/settings").session(adminSession).with(csrf())
+				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion()))
 				.param("coupleTitle", "Rama & Shinta")
 				.param("openingTextId", openingId).param("openingTextEn", openingEn)
 				.param("closingTextId", "Terima kasih").param("closingTextEn", "Thank you")
@@ -152,7 +153,8 @@ class WeddingContentJourneyTest {
 	}
 
 	private void publishAndAssertPublished() throws Exception {
-		mockMvc.perform(post("/admin/wedding/publish").session(adminSession).with(csrf()))
+		mockMvc.perform(post("/admin/wedding/publish").session(adminSession).with(csrf())
+				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())))
 				.andExpect(redirectedUrl("/admin/wedding"));
 		assertThat(settings.getSingleton().orElseThrow().getPublicationState()).isEqualTo(PublicationState.PUBLISHED);
 	}
@@ -166,7 +168,8 @@ class WeddingContentJourneyTest {
 	}
 
 	private void returnToDraftAndAssertDraft() throws Exception {
-		mockMvc.perform(post("/admin/wedding/return-to-draft").session(adminSession).with(csrf()))
+		mockMvc.perform(post("/admin/wedding/return-to-draft").session(adminSession).with(csrf())
+				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())))
 				.andExpect(redirectedUrl("/admin/wedding"));
 		WeddingSettings saved = settings.getSingleton().orElseThrow();
 		assertThat(saved.getPublicationState()).isEqualTo(PublicationState.DRAFT);

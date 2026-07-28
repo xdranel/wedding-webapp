@@ -9,6 +9,9 @@ import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public class WeddingSettingsForm {
+	@NotNull
+	private Long version;
+
 	@Size(max = 160)
 	private String coupleTitle;
 
@@ -41,6 +44,8 @@ public class WeddingSettingsForm {
 	@NotNull
 	private FontPreset fontPreset = FontPreset.CLASSIC;
 
+	public Long getVersion() { return version; }
+	public void setVersion(Long version) { this.version = version; }
 	public String getCoupleTitle() { return coupleTitle; }
 	public void setCoupleTitle(String coupleTitle) { this.coupleTitle = coupleTitle; }
 	public String getOpeningTextId() { return openingTextId; }

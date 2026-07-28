@@ -9,7 +9,9 @@
   <main>
     <h1>Wedding settings</h1>
     <form method="post" th:action="@{/admin/wedding/settings}" th:object="${form}">
+      <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}">Settings error</p>
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+      <input type="hidden" th:field="*{version}">
       <label for="couple-title">Couple title</label>
       <input id="couple-title" th:field="*{coupleTitle}" maxlength="160"
              th:attr="aria-describedby=${#fields.hasErrors('coupleTitle')} ? 'couple-title-error' : null">

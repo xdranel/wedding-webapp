@@ -10,11 +10,16 @@
     <h1>Wedding content</h1>
     <p role="status" th:text="${overview.publicationState}">DRAFT</p>
     <p th:if="${param.settingsSaved}">Settings saved.</p>
+    <p role="status" th:if="${publicationConflict}" th:text="${publicationConflict}">Publication conflict</p>
     <p role="status" th:if="${param.eventsSaved}">Event saved.</p>
     <section>
       <h2>Setup checklist</h2>
       <ul>
         <li th:text="${overview.settingsComplete} ? 'General settings complete' : 'General settings need attention'">General settings</li>
+		<li th:each="complete, stat : ${overview.partnerComplete}" th:text="${complete} ? |Partner ${stat.count} complete| : |Partner ${stat.count} needs attention|">Partner</li>
+		<li th:text="${overview.completeVisibleEvents.contains(T(myweddinginvitation.webapp.wedding.EventType).CEREMONY)} ? 'Ceremony complete' : 'Ceremony needs attention'">Ceremony</li>
+		<li th:text="${overview.completeVisibleEvents.contains(T(myweddinginvitation.webapp.wedding.EventType).RECEPTION)} ? 'Reception complete' : 'Reception needs attention'">Reception</li>
+		<li th:text="${overview.storyPresent} ? 'Story included' : 'Story not included (optional)'">Story</li>
         <li th:text="${publication.errors.empty} ? 'Ready to publish' : 'Publication requirements remain'">Publication status</li>
       </ul>
     </section>
@@ -35,10 +40,12 @@
     </nav>
     <form th:if="${overview.publicationState.name() == 'DRAFT'}" method="post" th:action="@{/admin/wedding/publish}">
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+	  <input type="hidden" name="version" th:value="${overview.version}">
       <button type="submit">Publish</button>
     </form>
     <form th:if="${overview.publicationState.name() == 'PUBLISHED'}" method="post" th:action="@{/admin/wedding/return-to-draft}">
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+	  <input type="hidden" name="version" th:value="${overview.version}">
       <button type="submit">Return to draft</button>
     </form>
   </main>

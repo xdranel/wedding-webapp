@@ -33,11 +33,16 @@ class WeddingContentMigrationTest {
 				select count(*) from flyway_schema_history
 				where version = '2' and script = 'V2__wedding_content.sql' and success = true
 				""", Integer.class)).isEqualTo(1);
+		assertThat(jdbc.queryForObject("""
+				select count(*) from flyway_schema_history
+				where version = '7' and script = 'V7__wedding_settings_optimistic_lock.sql' and success = true
+				""", Integer.class)).isEqualTo(1);
 		assertThat(settings.getSingleton()).get()
 				.extracting(WeddingSettings::getPublicationState,
 						WeddingSettings::getTimeZone,
-						WeddingSettings::getDefaultPhoneCountry)
-				.containsExactly(PublicationState.DRAFT, "Asia/Jakarta", "ID");
+						WeddingSettings::getDefaultPhoneCountry,
+						WeddingSettings::getVersion)
+				.containsExactly(PublicationState.DRAFT, "Asia/Jakarta", "ID", 0L);
 		assertThat(partners.findAllByOrderByDisplayOrderAsc())
 				.extracting(Partner::getDisplayOrder)
 				.containsExactly(1, 2);

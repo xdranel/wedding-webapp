@@ -46,11 +46,18 @@ class WeddingContentControllerTest {
 	@Autowired
 	private WeddingSettingsRepository settings;
 
+	@Autowired
+	private WeddingContentService weddingContent;
+
+	@Autowired
+	private StoryEntryRepository stories;
+
 	private MockHttpSession adminSession;
 	private MockHttpSession staffSession;
 
 	@BeforeEach
 	void setUp() throws Exception {
+		stories.deleteAll();
 		accounts.deleteAll();
 		accounts.save(new UserAccount("admin", "{noop}" + PASSWORD, AccountRole.ADMIN));
 		accounts.save(new UserAccount("staff", "{noop}" + PASSWORD, AccountRole.STAFF));
@@ -65,6 +72,7 @@ class WeddingContentControllerTest {
 		mockMvc.perform(post("/admin/wedding/settings")
 				.session(adminSession)
 				.with(csrf())
+				.param("version", Long.toString(currentSettingsVersion()))
 				.param("coupleTitle", "Rama & Shinta")
 				.param("openingTextId", "Dengan hormat")
 				.param("closingTextId", "Terima kasih")
@@ -98,6 +106,9 @@ class WeddingContentControllerTest {
 				.andExpect(content().string(containsString("/admin/wedding/events")))
 				.andExpect(content().string(containsString("/admin/wedding/story")))
 				.andExpect(content().string(containsString("/admin/wedding/preview")))
+				.andExpect(content().string(containsString("Partner 1 needs attention")))
+				.andExpect(content().string(containsString("Ceremony needs attention")))
+				.andExpect(content().string(containsString("Story not included (optional)")))
 				.andExpect(content().string(containsString("Partner 1: full name is required")));
 	}
 
@@ -105,7 +116,8 @@ class WeddingContentControllerTest {
 	void failedPublicationReturnsToOverviewWithErrors() throws Exception {
 		mockMvc.perform(post("/admin/wedding/publish")
 				.session(adminSession)
-				.with(csrf()))
+				.with(csrf())
+				.param("version", Long.toString(currentSettingsVersion())))
 				.andExpect(redirectedUrl("/admin/wedding"));
 
 		assertThat(settings.getSingleton().orElseThrow().getPublicationState())
@@ -119,6 +131,7 @@ class WeddingContentControllerTest {
 		mockMvc.perform(post("/admin/wedding/settings")
 				.session(adminSession)
 				.with(csrf())
+				.param("version", Long.toString(currentSettingsVersion()))
 				.param("coupleTitle", "Rama & Shinta")
 				.param("timeZone", "not/a-zone")
 				.param("accentColor", "red"))
@@ -126,6 +139,44 @@ class WeddingContentControllerTest {
 				.andExpect(view().name("admin/wedding/settings"))
 				.andExpect(model().attributeHasFieldErrors("form", "timeZone", "accentColor"))
 				.andExpect(content().string(containsString("Rama &amp; Shinta")));
+	}
+
+	@Test
+	void staleSettingsSubmissionShowsConflictInsteadOfFailing() throws Exception {
+		long staleVersion = currentSettingsVersion();
+		WeddingSettingsForm newer = weddingContent.settingsForm();
+		newer.setCoupleTitle("Newer title");
+		weddingContent.saveSettings(newer);
+
+		mockMvc.perform(post("/admin/wedding/settings")
+				.session(adminSession)
+				.with(csrf())
+				.param("version", Long.toString(staleVersion))
+				.param("openingTextId", "Dengan hormat")
+				.param("closingTextId", "Terima kasih")
+				.param("timeZone", "Asia/Jakarta")
+				.param("defaultPhoneCountry", "ID")
+				.param("accentColor", "#7a5c48")
+				.param("fontPreset", "CLASSIC"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("admin/wedding/settings"))
+				.andExpect(content().string(containsString("changed by another administrator")));
+	}
+
+	@Test
+	void lightAccentColorIsRejected() throws Exception {
+		mockMvc.perform(post("/admin/wedding/settings")
+				.session(adminSession)
+				.with(csrf())
+				.param("version", Long.toString(currentSettingsVersion()))
+				.param("openingTextId", "Dengan hormat")
+				.param("closingTextId", "Terima kasih")
+				.param("timeZone", "Asia/Jakarta")
+				.param("defaultPhoneCountry", "ID")
+				.param("accentColor", "#FFFFFF")
+				.param("fontPreset", "CLASSIC"))
+				.andExpect(status().isOk())
+				.andExpect(model().attributeHasFieldErrors("form", "accentColor"));
 	}
 
 	@Test
@@ -141,5 +192,9 @@ class WeddingContentControllerTest {
 				.param("username", username)
 				.param("password", PASSWORD))
 				.andReturn().getRequest().getSession(false);
+	}
+
+	private long currentSettingsVersion() {
+		return settings.getSingleton().orElseThrow().getVersion();
 	}
 }

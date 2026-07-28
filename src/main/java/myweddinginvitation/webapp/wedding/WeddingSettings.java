@@ -8,6 +8,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "wedding_settings")
@@ -15,6 +16,9 @@ public class WeddingSettings {
 	@Id
 	@Column(columnDefinition = "tinyint")
 	private Byte id = 1;
+
+	@Version
+	private long version;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "publication_state", nullable = false, length = 20)
@@ -64,6 +68,10 @@ public class WeddingSettings {
 
 	public PublicationState getPublicationState() {
 		return publicationState;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 
 	public String getCoupleTitle() {
