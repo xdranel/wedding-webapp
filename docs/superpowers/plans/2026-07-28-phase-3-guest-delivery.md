@@ -8,6 +8,9 @@
 
 **Tech Stack:** Java 21, Spring Boot 4.1, Spring MVC, Thymeleaf, Spring Security, Jakarta Validation, Spring Data JPA, Flyway, MySQL 8.4, Google libphonenumber, Apache Commons CSV, JUnit 5, AssertJ, MockMvc, and Testcontainers.
 
+**Status:** Implementation and automated verification complete; manual browser
+acceptance remains pending in Task 8 Step 6.
+
 ## Global Constraints
 
 - Work in an isolated worktree created at execution time with `superpowers:using-git-worktrees`.
@@ -87,7 +90,7 @@
 - Produces `MessageTemplateRepository#findByTypeAndLanguage(MessageType, MessageLanguage)`.
 - Produces `AppProperties.Invitation(baseUrl, signingSecret)`.
 
-- [ ] **Step 1: Write the failing migration/configuration test**
+- [x] **Step 1: Write the failing migration/configuration test**
 
 ```java
 @SpringBootTest(properties = {
@@ -116,7 +119,7 @@ class GuestDeliveryMigrationTest {
 }
 ```
 
-- [ ] **Step 2: Run the focused test and observe RED**
+- [x] **Step 2: Run the focused test and observe RED**
 
 Run:
 
@@ -126,7 +129,7 @@ Run:
 
 Expected: test compilation fails because the guest and messaging types do not exist.
 
-- [ ] **Step 3: Add the two parsing dependencies and invitation configuration**
+- [x] **Step 3: Add the two parsing dependencies and invitation configuration**
 
 Add:
 
@@ -171,7 +174,7 @@ app:
     signing-secret: ${INVITATION_SIGNING_SECRET}
 ```
 
-- [ ] **Step 4: Add V8 and minimal entities/repositories**
+- [x] **Step 4: Add V8 and minimal entities/repositories**
 
 Create tables with these constraints:
 
@@ -233,7 +236,7 @@ Seed all combinations of `INVITATION`, `RSVP_REMINDER`, and
 `EVENT_REMINDER` with `ID` and `EN` bodies. Use only the approved placeholders.
 Map entity versions with `@Version`.
 
-- [ ] **Step 5: Run the focused test and full migration regression**
+- [x] **Step 5: Run the focused test and full migration regression**
 
 Run:
 
@@ -243,7 +246,7 @@ Run:
 
 Expected: all selected tests pass and Flyway applies versions 1 through 8.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add pom.xml .env.example src/main/resources/application.yml \
@@ -273,7 +276,7 @@ git commit -m "feat: add guest delivery schema"
   and `delete(long, long)`.
 - Produces GET `/admin/guest-categories` and POST create/rename/delete routes.
 
-- [ ] **Step 1: Write failing MVC and service tests**
+- [x] **Step 1: Write failing MVC and service tests**
 
 ```java
 @Test
@@ -297,7 +300,7 @@ void staffCannotManageCategories() throws Exception {
 }
 ```
 
-- [ ] **Step 2: Run the tests and observe RED**
+- [x] **Step 2: Run the tests and observe RED**
 
 ```bash
 ./mvnw -q -Dtest=GuestCategoryControllerTest test
@@ -305,7 +308,7 @@ void staffCannotManageCategories() throws Exception {
 
 Expected: 404 because category routes do not exist.
 
-- [ ] **Step 3: Implement normalized category operations**
+- [x] **Step 3: Implement normalized category operations**
 
 Use one normalization rule:
 
@@ -319,13 +322,13 @@ static String normalizeCategoryName(String value) {
 `delete` compare the submitted optimistic-lock version. `delete` relies on the
 database `ON DELETE SET NULL`.
 
-- [ ] **Step 4: Add the administrator page**
+- [x] **Step 4: Add the administrator page**
 
 Render a single English page containing create, inline rename, confirmed
 delete, validation messages, CSRF fields, and a `Without category` guest count.
 Link it from the administrator home.
 
-- [ ] **Step 5: Run category and security tests**
+- [x] **Step 5: Run category and security tests**
 
 ```bash
 ./mvnw -q -Dtest=GuestCategoryControllerTest,SecurityRoutesTest test
@@ -333,7 +336,7 @@ Link it from the administrator home.
 
 Expected: all selected tests pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/main/java/myweddinginvitation/webapp/guest \
@@ -368,7 +371,7 @@ git commit -m "feat: manage guest categories"
 - Produces `archive`, `restore`, `deleteInactive`, and paged `search(GuestListQuery, Pageable)`.
 - Produces administrator routes under `/admin/guests`.
 
-- [ ] **Step 1: Write failing phone and guest-domain tests**
+- [x] **Step 1: Write failing phone and guest-domain tests**
 
 ```java
 @ParameterizedTest
@@ -399,7 +402,7 @@ void sentGuestCanOnlyBeArchived() {
 }
 ```
 
-- [ ] **Step 2: Run focused tests and observe RED**
+- [x] **Step 2: Run focused tests and observe RED**
 
 ```bash
 ./mvnw -q -Dtest=WhatsappNumberServiceTest,GuestServiceTest test
@@ -407,7 +410,7 @@ void sentGuestCanOnlyBeArchived() {
 
 Expected: compilation fails because services and forms do not exist.
 
-- [ ] **Step 3: Implement minimal guest domain and service**
+- [x] **Step 3: Implement minimal guest domain and service**
 
 Define form validation:
 
@@ -437,7 +440,7 @@ Generate `UUID.randomUUID()` only on create. Duplicate numbers return a
 warning result unless `acceptDuplicate` is true. Editing preserves delivery
 and later RSVP/check-in state.
 
-- [ ] **Step 4: Write failing MVC list/form tests**
+- [x] **Step 4: Write failing MVC list/form tests**
 
 ```java
 @Test
@@ -465,7 +468,7 @@ void duplicateRequiresExplicitConfirmation() throws Exception {
 }
 ```
 
-- [ ] **Step 5: Add repository specification and MVC pages**
+- [x] **Step 5: Add repository specification and MVC pages**
 
 Use Spring Data `JpaSpecificationExecutor<Guest>` for optional predicates.
 Allow only `name,asc`, `name,desc`, `updatedAt,asc`, or `updatedAt,desc`;
@@ -475,7 +478,7 @@ Pages use English labels, inline validation, duplicate confirmation, explicit
 archive/restore, and permanent-delete confirmation. Do not render future RSVP
 or check-in filters.
 
-- [ ] **Step 6: Run focused and regression tests**
+- [x] **Step 6: Run focused and regression tests**
 
 ```bash
 ./mvnw -q -Dtest=WhatsappNumberServiceTest,GuestServiceTest,GuestControllerTest,SecurityRoutesTest test
@@ -483,7 +486,7 @@ or check-in filters.
 
 Expected: all selected tests pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/main/java/myweddinginvitation/webapp/guest \
@@ -514,7 +517,7 @@ git commit -m "feat: manage wedding guests"
 - Produces `InvitationLinkSigner#verify(UUID publicId, long version, String signature): boolean`.
 - Produces GET `/i/{publicId}/{version}/{signature}`.
 
-- [ ] **Step 1: Write failing deterministic signer tests**
+- [x] **Step 1: Write failing deterministic signer tests**
 
 ```java
 @Test
@@ -532,7 +535,7 @@ void signsVerifiesAndRejectsChangedVersion() {
 }
 ```
 
-- [ ] **Step 2: Run signer test and observe RED**
+- [x] **Step 2: Run signer test and observe RED**
 
 ```bash
 ./mvnw -q -Dtest=InvitationLinkSignerTest test
@@ -540,14 +543,14 @@ void signsVerifiesAndRejectsChangedVersion() {
 
 Expected: compilation fails because the signer does not exist.
 
-- [ ] **Step 3: Implement the JDK HMAC signer**
+- [x] **Step 3: Implement the JDK HMAC signer**
 
 Sign the UTF-8 value `publicId + ":" + version` with `HmacSHA256`, encode with
 `Base64.getUrlEncoder().withoutPadding()`, and verify decoded bytes using
 `MessageDigest.isEqual`. Construct URLs with `UriComponentsBuilder`; never
 concatenate unescaped user values.
 
-- [ ] **Step 4: Write failing public-controller tests**
+- [x] **Step 4: Write failing public-controller tests**
 
 ```java
 @Test
@@ -577,7 +580,7 @@ Cover draft wedding, invalid signature, old version, archived guest, and
 missing guest. Assert every response has the same status/view and contains no
 guest name.
 
-- [ ] **Step 5: Replace the placeholder guest route**
+- [x] **Step 5: Replace the placeholder guest route**
 
 Remove the broad `/i/{token}` placeholder mapping. The controller validates
 the signature before loading/rendering guest data, requires `PUBLISHED`, and
@@ -585,7 +588,7 @@ delegates bilingual fallback to `WeddingContentService`. Add `noindex`,
 responsive markup, and the existing invitation CSS. Do not render RSVP, PIN,
 QR, category, number, internal note, or delivery state.
 
-- [ ] **Step 6: Run public/security tests**
+- [x] **Step 6: Run public/security tests**
 
 ```bash
 ./mvnw -q -Dtest=InvitationLinkSignerTest,PublicInvitationControllerTest,WeddingPreviewTest,SecurityRoutesTest test
@@ -594,7 +597,7 @@ QR, category, number, internal note, or delivery state.
 Expected: all selected tests pass and anonymous access works only for signed
 public invitation routes.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/main/java/myweddinginvitation/webapp/guest \
@@ -625,7 +628,7 @@ git commit -m "feat: add signed guest invitations"
 - Produces `MessageTemplateService#render(MessageType, MessageLanguage, MessageTemplateValues): String`.
 - Produces GET/POST routes under `/admin/message-templates`.
 
-- [ ] **Step 1: Write failing placeholder tests**
+- [x] **Step 1: Write failing placeholder tests**
 
 ```java
 @Test
@@ -646,7 +649,7 @@ void rejectsUnknownPlaceholder() {
 }
 ```
 
-- [ ] **Step 2: Run service test and observe RED**
+- [x] **Step 2: Run service test and observe RED**
 
 ```bash
 ./mvnw -q -Dtest=MessageTemplateServiceTest test
@@ -654,7 +657,7 @@ void rejectsUnknownPlaceholder() {
 
 Expected: compilation fails because the service and values do not exist.
 
-- [ ] **Step 3: Implement fixed placeholder parsing**
+- [x] **Step 3: Implement fixed placeholder parsing**
 
 Use a precompiled pattern:
 
@@ -670,7 +673,7 @@ private static final Set<String> ALLOWED = Set.of(
 Validate every match before replacement. Replace missing optional values with
 `""`. Do not evaluate expressions, HTML, nested placeholders, or scripts.
 
-- [ ] **Step 4: Write failing editor tests**
+- [x] **Step 4: Write failing editor tests**
 
 ```java
 @Test
@@ -685,14 +688,14 @@ void unknownPlaceholderPreservesSubmittedTemplate() throws Exception {
 }
 ```
 
-- [ ] **Step 5: Add editor pages and optimistic locking**
+- [x] **Step 5: Add editor pages and optimistic locking**
 
 The list shows all six type/language rows. The edit page shows the approved
 placeholder list, textarea, preview, CSRF, and version. Unknown placeholders,
 blank bodies, and bodies over 4,000 characters are rejected. Concurrent
 changes return a reload message instead of overwriting.
 
-- [ ] **Step 6: Run messaging tests**
+- [x] **Step 6: Run messaging tests**
 
 ```bash
 ./mvnw -q -Dtest=MessageTemplateServiceTest,MessageTemplateControllerTest test
@@ -700,7 +703,7 @@ changes return a reload message instead of overwriting.
 
 Expected: all selected tests pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/main/java/myweddinginvitation/webapp/messaging \
@@ -728,7 +731,7 @@ git commit -m "feat: edit WhatsApp message templates"
 - Produces `GuestDeliveryService#confirmSent(long guestId, long version, Instant now)`.
 - Produces `GuestService#regenerateInvitation(long guestId, long version, Instant now)`.
 
-- [ ] **Step 1: Write failing delivery-state tests**
+- [x] **Step 1: Write failing delivery-state tests**
 
 ```java
 @Test
@@ -756,7 +759,7 @@ void repeatedConfirmationPreservesFirstAndUpdatesLast() {
 }
 ```
 
-- [ ] **Step 2: Run focused test and observe RED**
+- [x] **Step 2: Run focused test and observe RED**
 
 ```bash
 ./mvnw -q -Dtest=GuestDeliveryServiceTest test
@@ -764,7 +767,7 @@ void repeatedConfirmationPreservesFirstAndUpdatesLast() {
 
 Expected: compilation fails because delivery service does not exist.
 
-- [ ] **Step 3: Implement WhatsApp URI and confirmation**
+- [x] **Step 3: Implement WhatsApp URI and confirmation**
 
 Render `INVITATION` using the requested one-time language without changing
 the stored preference. Build `https://wa.me/{digits}?text={encoded}` with
@@ -772,7 +775,7 @@ the stored preference. Build `https://wa.me/{digits}?text={encoded}` with
 E.164 number. A confirmation transaction sets `SENT`, initializes
 `firstSentAt` only when null, and always updates `lastSentAt`.
 
-- [ ] **Step 4: Write failing controller/regeneration tests**
+- [x] **Step 4: Write failing controller/regeneration tests**
 
 ```java
 @Test
@@ -796,13 +799,13 @@ void regenerationInvalidatesOldLinkAndResetsDelivery() throws Exception {
 }
 ```
 
-- [ ] **Step 5: Add detail-page actions**
+- [x] **Step 5: Add detail-page actions**
 
 Add language selection, `Open WhatsApp`, separate `Confirm sent`, delivery
 timestamps, and confirmed `Regenerate invitation link`. Disable delivery
 actions for archived guests. Do not activate reminder buttons.
 
-- [ ] **Step 6: Run delivery/public regression tests**
+- [x] **Step 6: Run delivery/public regression tests**
 
 ```bash
 ./mvnw -q -Dtest=GuestDeliveryServiceTest,GuestDeliveryControllerTest,PublicInvitationControllerTest test
@@ -810,7 +813,7 @@ actions for archived guests. Do not activate reminder buttons.
 
 Expected: all selected tests pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/main/java/myweddinginvitation/webapp/messaging \
@@ -842,7 +845,7 @@ git commit -m "feat: track manual invitation delivery"
 - Produces `GuestCsvService#template(OutputStream)` and `exportAll(OutputStream)`.
 - Produces `/admin/guests/import`, `/template.csv`, and `/export.csv`.
 
-- [ ] **Step 1: Write failing parser/validation tests**
+- [x] **Step 1: Write failing parser/validation tests**
 
 ```java
 @ParameterizedTest
@@ -868,7 +871,7 @@ void unknownCategoryIsAnErrorButDuplicateNumberIsAWarning() {
 }
 ```
 
-- [ ] **Step 2: Run CSV service test and observe RED**
+- [x] **Step 2: Run CSV service test and observe RED**
 
 ```bash
 ./mvnw -q -Dtest=GuestCsvServiceTest test
@@ -876,7 +879,7 @@ void unknownCategoryIsAnErrorButDuplicateNumberIsAWarning() {
 
 Expected: compilation fails because CSV types do not exist.
 
-- [ ] **Step 3: Implement bounded preview parsing**
+- [x] **Step 3: Implement bounded preview parsing**
 
 Reject `bytes.length > 2 * 1024 * 1024` before parsing. Remove one leading BOM
 for header detection. Detect `,` or `;` by parsing the first record and
@@ -888,7 +891,7 @@ the same normalization and length rules as `GuestService`. Record issues as
 `row`, `column`, `message`, and `severity`. Check duplicates both against the
 database and earlier preview rows.
 
-- [ ] **Step 4: Write failing atomic-import/export tests**
+- [x] **Step 4: Write failing atomic-import/export tests**
 
 ```java
 @Test
@@ -911,7 +914,7 @@ void exportContainsActiveAndArchivedAndStartsWithBom() {
 }
 ```
 
-- [ ] **Step 5: Implement transactional confirmation and export**
+- [x] **Step 5: Implement transactional confirmation and export**
 
 Do not trust serialized preview rows from the browser. Store the uploaded
 bytes in the HTTP session for the preview-confirm cycle, cap it at 2 MiB, and
@@ -928,7 +931,7 @@ preferred_language,internal_note,archive_state,archived_at,delivery_state,
 first_sent_at,last_sent_at,created_at,updated_at
 ```
 
-- [ ] **Step 6: Add upload/preview controller tests**
+- [x] **Step 6: Add upload/preview controller tests**
 
 ```java
 @Test
@@ -943,7 +946,7 @@ void previewErrorsDoNotExposeAConfirmAction() throws Exception {
 }
 ```
 
-- [ ] **Step 7: Run CSV tests**
+- [x] **Step 7: Run CSV tests**
 
 ```bash
 ./mvnw -q -Dtest=GuestCsvServiceTest,GuestCsvControllerTest,GuestControllerTest test
@@ -951,7 +954,7 @@ void previewErrorsDoNotExposeAConfirmAction() throws Exception {
 
 Expected: all selected tests pass.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/main/java/myweddinginvitation/webapp/guest \
@@ -975,7 +978,7 @@ git commit -m "feat: import and export wedding guests"
 - Consumes all Phase 3 routes and services.
 - Produces one end-to-end administrator/public journey and operational docs.
 
-- [ ] **Step 1: Write the end-to-end journey test**
+- [x] **Step 1: Write the end-to-end journey test**
 
 ```java
 @Test
@@ -999,7 +1002,7 @@ void administratorImportsSendsArchivesRestoresAndRegenerates() throws Exception 
 Implement the named test helpers in the test class using MockMvc and
 repositories; do not call controller methods directly.
 
-- [ ] **Step 2: Run the journey test and fix only integration gaps**
+- [x] **Step 2: Run the journey test and fix only integration gaps**
 
 ```bash
 ./mvnw -q -Dtest=GuestDeliveryJourneyTest test
@@ -1007,7 +1010,7 @@ repositories; do not call controller methods directly.
 
 Expected: the full Phase 3 lifecycle passes.
 
-- [ ] **Step 3: Add documentation**
+- [x] **Step 3: Add documentation**
 
 Document:
 
@@ -1021,7 +1024,7 @@ Document:
 Update the roadmap to `Phase 3 implementation and automated verification
 complete; manual browser acceptance pending` only after Step 5 passes.
 
-- [ ] **Step 4: Run formatting and packaging checks**
+- [x] **Step 4: Run formatting and packaging checks**
 
 ```bash
 git diff --check
@@ -1030,7 +1033,7 @@ git diff --check
 
 Expected: both commands exit zero.
 
-- [ ] **Step 5: Run the complete MySQL 8.4 suite**
+- [x] **Step 5: Run the complete MySQL 8.4 suite**
 
 For rootless Podman:
 
@@ -1067,13 +1070,14 @@ Verify:
 
 Expected: health is `UP` and every listed flow succeeds.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add README.md docs/installation/development.md \
   docs/superpowers/plans/2026-07-27-implementation-roadmap.md \
   docs/superpowers/plans/2026-07-28-phase-3-guest-delivery.md \
-  src/test/java/myweddinginvitation/webapp/guest/GuestDeliveryJourneyTest.java
+  src/test/java/myweddinginvitation/webapp/guest/GuestDeliveryJourneyTest.java \
+  src/test/java/myweddinginvitation/webapp/wedding/WeddingContentControllerTest.java
 git commit -m "docs: complete guest delivery phase"
 ```
 

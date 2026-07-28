@@ -28,3 +28,23 @@ Partner photos are JPEG, PNG, or WebP files up to 10 MiB. Set
 `MEDIA_DIRECTORY` in the untracked `.env` file to choose where they are stored.
 The default is `./data/media`; `/data/` is intentionally ignored by Git, so do
 not put uploaded media under version control.
+
+## Guest invitations and delivery
+
+Set `INVITATION_BASE_URL` and `INVITATION_SIGNING_SECRET` in untracked
+`.env`. The secret must be at least 32 bytes; generate a random value and keep
+it private. Rotating that secret invalidates every existing personal invitation
+link, so regenerate and resend links afterwards.
+
+Administrators manage categories at `/admin/guest-categories`, guests at
+`/admin/guests`, imports at `/admin/guests/import`, and message templates at
+`/admin/message-templates`. Guest CSV imports use UTF-8 (with or without BOM),
+comma or semicolon delimiters, and exactly these columns:
+`display_name, whatsapp_number, salutation, category, plus_one_allowed,
+preferred_language, internal_note`. Files are limited to 2 MiB and 2,000 rows;
+every row is validated before the atomic import, so one error imports nothing.
+
+Opening WhatsApp only opens a prefilled message; it does not record delivery.
+Use **Confirm sent** after sending to record the timestamps. A public signed
+invitation is read-only and neutral when unavailable. RSVP, PIN protection, and
+QR features are deferred to a later phase.

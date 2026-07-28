@@ -41,6 +41,28 @@ administrator exists. Re-running it does not create another administrator or
 replace the existing password. Change the bootstrap password at the first
 login.
 
+## Guest delivery configuration and operations
+
+Set `INVITATION_BASE_URL` to the public URL prefix ending in `/i`, and set
+`INVITATION_SIGNING_SECRET` to a private random secret of at least 32 bytes.
+Changing the signing secret immediately invalidates all issued invitation links;
+regenerate and resend the links after a rotation.
+
+Administrator routes are `/admin/guest-categories`, `/admin/guests`,
+`/admin/guests/import`, `/admin/guests/export.csv`, and
+`/admin/message-templates`. Imports accept UTF-8 CSV with an optional BOM and
+either comma or semicolon delimiters. The exact columns are
+`display_name,whatsapp_number,salutation,category,plus_one_allowed,preferred_language,internal_note`.
+An upload is limited to 2 MiB and 2,000 rows. Preview before confirmation;
+warnings need explicit acceptance, while any error blocks the transaction, so
+no rows are imported.
+
+`Open WhatsApp` creates only a redirect to a prefilled WhatsApp message.
+`Confirm sent` is the separate manual action that stores the first and latest
+send timestamps. Public `/i/...` invitations are read-only; unavailable links
+return a neutral page without guest data. RSVP, PIN protection, and QR are
+intentionally deferred to Phase 4.
+
 ## Wedding content and media
 
 After signing in as an administrator, open `/admin/wedding` to edit wedding

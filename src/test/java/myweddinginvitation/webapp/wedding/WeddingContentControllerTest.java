@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -52,12 +53,15 @@ class WeddingContentControllerTest {
 	@Autowired
 	private StoryEntryRepository stories;
 
+	@Autowired
+	private JdbcTemplate jdbc;
+
 	private MockHttpSession adminSession;
 	private MockHttpSession staffSession;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		stories.deleteAll();
+		resetWeddingContent();
 		accounts.deleteAll();
 		accounts.save(new UserAccount("admin", "{noop}" + PASSWORD, AccountRole.ADMIN));
 		accounts.save(new UserAccount("staff", "{noop}" + PASSWORD, AccountRole.STAFF));
@@ -196,5 +200,21 @@ class WeddingContentControllerTest {
 
 	private long currentSettingsVersion() {
 		return settings.getSingleton().orElseThrow().getVersion();
+	}
+
+	private void resetWeddingContent() {
+		stories.deleteAll();
+		jdbc.update("delete from event_part");
+		jdbc.update("""
+				update partner set full_name = null, nickname = null, photo_path = null,
+				child_of_label_id = null, child_of_label_en = null,
+				parents_names_id = null, parents_names_en = null, instagram_url = null
+				""");
+		jdbc.update("""
+				update wedding_settings set publication_state = 'DRAFT', couple_title = null,
+				opening_text_id = null, opening_text_en = null, closing_text_id = null,
+				closing_text_en = null, accent_color = '#7A5C48', font_preset = 'CLASSIC'
+				where id = 1
+				""");
 	}
 }
