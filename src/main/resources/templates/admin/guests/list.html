@@ -4,7 +4,8 @@
 <body>
 <main>
   <h1>Guests</h1>
-  <p><a th:href="@{/admin}">Back to administrator home</a> · <a th:href="@{/admin/guests/new}">Add guest</a></p>
+  <p><a th:href="@{/admin}">Back to administrator home</a> · <a th:href="@{/admin/guests/new}">Add guest</a> · <a th:href="@{/admin/guests/import}">Import CSV</a> · <a th:href="@{/admin/guests/export.csv}">Export CSV</a></p>
+  <p th:if="${param.imported}" th:text="|Imported ${param.imported[0]} guests.|">Guests imported.</p>
   <p th:if="${guestError}" th:text="${guestError}" role="alert">Guest error</p>
   <form method="get" th:action="@{/admin/guests}">
     <label>Search <input type="search" name="query" th:value="${filters.query}"></label>
