@@ -6,7 +6,35 @@
   <h1 th:text="${guest.displayName}">Guest</h1>
   <p><a th:href="@{/admin/guests}">Back to guests</a> · <a th:href="@{/admin/guests/{id}/edit(id=${guest.id})}">Edit guest</a></p>
   <p th:if="${guestError}" th:text="${guestError}" role="alert">Guest error</p>
-  <dl><dt>WhatsApp number</dt><dd th:text="${guest.normalizedWhatsappNumber}">+62</dd><dt>Delivery</dt><dd th:text="${guest.deliveryState}">UNSENT</dd><dt>Archived</dt><dd th:text="${guest.archived ? 'Yes' : 'No'}">No</dd></dl>
+  <dl>
+    <dt>WhatsApp number</dt><dd th:text="${guest.normalizedWhatsappNumber}">+62</dd>
+    <dt>Delivery</dt><dd th:text="${guest.deliveryState}">UNSENT</dd>
+    <dt>First sent</dt><dd th:text="${guest.firstSentAt ?: 'Not sent'}">Not sent</dd>
+    <dt>Last sent</dt><dd th:text="${guest.lastSentAt ?: 'Not sent'}">Not sent</dd>
+    <dt>Invitation link regenerated</dt><dd th:text="${guest.tokenRegeneratedAt ?: 'Never'}">Never</dd>
+    <dt>Archived</dt><dd th:text="${guest.archived ? 'Yes' : 'No'}">No</dd>
+  </dl>
+  <section th:if="${!guest.archived}" aria-labelledby="delivery-heading">
+    <h2 id="delivery-heading">Invitation delivery</h2>
+    <form method="post" th:action="@{/admin/guests/{id}/open-whatsapp(id=${guest.id})}">
+      <label>Message language
+        <select name="language">
+          <option value="ID" th:selected="${guest.preferredLanguage.name() == 'ID'}">Indonesian</option>
+          <option value="EN" th:selected="${guest.preferredLanguage.name() == 'EN'}">English</option>
+        </select>
+      </label>
+      <button type="submit">Open WhatsApp</button>
+    </form>
+    <form method="post" th:action="@{/admin/guests/{id}/confirm-sent(id=${guest.id})}">
+      <input type="hidden" name="version" th:value="${guest.version}">
+      <button type="submit">Confirm sent</button>
+    </form>
+    <form method="post" th:action="@{/admin/guests/{id}/regenerate-invitation(id=${guest.id})}"
+          onsubmit="return confirm('Regenerate the invitation link? The previous link will stop working.');">
+      <input type="hidden" name="version" th:value="${guest.version}">
+      <button type="submit">Regenerate invitation link</button>
+    </form>
+  </section>
   <form th:if="${!guest.archived}" method="post" th:action="@{/admin/guests/{id}/archive(id=${guest.id})}"><input type="hidden" name="version" th:value="${guest.version}"><button type="submit">Archive guest</button></form>
   <form th:if="${guest.archived}" method="post" th:action="@{/admin/guests/{id}/restore(id=${guest.id})}"><input type="hidden" name="version" th:value="${guest.version}"><button type="submit">Restore guest</button></form>
   <form method="post" th:action="@{/admin/guests/{id}/delete(id=${guest.id})}" onsubmit="return confirm('Permanently delete this guest?');"><input type="hidden" name="version" th:value="${guest.version}"><button type="submit">Permanently delete</button></form>

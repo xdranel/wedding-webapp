@@ -1,5 +1,6 @@
 package myweddinginvitation.webapp.guest;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -80,6 +81,24 @@ public class GuestService {
 		guests.flush();
 	}
 
+	@Transactional
+	public void confirmSent(long id, long version, Instant sentAt) {
+		Guest guest = guest(id);
+		requireActive(guest);
+		requireVersion(guest, version);
+		guest.confirmSent(sentAt);
+		guests.saveAndFlush(guest);
+	}
+
+	@Transactional
+	public Guest regenerateInvitation(long id, long version, Instant regeneratedAt) {
+		Guest guest = guest(id);
+		requireActive(guest);
+		requireVersion(guest, version);
+		guest.regenerateInvitation(regeneratedAt);
+		return guests.saveAndFlush(guest);
+	}
+
 	@Transactional(readOnly = true)
 	public Guest get(long id) {
 		return guest(id);
@@ -131,6 +150,12 @@ public class GuestService {
 	private void requireVersion(Guest guest, long version) {
 		if (guest.getVersion() != version) {
 			throw new OptimisticLockingFailureException("Guest has changed");
+		}
+	}
+
+	private void requireActive(Guest guest) {
+		if (guest.isArchived()) {
+			throw new IllegalStateException("Delivery is disabled for archived guests.");
 		}
 	}
 

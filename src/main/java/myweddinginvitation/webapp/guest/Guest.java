@@ -123,6 +123,15 @@ public class Guest {
 		updatedAt = sentAt;
 	}
 
+	void regenerateInvitation(Instant regeneratedAt) {
+		invitationTokenVersion++;
+		tokenRegeneratedAt = regeneratedAt;
+		deliveryState = DeliveryState.UNSENT;
+		firstSentAt = null;
+		lastSentAt = null;
+		updatedAt = regeneratedAt;
+	}
+
 	public Long getId() { return id; }
 	public UUID getPublicId() { return publicId; }
 	public String getDisplayName() { return displayName; }
