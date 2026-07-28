@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Edit message template</title>
+</head>
+<body>
+  <main>
+    <h1>Edit message template</h1>
+    <p><a th:href="@{/admin/message-templates}">Back to message templates</a></p>
+    <p><strong th:text="${template.type}">INVITATION</strong> <span th:text="${template.language}">ID</span></p>
+
+    <section aria-labelledby="placeholders-heading">
+      <h2 id="placeholders-heading">Approved placeholders</h2>
+      <ul>
+        <li><code>{{salutation}}</code></li>
+        <li><code>{{guest_name}}</code></li>
+        <li><code>{{couple_name}}</code></li>
+        <li><code>{{invitation_link}}</code></li>
+        <li><code>{{rsvp_deadline}}</code></li>
+        <li><code>{{ceremony_date}}</code></li>
+        <li><code>{{ceremony_location}}</code></li>
+        <li><code>{{reception_date}}</code></li>
+        <li><code>{{reception_location}}</code></li>
+      </ul>
+    </section>
+
+    <form method="post" th:action="@{/admin/message-templates/{id}(id=${template.id})}" th:object="${form}">
+      <input type="hidden" th:field="*{version}">
+      <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Template error</p>
+      <label for="template-body">Message body</label>
+      <textarea id="template-body" th:field="*{body}" maxlength="4000" required rows="12"
+                aria-describedby="template-body-error"></textarea>
+      <p id="template-body-error" th:if="${#fields.hasErrors('body')}" th:errors="*{body}" role="alert">Body error</p>
+      <button type="submit">Save template</button>
+    </form>
+
+    <section aria-labelledby="preview-heading">
+      <h2 id="preview-heading">Preview</h2>
+      <pre th:text="${preview}">Message preview</pre>
+    </section>
+  </main>
+</body>
+</html>

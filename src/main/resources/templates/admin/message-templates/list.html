@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Message templates</title>
+</head>
+<body>
+  <main>
+    <h1>Message templates</h1>
+    <p><a th:href="@{/admin}">Back to administrator home</a></p>
+    <p>Edit the Indonesian and English WhatsApp messages used for each delivery type.</p>
+    <ul>
+      <li th:each="template : ${templates}">
+        <strong th:text="${template.type}">INVITATION</strong>
+        <span th:text="${template.language}">ID</span>
+        <a th:href="@{/admin/message-templates/{id}(id=${template.id})}">Edit template</a>
+      </li>
+    </ul>
+  </main>
+</body>
+</html>

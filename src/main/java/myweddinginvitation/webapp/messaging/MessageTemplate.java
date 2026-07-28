@@ -40,6 +40,11 @@ public class MessageTemplate {
 	protected MessageTemplate() {
 	}
 
+	void update(String body) {
+		this.body = body;
+		updatedAt = Instant.now();
+	}
+
 	public Long getId() { return id; }
 	public MessageType getType() { return type; }
 	public MessageLanguage getLanguage() { return language; }
