@@ -16,51 +16,51 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
-	@Bean
-	WebSecurityCustomizer requestRejectedHandler() {
-		return web -> web.requestRejectedHandler((request, response, exception) -> response.sendError(404));
-	}
+    @Bean
+    WebSecurityCustomizer requestRejectedHandler() {
+        return web -> web.requestRejectedHandler((request, response, exception) -> response.sendError(404));
+    }
 
-	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http,
-			RoleSessionAuthenticationSuccessHandler roleSessionAuthenticationSuccessHandler,
-			AuthenticationFailureHandler authenticationFailureHandler,
-			UserAccountRepository accounts)
-			throws Exception {
-		return http
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/i/**", "/login", "/error", "/forbidden",
-								"/actuator/health",
-								"/css/**", "/js/**", "/images/**").permitAll()
-						.requestMatchers("/account/password").authenticated()
-						.requestMatchers("/admin/**").hasRole("ADMIN")
-						.requestMatchers("/check-in/**").hasAnyRole("ADMIN", "STAFF")
-						.anyRequest().denyAll())
-				.csrf(Customizer.withDefaults())
-				.formLogin(form -> form
-						.loginPage("/login")
-						.successHandler(roleSessionAuthenticationSuccessHandler)
-						.failureHandler(authenticationFailureHandler)
-						.permitAll())
-				.exceptionHandling(exceptions -> exceptions.accessDeniedPage("/forbidden"))
-				.logout(logout -> logout.logoutSuccessUrl("/login?logout"))
-				.addFilterBefore(new AccountSessionFilter(accounts), AuthorizationFilter.class)
-				.build();
-	}
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                            RoleSessionAuthenticationSuccessHandler roleSessionAuthenticationSuccessHandler,
+                                            AuthenticationFailureHandler authenticationFailureHandler,
+                                            UserAccountRepository accounts)
+            throws Exception {
+        return http
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/i/**", "/login", "/error", "/forbidden",
+                                "/actuator/health",
+                                "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/account/password").authenticated()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/check-in/**").hasAnyRole("ADMIN", "STAFF")
+                        .anyRequest().denyAll())
+                .csrf(Customizer.withDefaults())
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .successHandler(roleSessionAuthenticationSuccessHandler)
+                        .failureHandler(authenticationFailureHandler)
+                        .permitAll())
+                .exceptionHandling(exceptions -> exceptions.accessDeniedPage("/forbidden"))
+                .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
+                .addFilterBefore(new AccountSessionFilter(accounts), AuthorizationFilter.class)
+                .build();
+    }
 
-	@Bean
-	AuthenticationFailureHandler authenticationFailureHandler(
-			AccountSecurityService accountSecurity) {
-		return (request, response, exception) -> {
-			if (exception instanceof BadCredentialsException) {
-				accountSecurity.loginFailed(request.getParameter("username"));
-			}
-			response.sendRedirect("/login?error");
-		};
-	}
+    @Bean
+    AuthenticationFailureHandler authenticationFailureHandler(
+            AccountSecurityService accountSecurity) {
+        return (request, response, exception) -> {
+            if (exception instanceof BadCredentialsException) {
+                accountSecurity.loginFailed(request.getParameter("username"));
+            }
+            response.sendRedirect("/login?error");
+        };
+    }
 
-	@Bean
-	PasswordEncoder passwordEncoder() {
-		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-	}
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
 }

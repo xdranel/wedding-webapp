@@ -1,19 +1,100 @@
-:root { --accent: #7A5C48; color: #202020; background: #fffdf9; }
-* { box-sizing: border-box; }
-body { margin: 0; font-family: Georgia, serif; line-height: 1.5; }
-body[data-font="ELEGANT"] { font-family: "Palatino Linotype", Palatino, serif; }
-body[data-font="MODERN"] { font-family: system-ui, sans-serif; }
-a, button, input, select { font: inherit; }
-a { color: var(--accent); }
-button { background: var(--accent); border: 0; color: white; cursor: pointer; padding: .7rem 1rem; }
-:focus-visible { outline: 3px solid #005fcc; outline-offset: 3px; }
-.preview-controls, main { margin: 0 auto; max-width: 46rem; padding: 1rem; }
-.preview-controls form { display: grid; gap: .5rem; }
-.cover { min-height: 55vh; display: grid; align-content: center; gap: .5rem; text-align: center; }
-section { margin-block: 3rem; }
-article { margin-block: 1.5rem; }
-img { display: block; height: auto; max-width: 100%; }
-.js #invitation { display: none; }
-.js #invitation.is-open { display: block; }
-@media (min-width: 48rem) { .preview-controls form { grid-template-columns: repeat(3, 1fr) auto; align-items: end; } }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+:root {
+    --accent: #7A5C48;
+    color: #202020;
+    background: #fffdf9;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Georgia, serif;
+    line-height: 1.5;
+}
+
+body[data-font="ELEGANT"] {
+    font-family: "Palatino Linotype", Palatino, serif;
+}
+
+body[data-font="MODERN"] {
+    font-family: system-ui, sans-serif;
+}
+
+a, button, input, select {
+    font: inherit;
+}
+
+a {
+    color: var(--accent);
+}
+
+button {
+    background: var(--accent);
+    border: 0;
+    color: white;
+    cursor: pointer;
+    padding: .7rem 1rem;
+}
+
+:focus-visible {
+    outline: 3px solid #005fcc;
+    outline-offset: 3px;
+}
+
+.preview-controls, main {
+    margin: 0 auto;
+    max-width: 46rem;
+    padding: 1rem;
+}
+
+.preview-controls form {
+    display: grid;
+    gap: .5rem;
+}
+
+.cover {
+    min-height: 55vh;
+    display: grid;
+    align-content: center;
+    gap: .5rem;
+    text-align: center;
+}
+
+section {
+    margin-block: 3rem;
+}
+
+article {
+    margin-block: 1.5rem;
+}
+
+img {
+    display: block;
+    height: auto;
+    max-width: 100%;
+}
+
+.js #invitation {
+    display: none;
+}
+
+.js #invitation.is-open {
+    display: block;
+}
+
+@media (min-width: 48rem) {
+    .preview-controls form {
+        grid-template-columns: repeat(3, 1fr) auto;
+        align-items: end;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}

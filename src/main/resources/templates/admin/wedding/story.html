@@ -1,80 +1,87 @@
 <!doctype html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Relationship story</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Relationship story</title>
 </head>
 <body>
-  <main>
+<main>
     <h1>Relationship story</h1>
     <section aria-labelledby="add-story-heading">
-      <h2 id="add-story-heading">Add story entry</h2>
-      <form method="post" th:action="@{/admin/wedding/story}" th:object="${form}" th:if="${editingId == null}">
-        <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Story error</p>
-        <label for="story-date">Date (optional)</label>
-        <input id="story-date" type="date" th:field="*{date}">
-        <label for="story-title-id">Title (Indonesian)</label>
-        <input id="story-title-id" th:field="*{titleId}" maxlength="200" required>
-        <p th:if="${#fields.hasErrors('titleId')}" th:errors="*{titleId}" role="alert">Title error</p>
-        <label for="story-title-en">Title (English, falls back to Indonesian)</label>
-        <input id="story-title-en" th:field="*{titleEn}" maxlength="200">
-        <p th:if="${#fields.hasErrors('titleEn')}" th:errors="*{titleEn}" role="alert">English title error</p>
-        <label for="story-body-id">Story (Indonesian)</label>
-        <textarea id="story-body-id" th:field="*{bodyId}" maxlength="4000" required></textarea>
-        <p th:if="${#fields.hasErrors('bodyId')}" th:errors="*{bodyId}" role="alert">Story error</p>
-        <label for="story-body-en">Story (English, falls back to Indonesian)</label>
-        <textarea id="story-body-en" th:field="*{bodyEn}" maxlength="4000"></textarea>
-        <p th:if="${#fields.hasErrors('bodyEn')}" th:errors="*{bodyEn}" role="alert">English story error</p>
-        <button type="submit">Add story entry</button>
-      </form>
+        <h2 id="add-story-heading">Add story entry</h2>
+        <form method="post" th:action="@{/admin/wedding/story}" th:object="${form}" th:if="${editingId == null}">
+            <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Story error</p>
+            <label for="story-date">Date (optional)</label>
+            <input id="story-date" type="date" th:field="*{date}">
+            <label for="story-title-id">Title (Indonesian)</label>
+            <input id="story-title-id" th:field="*{titleId}" maxlength="200" required>
+            <p th:if="${#fields.hasErrors('titleId')}" th:errors="*{titleId}" role="alert">Title error</p>
+            <label for="story-title-en">Title (English, falls back to Indonesian)</label>
+            <input id="story-title-en" th:field="*{titleEn}" maxlength="200">
+            <p th:if="${#fields.hasErrors('titleEn')}" th:errors="*{titleEn}" role="alert">English title error</p>
+            <label for="story-body-id">Story (Indonesian)</label>
+            <textarea id="story-body-id" th:field="*{bodyId}" maxlength="4000" required></textarea>
+            <p th:if="${#fields.hasErrors('bodyId')}" th:errors="*{bodyId}" role="alert">Story error</p>
+            <label for="story-body-en">Story (English, falls back to Indonesian)</label>
+            <textarea id="story-body-en" th:field="*{bodyEn}" maxlength="4000"></textarea>
+            <p th:if="${#fields.hasErrors('bodyEn')}" th:errors="*{bodyEn}" role="alert">English story error</p>
+            <button type="submit">Add story entry</button>
+        </form>
     </section>
     <ol>
-      <li th:each="entry, state : ${storyForms}">
-        <form method="post" th:action="@{/admin/wedding/story/{id}(id=${entry.id})}" th:object="${form}" th:if="${editingId != null and editingId == entry.id}">
-          <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Story error</p>
-          <input type="hidden" th:field="*{version}">
-          <label for="story-date">Date (optional)</label>
-          <input id="story-date" type="date" th:field="*{date}">
-          <label for="story-title-id">Title (Indonesian)</label>
-          <input id="story-title-id" th:field="*{titleId}" maxlength="200" required>
-          <p th:if="${#fields.hasErrors('titleId')}" th:errors="*{titleId}" role="alert">Title error</p>
-          <label for="story-title-en">Title (English, falls back to Indonesian)</label>
-          <input id="story-title-en" th:field="*{titleEn}" maxlength="200">
-          <p th:if="${#fields.hasErrors('titleEn')}" th:errors="*{titleEn}" role="alert">English title error</p>
-          <label for="story-body-id">Story (Indonesian)</label>
-          <textarea id="story-body-id" th:field="*{bodyId}" maxlength="4000" required></textarea>
-          <p th:if="${#fields.hasErrors('bodyId')}" th:errors="*{bodyId}" role="alert">Story error</p>
-          <label for="story-body-en">Story (English, falls back to Indonesian)</label>
-          <textarea id="story-body-en" th:field="*{bodyEn}" maxlength="4000"></textarea>
-          <p th:if="${#fields.hasErrors('bodyEn')}" th:errors="*{bodyEn}" role="alert">English story error</p>
-          <button type="submit">Save story entry</button>
-        </form>
-        <form method="post" th:action="@{/admin/wedding/story/{id}(id=${entry.id})}" th:unless="${editingId != null and editingId == entry.id}">
-          <input type="hidden" name="version" th:value="${entry.version}">
-          <label th:for="${'story-date-' + entry.id}">Date (optional)</label>
-          <input th:id="${'story-date-' + entry.id}" type="date" name="date" th:value="${entry.date}">
-          <label th:for="${'story-title-id-' + entry.id}">Title (Indonesian)</label>
-          <input th:id="${'story-title-id-' + entry.id}" name="titleId" th:value="${entry.titleId}" maxlength="200" required>
-          <label th:for="${'story-title-en-' + entry.id}">Title (English, falls back to Indonesian)</label>
-          <input th:id="${'story-title-en-' + entry.id}" name="titleEn" th:value="${entry.titleEn}" maxlength="200">
-          <label th:for="${'story-body-id-' + entry.id}">Story (Indonesian)</label>
-          <textarea th:id="${'story-body-id-' + entry.id}" name="bodyId" th:text="${entry.bodyId}" maxlength="4000" required></textarea>
-          <label th:for="${'story-body-en-' + entry.id}">Story (English, falls back to Indonesian)</label>
-          <textarea th:id="${'story-body-en-' + entry.id}" name="bodyEn" th:text="${entry.bodyEn}" maxlength="4000"></textarea>
-          <button type="submit">Save story entry</button>
-        </form>
-        <form method="post" th:action="@{/admin/wedding/story/{id}/up(id=${entry.id})}">
-          <button type="submit" th:disabled="${state.first}">Move up</button>
-        </form>
-        <form method="post" th:action="@{/admin/wedding/story/{id}/down(id=${entry.id})}">
-          <button type="submit" th:disabled="${state.last}">Move down</button>
-        </form>
-        <form method="post" th:action="@{/admin/wedding/story/{id}/delete(id=${entry.id})}" onsubmit="return confirm('Delete this story entry?');">
-          <button type="submit">Delete story entry</button>
-        </form>
-      </li>
+        <li th:each="entry, state : ${storyForms}">
+            <form method="post" th:action="@{/admin/wedding/story/{id}(id=${entry.id})}" th:object="${form}"
+                  th:if="${editingId != null and editingId == entry.id}">
+                <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Story error</p>
+                <input type="hidden" th:field="*{version}">
+                <label for="story-date">Date (optional)</label>
+                <input id="story-date" type="date" th:field="*{date}">
+                <label for="story-title-id">Title (Indonesian)</label>
+                <input id="story-title-id" th:field="*{titleId}" maxlength="200" required>
+                <p th:if="${#fields.hasErrors('titleId')}" th:errors="*{titleId}" role="alert">Title error</p>
+                <label for="story-title-en">Title (English, falls back to Indonesian)</label>
+                <input id="story-title-en" th:field="*{titleEn}" maxlength="200">
+                <p th:if="${#fields.hasErrors('titleEn')}" th:errors="*{titleEn}" role="alert">English title error</p>
+                <label for="story-body-id">Story (Indonesian)</label>
+                <textarea id="story-body-id" th:field="*{bodyId}" maxlength="4000" required></textarea>
+                <p th:if="${#fields.hasErrors('bodyId')}" th:errors="*{bodyId}" role="alert">Story error</p>
+                <label for="story-body-en">Story (English, falls back to Indonesian)</label>
+                <textarea id="story-body-en" th:field="*{bodyEn}" maxlength="4000"></textarea>
+                <p th:if="${#fields.hasErrors('bodyEn')}" th:errors="*{bodyEn}" role="alert">English story error</p>
+                <button type="submit">Save story entry</button>
+            </form>
+            <form method="post" th:action="@{/admin/wedding/story/{id}(id=${entry.id})}"
+                  th:unless="${editingId != null and editingId == entry.id}">
+                <input type="hidden" name="version" th:value="${entry.version}">
+                <label th:for="${'story-date-' + entry.id}">Date (optional)</label>
+                <input th:id="${'story-date-' + entry.id}" type="date" name="date" th:value="${entry.date}">
+                <label th:for="${'story-title-id-' + entry.id}">Title (Indonesian)</label>
+                <input th:id="${'story-title-id-' + entry.id}" name="titleId" th:value="${entry.titleId}"
+                       maxlength="200" required>
+                <label th:for="${'story-title-en-' + entry.id}">Title (English, falls back to Indonesian)</label>
+                <input th:id="${'story-title-en-' + entry.id}" name="titleEn" th:value="${entry.titleEn}"
+                       maxlength="200">
+                <label th:for="${'story-body-id-' + entry.id}">Story (Indonesian)</label>
+                <textarea th:id="${'story-body-id-' + entry.id}" name="bodyId" th:text="${entry.bodyId}"
+                          maxlength="4000" required></textarea>
+                <label th:for="${'story-body-en-' + entry.id}">Story (English, falls back to Indonesian)</label>
+                <textarea th:id="${'story-body-en-' + entry.id}" name="bodyEn" th:text="${entry.bodyEn}"
+                          maxlength="4000"></textarea>
+                <button type="submit">Save story entry</button>
+            </form>
+            <form method="post" th:action="@{/admin/wedding/story/{id}/up(id=${entry.id})}">
+                <button type="submit" th:disabled="${state.first}">Move up</button>
+            </form>
+            <form method="post" th:action="@{/admin/wedding/story/{id}/down(id=${entry.id})}">
+                <button type="submit" th:disabled="${state.last}">Move down</button>
+            </form>
+            <form method="post" th:action="@{/admin/wedding/story/{id}/delete(id=${entry.id})}"
+                  onsubmit="return confirm('Delete this story entry?');">
+                <button type="submit">Delete story entry</button>
+            </form>
+        </li>
     </ol>
-  </main>
+</main>
 </body>
 </html>

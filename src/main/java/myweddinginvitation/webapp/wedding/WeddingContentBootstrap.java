@@ -9,27 +9,27 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 class WeddingContentBootstrap implements ApplicationRunner {
-	private final WeddingSettingsRepository settings;
-	private final PartnerRepository partners;
+    private final WeddingSettingsRepository settings;
+    private final PartnerRepository partners;
 
-	WeddingContentBootstrap(WeddingSettingsRepository settings, PartnerRepository partners) {
-		this.settings = settings;
-		this.partners = partners;
-	}
+    WeddingContentBootstrap(WeddingSettingsRepository settings, PartnerRepository partners) {
+        this.settings = settings;
+        this.partners = partners;
+    }
 
-	@Override
-	@Transactional
-	public void run(ApplicationArguments args) {
-		if (settings.getSingleton().isEmpty()) {
-			settings.save(WeddingSettings.initial());
-		}
-		List<Integer> displayOrders = partners.findAllByOrderByDisplayOrderAsc().stream()
-				.map(Partner::getDisplayOrder)
-				.toList();
-		for (int displayOrder = 1; displayOrder <= 2; displayOrder++) {
-			if (!displayOrders.contains(displayOrder)) {
-				partners.save(Partner.empty(displayOrder));
-			}
-		}
-	}
+    @Override
+    @Transactional
+    public void run(ApplicationArguments args) {
+        if (settings.getSingleton().isEmpty()) {
+            settings.save(WeddingSettings.initial());
+        }
+        List<Integer> displayOrders = partners.findAllByOrderByDisplayOrderAsc().stream()
+                .map(Partner::getDisplayOrder)
+                .toList();
+        for (int displayOrder = 1; displayOrder <= 2; displayOrder++) {
+            if (!displayOrders.contains(displayOrder)) {
+                partners.save(Partner.empty(displayOrder));
+            }
+        }
+    }
 }

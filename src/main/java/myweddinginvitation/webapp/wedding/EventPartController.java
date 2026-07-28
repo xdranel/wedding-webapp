@@ -16,63 +16,64 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @Controller
 public class EventPartController {
-	private final WeddingContentService weddingContent;
+    private final WeddingContentService weddingContent;
 
-	public EventPartController(WeddingContentService weddingContent) {
-		this.weddingContent = weddingContent;
-	}
+    public EventPartController(WeddingContentService weddingContent) {
+        this.weddingContent = weddingContent;
+    }
 
-	@GetMapping("/admin/wedding/events")
-	String events(Model model) {
-		forms(model, null, null, null);
-		return "admin/wedding/events";
-	}
+    @GetMapping("/admin/wedding/events")
+    String events(Model model) {
+        forms(model, null, null, null);
+        return "admin/wedding/events";
+    }
 
-	@PostMapping("/admin/wedding/events/{type}")
-	String saveEvent(@PathVariable EventType type, @Valid @ModelAttribute("form") EventPartForm form, BindingResult result, Model model) {
-		validateVisibleEvent(form, result);
-		if (!result.hasErrors()) {
-			try {
-				weddingContent.saveEvent(type, form);
-				return "redirect:/admin/wedding?eventsSaved";
-			} catch (OptimisticLockingFailureException exception) {
-				result.reject("event.conflict", "This event changed by another administrator. Reload and try again.");
-			}
-		}
-		forms(model, type, form, result);
-		return "admin/wedding/events";
-	}
+    @PostMapping("/admin/wedding/events/{type}")
+    String saveEvent(@PathVariable EventType type, @Valid @ModelAttribute("form") EventPartForm form, BindingResult result, Model model) {
+        validateVisibleEvent(form, result);
+        if (!result.hasErrors()) {
+            try {
+                weddingContent.saveEvent(type, form);
+                return "redirect:/admin/wedding?eventsSaved";
+            } catch (OptimisticLockingFailureException exception) {
+                result.reject("event.conflict", "This event changed by another administrator. Reload and try again.");
+            }
+        }
+        forms(model, type, form, result);
+        return "admin/wedding/events";
+    }
 
-	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	void invalidEventType() {
-	}
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    void invalidEventType() {
+    }
 
-	private void forms(Model model, EventType editedType, EventPartForm submitted, BindingResult result) {
-		model.addAttribute("ceremonyForm", editedType == EventType.CEREMONY ? submitted : weddingContent.eventForm(EventType.CEREMONY));
-		model.addAttribute("receptionForm", editedType == EventType.RECEPTION ? submitted : weddingContent.eventForm(EventType.RECEPTION));
-		if (result != null) model.addAttribute(BindingResult.MODEL_KEY_PREFIX + formName(editedType), result);
-	}
+    private void forms(Model model, EventType editedType, EventPartForm submitted, BindingResult result) {
+        model.addAttribute("ceremonyForm", editedType == EventType.CEREMONY ? submitted : weddingContent.eventForm(EventType.CEREMONY));
+        model.addAttribute("receptionForm", editedType == EventType.RECEPTION ? submitted : weddingContent.eventForm(EventType.RECEPTION));
+        if (result != null) model.addAttribute(BindingResult.MODEL_KEY_PREFIX + formName(editedType), result);
+    }
 
-	private void validateVisibleEvent(EventPartForm form, BindingResult result) {
-		if (!form.isVisible()) return;
-		required(form.getEventDate(), "eventDate", "Date is required", result);
-		required(form.getStartTime(), "startTime", "Start time is required", result);
-		required(form.getVenueName(), "venueName", "Venue name is required", result);
-		required(form.getAddressId(), "addressId", "Indonesian address is required", result);
-		if (!WeddingContentService.isHttpUrl(form.getMapUrl())) {
-			result.rejectValue("mapUrl", "mapUrl.invalid", "Must use an HTTP or HTTPS URL with a host");
-		}
-		if (form.getStartTime() != null && form.getEndTime() != null && !form.getEndTime().isAfter(form.getStartTime())) {
-			result.rejectValue("endTime", "endTime.invalid", "End time must be after start time");
-		}
-	}
+    private void validateVisibleEvent(EventPartForm form, BindingResult result) {
+        if (!form.isVisible()) return;
+        required(form.getEventDate(), "eventDate", "Date is required", result);
+        required(form.getStartTime(), "startTime", "Start time is required", result);
+        required(form.getVenueName(), "venueName", "Venue name is required", result);
+        required(form.getAddressId(), "addressId", "Indonesian address is required", result);
+        if (!WeddingContentService.isHttpUrl(form.getMapUrl())) {
+            result.rejectValue("mapUrl", "mapUrl.invalid", "Must use an HTTP or HTTPS URL with a host");
+        }
+        if (form.getStartTime() != null && form.getEndTime() != null && !form.getEndTime().isAfter(form.getStartTime())) {
+            result.rejectValue("endTime", "endTime.invalid", "End time must be after start time");
+        }
+    }
 
-	private void required(Object value, String field, String message, BindingResult result) {
-		if (value == null || value instanceof String text && text.isBlank()) result.rejectValue(field, field + ".required", message);
-	}
+    private void required(Object value, String field, String message, BindingResult result) {
+        if (value == null || value instanceof String text && text.isBlank())
+            result.rejectValue(field, field + ".required", message);
+    }
 
-	private String formName(EventType type) {
-		return type == EventType.CEREMONY ? "ceremonyForm" : "receptionForm";
-	}
+    private String formName(EventType type) {
+        return type == EventType.CEREMONY ? "ceremonyForm" : "receptionForm";
+    }
 }

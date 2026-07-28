@@ -1,33 +1,33 @@
 <!doctype html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Guest Check-in</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Guest Check-in</title>
 </head>
 <body>
-  <header>
+<header>
     <h1>Guest Check-in</h1>
     <nav aria-label="Check-in navigation">
-      <a href="#find-guest">Find guest</a>
-      <form method="post" th:action="@{/logout}">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <button type="submit">Sign out</button>
-      </form>
+        <a href="#find-guest">Find guest</a>
+        <form method="post" th:action="@{/logout}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit">Sign out</button>
+        </form>
     </nav>
-  </header>
-  <main>
+</header>
+<main>
     <section id="find-guest">
-      <h2>Find a guest</h2>
-      <p>
-        <label for="guest-search">Search guests</label>
-        <input id="guest-search" type="search" placeholder="Search by guest name">
-      </p>
-      <p>
-        <label for="scanner-input">Scanner input</label>
-        <input id="scanner-input" type="text" placeholder="Scan invitation code" inputmode="text">
-      </p>
+        <h2>Find a guest</h2>
+        <p>
+            <label for="guest-search">Search guests</label>
+            <input id="guest-search" type="search" placeholder="Search by guest name">
+        </p>
+        <p>
+            <label for="scanner-input">Scanner input</label>
+            <input id="scanner-input" type="text" placeholder="Scan invitation code" inputmode="text">
+        </p>
     </section>
-  </main>
+</main>
 </body>
 </html>

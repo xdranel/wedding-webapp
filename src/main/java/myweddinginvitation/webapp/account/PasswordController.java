@@ -15,37 +15,37 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class PasswordController {
-	private final AccountSecurityService accountSecurity;
+    private final AccountSecurityService accountSecurity;
 
-	public PasswordController(AccountSecurityService accountSecurity) {
-		this.accountSecurity = accountSecurity;
-	}
+    public PasswordController(AccountSecurityService accountSecurity) {
+        this.accountSecurity = accountSecurity;
+    }
 
-	@GetMapping("/account/password")
-	String form(Model model) {
-		model.addAttribute("passwordChangeForm", new PasswordChangeForm("", "", ""));
-		return "account/password";
-	}
+    @GetMapping("/account/password")
+    String form(Model model) {
+        model.addAttribute("passwordChangeForm", new PasswordChangeForm("", "", ""));
+        return "account/password";
+    }
 
-	@PostMapping("/account/password")
-	String change(@Valid @ModelAttribute PasswordChangeForm form, BindingResult errors,
-			Authentication authentication, HttpServletRequest request) {
-		if (!Objects.equals(form.newPassword(), form.confirmPassword())) {
-			errors.rejectValue("confirmPassword", "password.mismatch",
-					"Passwords do not match.");
-		}
-		if (!errors.hasErrors()
-				&& !accountSecurity.changePassword(authentication.getName(),
-						form.currentPassword(), form.newPassword())) {
-			errors.rejectValue("currentPassword", "password.invalid",
-					"Current password is incorrect.");
-		}
-		if (errors.hasErrors()) {
-			return "account/password";
-		}
+    @PostMapping("/account/password")
+    String change(@Valid @ModelAttribute PasswordChangeForm form, BindingResult errors,
+                  Authentication authentication, HttpServletRequest request) {
+        if (!Objects.equals(form.newPassword(), form.confirmPassword())) {
+            errors.rejectValue("confirmPassword", "password.mismatch",
+                    "Passwords do not match.");
+        }
+        if (!errors.hasErrors()
+                && !accountSecurity.changePassword(authentication.getName(),
+                form.currentPassword(), form.newPassword())) {
+            errors.rejectValue("currentPassword", "password.invalid",
+                    "Current password is incorrect.");
+        }
+        if (errors.hasErrors()) {
+            return "account/password";
+        }
 
-		SecurityContextHolder.clearContext();
-		request.getSession(false).invalidate();
-		return "redirect:/login?passwordChanged";
-	}
+        SecurityContextHolder.clearContext();
+        request.getSession(false).invalidate();
+        return "redirect:/login?passwordChanged";
+    }
 }

@@ -16,102 +16,102 @@ import jakarta.persistence.Version;
 @Entity
 @Table(name = "event_part")
 public class EventPart {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Version
-	private long version;
+    @Version
+    private long version;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "event_type", nullable = false, length = 20)
-	private EventType type;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "event_type", nullable = false, length = 20)
+    private EventType type;
 
-	@Column(nullable = false)
-	private boolean visible;
+    @Column(nullable = false)
+    private boolean visible;
 
-	@Column(name = "event_date")
-	private LocalDate date;
+    @Column(name = "event_date")
+    private LocalDate date;
 
-	@Column(name = "start_time")
-	private LocalTime startTime;
+    @Column(name = "start_time")
+    private LocalTime startTime;
 
-	@Column(name = "end_time")
-	private LocalTime endTime;
+    @Column(name = "end_time")
+    private LocalTime endTime;
 
-	@Column(name = "venue_name", length = 200)
-	private String venueName;
+    @Column(name = "venue_name", length = 200)
+    private String venueName;
 
-	@Column(name = "address_id", length = 1000)
-	private String addressId;
+    @Column(name = "address_id", length = 1000)
+    private String addressId;
 
-	@Column(name = "address_en", length = 1000)
-	private String addressEn;
+    @Column(name = "address_en", length = 1000)
+    private String addressEn;
 
-	@Column(name = "map_url", length = 1000)
-	private String mapUrl;
+    @Column(name = "map_url", length = 1000)
+    private String mapUrl;
 
-	protected EventPart() {
-	}
+    protected EventPart() {
+    }
 
-	static EventPart create(EventType type) {
-		EventPart event = new EventPart();
-		event.type = type;
-		return event;
-	}
+    static EventPart create(EventType type) {
+        EventPart event = new EventPart();
+        event.type = type;
+        return event;
+    }
 
-	void update(EventPartForm form) {
-		visible = form.isVisible();
-		date = form.getEventDate();
-		startTime = form.getStartTime();
-		endTime = form.getEndTime();
-		venueName = form.getVenueName();
-		addressId = form.getAddressId();
-		addressEn = form.getAddressEn();
-		mapUrl = form.getMapUrl();
-	}
+    void update(EventPartForm form) {
+        visible = form.isVisible();
+        date = form.getEventDate();
+        startTime = form.getStartTime();
+        endTime = form.getEndTime();
+        venueName = form.getVenueName();
+        addressId = form.getAddressId();
+        addressEn = form.getAddressEn();
+        mapUrl = form.getMapUrl();
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public long getVersion() {
-		return version;
-	}
+    public long getVersion() {
+        return version;
+    }
 
-	public EventType getType() {
-		return type;
-	}
+    public EventType getType() {
+        return type;
+    }
 
-	public boolean isVisible() {
-		return visible;
-	}
+    public boolean isVisible() {
+        return visible;
+    }
 
-	public LocalDate getDate() {
-		return date;
-	}
+    public LocalDate getDate() {
+        return date;
+    }
 
-	public LocalTime getStartTime() {
-		return startTime;
-	}
+    public LocalTime getStartTime() {
+        return startTime;
+    }
 
-	public LocalTime getEndTime() {
-		return endTime;
-	}
+    public LocalTime getEndTime() {
+        return endTime;
+    }
 
-	public String getVenueName() {
-		return venueName;
-	}
+    public String getVenueName() {
+        return venueName;
+    }
 
-	public String getAddressId() {
-		return addressId;
-	}
+    public String getAddressId() {
+        return addressId;
+    }
 
-	public String getAddressEn() {
-		return addressEn;
-	}
+    public String getAddressEn() {
+        return addressEn;
+    }
 
-	public String getMapUrl() {
-		return mapUrl;
-	}
+    public String getMapUrl() {
+        return mapUrl;
+    }
 }

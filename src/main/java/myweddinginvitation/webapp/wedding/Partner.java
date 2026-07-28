@@ -11,110 +11,110 @@ import jakarta.persistence.Version;
 @Entity
 @Table(name = "partner")
 public class Partner {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Version
-	private long version;
+    @Version
+    private long version;
 
-	@Column(name = "display_order", nullable = false, columnDefinition = "tinyint")
-	private int displayOrder;
+    @Column(name = "display_order", nullable = false, columnDefinition = "tinyint")
+    private int displayOrder;
 
-	@Column(name = "full_name", length = 160)
-	private String fullName;
+    @Column(name = "full_name", length = 160)
+    private String fullName;
 
-	@Column(length = 80)
-	private String nickname;
+    @Column(length = 80)
+    private String nickname;
 
-	@Column(name = "photo_path", length = 500)
-	private String photoPath;
+    @Column(name = "photo_path", length = 500)
+    private String photoPath;
 
-	@Column(name = "child_of_label_id", length = 120)
-	private String childOfLabelId;
+    @Column(name = "child_of_label_id", length = 120)
+    private String childOfLabelId;
 
-	@Column(name = "child_of_label_en", length = 120)
-	private String childOfLabelEn;
+    @Column(name = "child_of_label_en", length = 120)
+    private String childOfLabelEn;
 
-	@Column(name = "parents_names_id", length = 300)
-	private String parentsNamesId;
+    @Column(name = "parents_names_id", length = 300)
+    private String parentsNamesId;
 
-	@Column(name = "parents_names_en", length = 300)
-	private String parentsNamesEn;
+    @Column(name = "parents_names_en", length = 300)
+    private String parentsNamesEn;
 
-	@Column(name = "instagram_url", length = 500)
-	private String instagramUrl;
+    @Column(name = "instagram_url", length = 500)
+    private String instagramUrl;
 
-	protected Partner() {
-	}
+    protected Partner() {
+    }
 
-	private Partner(int displayOrder) {
-		this.displayOrder = displayOrder;
-	}
+    private Partner(int displayOrder) {
+        this.displayOrder = displayOrder;
+    }
 
-	static Partner empty(int displayOrder) {
-		return new Partner(displayOrder);
-	}
+    static Partner empty(int displayOrder) {
+        return new Partner(displayOrder);
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public long getVersion() {
-		return version;
-	}
+    public long getVersion() {
+        return version;
+    }
 
-	public int getDisplayOrder() {
-		return displayOrder;
-	}
+    public int getDisplayOrder() {
+        return displayOrder;
+    }
 
-	public String getFullName() {
-		return fullName;
-	}
+    public String getFullName() {
+        return fullName;
+    }
 
-	public String getNickname() {
-		return nickname;
-	}
+    public String getNickname() {
+        return nickname;
+    }
 
-	public String getPhotoPath() {
-		return photoPath;
-	}
+    public String getPhotoPath() {
+        return photoPath;
+    }
 
-	public String getChildOfLabelId() {
-		return childOfLabelId;
-	}
+    public String getChildOfLabelId() {
+        return childOfLabelId;
+    }
 
-	public String getChildOfLabelEn() {
-		return childOfLabelEn;
-	}
+    public String getChildOfLabelEn() {
+        return childOfLabelEn;
+    }
 
-	public String getParentsNamesId() {
-		return parentsNamesId;
-	}
+    public String getParentsNamesId() {
+        return parentsNamesId;
+    }
 
-	public String getParentsNamesEn() {
-		return parentsNamesEn;
-	}
+    public String getParentsNamesEn() {
+        return parentsNamesEn;
+    }
 
-	public String getInstagramUrl() {
-		return instagramUrl;
-	}
+    public String getInstagramUrl() {
+        return instagramUrl;
+    }
 
-	void update(PartnerForm form) {
-		fullName = form.getFullName();
-		nickname = form.getNickname();
-		childOfLabelId = form.getChildOfLabelId();
-		childOfLabelEn = form.getChildOfLabelEn();
-		parentsNamesId = form.getParentsNamesId();
-		parentsNamesEn = form.getParentsNamesEn();
-		instagramUrl = form.getInstagramUrl();
-	}
+    void update(PartnerForm form) {
+        fullName = form.getFullName();
+        nickname = form.getNickname();
+        childOfLabelId = form.getChildOfLabelId();
+        childOfLabelEn = form.getChildOfLabelEn();
+        parentsNamesId = form.getParentsNamesId();
+        parentsNamesEn = form.getParentsNamesEn();
+        instagramUrl = form.getInstagramUrl();
+    }
 
-	void replacePhoto(String photoPath) {
-		this.photoPath = photoPath;
-	}
+    void replacePhoto(String photoPath) {
+        this.photoPath = photoPath;
+    }
 
-	void setDisplayOrder(int displayOrder) {
-		this.displayOrder = displayOrder;
-	}
+    void setDisplayOrder(int displayOrder) {
+        this.displayOrder = displayOrder;
+    }
 }

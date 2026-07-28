@@ -1,32 +1,32 @@
 <!doctype html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Wedding Overview</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wedding Overview</title>
 </head>
 <body>
-  <header>
+<header>
     <h1>Wedding Overview</h1>
     <nav aria-label="Administrator navigation">
-      <a href="#guests">Guests</a>
-      <a href="#settings">Settings</a>
-      <form method="post" th:action="@{/logout}">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <button type="submit">Sign out</button>
-      </form>
+        <a href="#guests">Guests</a>
+        <a href="#settings">Settings</a>
+        <form method="post" th:action="@{/logout}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit">Sign out</button>
+        </form>
     </nav>
-  </header>
-  <main>
+</header>
+<main>
     <section id="guests">
-      <h2>Guests</h2>
-      <label for="guest-search">Search guests</label>
-      <input id="guest-search" type="search" placeholder="Search by guest name">
+        <h2>Guests</h2>
+        <label for="guest-search">Search guests</label>
+        <input id="guest-search" type="search" placeholder="Search by guest name">
     </section>
     <section id="settings">
-      <h2>Wedding settings</h2>
-      <p><a th:href="@{/admin/wedding}">Manage wedding content</a></p>
+        <h2>Wedding settings</h2>
+        <p><a th:href="@{/admin/wedding}">Manage wedding content</a></p>
     </section>
-  </main>
+</main>
 </body>
 </html>

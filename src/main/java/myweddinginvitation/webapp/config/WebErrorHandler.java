@@ -16,36 +16,36 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 @ControllerAdvice
 public class WebErrorHandler {
-	private static final Logger log = LoggerFactory.getLogger(WebErrorHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(WebErrorHandler.class);
 
-	@GetMapping("/forbidden")
-	@ResponseStatus(HttpStatus.FORBIDDEN)
-	String forbiddenPage() {
-		log.warn("Access denied [reference={}]", reference());
-		return "error/403";
-	}
+    @GetMapping("/forbidden")
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    String forbiddenPage() {
+        log.warn("Access denied [reference={}]", reference());
+        return "error/403";
+    }
 
-	@ExceptionHandler(AccessDeniedException.class)
-	ModelAndView forbidden() {
-		return error("error/403", HttpStatus.FORBIDDEN);
-	}
+    @ExceptionHandler(AccessDeniedException.class)
+    ModelAndView forbidden() {
+        return error("error/403", HttpStatus.FORBIDDEN);
+    }
 
-	@ExceptionHandler(Exception.class)
-	ModelAndView internalError() {
-		String reference = reference();
-		log.error("Request failed [reference={}]", reference);
-		ModelAndView error = error("error/500", HttpStatus.INTERNAL_SERVER_ERROR);
-		error.addObject("reference", reference);
-		return error;
-	}
+    @ExceptionHandler(Exception.class)
+    ModelAndView internalError() {
+        String reference = reference();
+        log.error("Request failed [reference={}]", reference);
+        ModelAndView error = error("error/500", HttpStatus.INTERNAL_SERVER_ERROR);
+        error.addObject("reference", reference);
+        return error;
+    }
 
-	private ModelAndView error(String view, HttpStatus status) {
-		ModelAndView error = new ModelAndView(view);
-		error.setStatus(status);
-		return error;
-	}
+    private ModelAndView error(String view, HttpStatus status) {
+        ModelAndView error = new ModelAndView(view);
+        error.setStatus(status);
+        return error;
+    }
 
-	private String reference() {
-		return UUID.randomUUID().toString();
-	}
+    private String reference() {
+        return UUID.randomUUID().toString();
+    }
 }

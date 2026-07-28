@@ -1,53 +1,69 @@
 <!doctype html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Wedding content</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wedding content</title>
 </head>
 <body>
-  <main>
+<main>
     <h1>Wedding content</h1>
     <p role="status" th:text="${overview.publicationState}">DRAFT</p>
     <p th:if="${param.settingsSaved}">Settings saved.</p>
     <p role="status" th:if="${publicationConflict}" th:text="${publicationConflict}">Publication conflict</p>
     <p role="status" th:if="${param.eventsSaved}">Event saved.</p>
     <section>
-      <h2>Setup checklist</h2>
-      <ul>
-        <li th:text="${overview.settingsComplete} ? 'General settings complete' : 'General settings need attention'">General settings</li>
-		<li th:each="complete, stat : ${overview.partnerComplete}" th:text="${complete} ? |Partner ${stat.count} complete| : |Partner ${stat.count} needs attention|">Partner</li>
-		<li th:text="${overview.completeVisibleEvents.contains(T(myweddinginvitation.webapp.wedding.EventType).CEREMONY)} ? 'Ceremony complete' : 'Ceremony needs attention'">Ceremony</li>
-		<li th:text="${overview.completeVisibleEvents.contains(T(myweddinginvitation.webapp.wedding.EventType).RECEPTION)} ? 'Reception complete' : 'Reception needs attention'">Reception</li>
-		<li th:text="${overview.storyPresent} ? 'Story included' : 'Story not included (optional)'">Story</li>
-        <li th:text="${publication.errors.empty} ? 'Ready to publish' : 'Publication requirements remain'">Publication status</li>
-      </ul>
+        <h2>Setup checklist</h2>
+        <ul>
+            <li th:text="${overview.settingsComplete} ? 'General settings complete' : 'General settings need attention'">
+                General settings
+            </li>
+            <li th:each="complete, stat : ${overview.partnerComplete}"
+                th:text="${complete} ? |Partner ${stat.count} complete| : |Partner ${stat.count} needs attention|">
+                Partner
+            </li>
+            <li th:text="${overview.completeVisibleEvents.contains(T(myweddinginvitation.webapp.wedding.EventType).CEREMONY)} ? 'Ceremony complete' : 'Ceremony needs attention'">
+                Ceremony
+            </li>
+            <li th:text="${overview.completeVisibleEvents.contains(T(myweddinginvitation.webapp.wedding.EventType).RECEPTION)} ? 'Reception complete' : 'Reception needs attention'">
+                Reception
+            </li>
+            <li th:text="${overview.storyPresent} ? 'Story included' : 'Story not included (optional)'">Story</li>
+            <li th:text="${publication.errors.empty} ? 'Ready to publish' : 'Publication requirements remain'">
+                Publication status
+            </li>
+        </ul>
     </section>
     <section th:if="${!publication.errors.empty}">
-      <h2>Publication requirements</h2>
-      <ul><li th:each="error : ${publication.errors}" th:text="${error}">Requirement</li></ul>
+        <h2>Publication requirements</h2>
+        <ul>
+            <li th:each="error : ${publication.errors}" th:text="${error}">Requirement</li>
+        </ul>
     </section>
     <section th:if="${!overview.translationWarnings.empty}">
-      <h2>Translation warnings</h2>
-      <ul><li th:each="warning : ${overview.translationWarnings}" th:text="${warning}">Warning</li></ul>
+        <h2>Translation warnings</h2>
+        <ul>
+            <li th:each="warning : ${overview.translationWarnings}" th:text="${warning}">Warning</li>
+        </ul>
     </section>
     <nav aria-label="Wedding content sections">
-      <a th:href="@{/admin/wedding/settings}">General settings</a>
-      <a th:href="@{/admin/wedding/partners}">Partners</a>
-      <a th:href="@{/admin/wedding/events}">Events</a>
-      <a th:href="@{/admin/wedding/story}">Story</a>
-      <a th:href="@{/admin/wedding/preview}">Preview</a>
+        <a th:href="@{/admin/wedding/settings}">General settings</a>
+        <a th:href="@{/admin/wedding/partners}">Partners</a>
+        <a th:href="@{/admin/wedding/events}">Events</a>
+        <a th:href="@{/admin/wedding/story}">Story</a>
+        <a th:href="@{/admin/wedding/preview}">Preview</a>
     </nav>
     <form th:if="${overview.publicationState.name() == 'DRAFT'}" method="post" th:action="@{/admin/wedding/publish}">
-      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-	  <input type="hidden" name="version" th:value="${overview.version}">
-      <button type="submit">Publish</button>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <input type="hidden" name="version" th:value="${overview.version}">
+        <button type="submit">Publish</button>
     </form>
-    <form th:if="${overview.publicationState.name() == 'PUBLISHED'}" method="post" th:action="@{/admin/wedding/return-to-draft}">
-      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-	  <input type="hidden" name="version" th:value="${overview.version}">
-      <button type="submit">Return to draft</button>
+    <form th:if="${overview.publicationState.name() == 'PUBLISHED'}" method="post"
+          th:action="@{/admin/wedding/return-to-draft}">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <input type="hidden" name="version" th:value="${overview.version}">
+        <button type="submit">Return to draft</button>
     </form>
-  </main>
+</main>
 </body>
 </html>
