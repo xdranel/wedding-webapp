@@ -1,14 +1,19 @@
 package myweddinginvitation.webapp.wedding;
 
+import java.util.NoSuchElementException;
+
 import jakarta.validation.Valid;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 public class StoryController {
@@ -65,6 +70,11 @@ public class StoryController {
 	String moveStoryDown(@PathVariable long id) {
 		weddingContent.moveStoryDown(id);
 		return "redirect:/admin/wedding/story?storyMoved";
+	}
+
+	@ExceptionHandler(NoSuchElementException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	void storyNotFound() {
 	}
 
 	private void forms(Model model, StoryEntryForm form, Long editingId) {

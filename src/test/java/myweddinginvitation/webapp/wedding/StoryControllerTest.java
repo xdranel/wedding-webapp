@@ -184,6 +184,30 @@ class StoryControllerTest {
 	}
 
 	@Test
+	void unknownStoryActionsAreNotFound() throws Exception {
+		long missingId = 999L;
+		mockMvc.perform(post("/admin/wedding/story/{id}", missingId)
+				.session(adminSession)
+				.with(csrf())
+				.param("version", "0")
+				.param("titleId", "Missing")
+				.param("bodyId", "Missing"))
+				.andExpect(status().isNotFound());
+		mockMvc.perform(post("/admin/wedding/story/{id}/delete", missingId)
+				.session(adminSession)
+				.with(csrf()))
+				.andExpect(status().isNotFound());
+		mockMvc.perform(post("/admin/wedding/story/{id}/up", missingId)
+				.session(adminSession)
+				.with(csrf()))
+				.andExpect(status().isNotFound());
+		mockMvc.perform(post("/admin/wedding/story/{id}/down", missingId)
+				.session(adminSession)
+				.with(csrf()))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
 	void administratorCanAddEditMoveAndDeleteStory() throws Exception {
 		mockMvc.perform(post("/admin/wedding/story")
 				.session(adminSession)
