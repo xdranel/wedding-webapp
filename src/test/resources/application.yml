@@ -1,0 +1,5 @@
+app:
+  media-directory: target/test-media
+  invitation:
+    base-url: https://invite.example/i
+    signing-secret: 0123456789abcdef0123456789abcdef

@@ -139,6 +139,7 @@ Add:
 <dependency>
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-csv</artifactId>
+    <version>1.14.1</version>
 </dependency>
 ```
 

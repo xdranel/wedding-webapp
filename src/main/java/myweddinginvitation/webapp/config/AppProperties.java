@@ -11,9 +11,15 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "app")
-public record AppProperties(@NotNull @Valid BootstrapAdmin bootstrapAdmin, @NotNull Path mediaDirectory) {
+public record AppProperties(@NotNull @Valid BootstrapAdmin bootstrapAdmin, @NotNull Path mediaDirectory,
+		@NotNull @Valid Invitation invitation) {
     public record BootstrapAdmin(
             @NotBlank String username,
             @NotBlank @Size(min = 12) String password) {
     }
+
+	public record Invitation(
+			@NotBlank String baseUrl,
+			@NotBlank @Size(min = 32) String signingSecret) {
+	}
 }

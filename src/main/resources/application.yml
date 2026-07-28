@@ -22,6 +22,9 @@ app:
     username: ${ADMIN_USERNAME}
     password: ${ADMIN_PASSWORD}
   media-directory: ${MEDIA_DIRECTORY:./data/media}
+  invitation:
+    base-url: ${INVITATION_BASE_URL:http://localhost:8080/i}
+    signing-secret: ${INVITATION_SIGNING_SECRET}
 server:
   forward-headers-strategy: framework
 management:
