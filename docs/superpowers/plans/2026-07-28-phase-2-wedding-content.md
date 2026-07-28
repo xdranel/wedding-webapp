@@ -16,7 +16,7 @@
 - Indonesian narrative values are required; missing English values fall back to Indonesian and never block publication.
 - Publishing requires two complete partner profiles with photos and at least one complete active event.
 - Preview is administrator-only and uses non-persisted sample guest values.
-- Accept only JPG, PNG, or WebP partner photos up to 10 MB; failed replacement must preserve the active photo.
+- Accept only JPG, PNG, or WebP partner photos up to 10 MiB; failed replacement must preserve the active photo.
 - Defer gallery, audio, gifts, countdown, calendar files, dress code, live stream, help contacts, image optimization, resizing, and thumbnails.
 - Every state-changing route is POST and CSRF-protected.
 - MySQL 8.4 and Flyway remain the only production schema path.
@@ -578,7 +578,7 @@ static Stream<Arguments> validSignatures() {
 }
 ```
 
-Generate an 10 MB + 1 byte mock stream for the size boundary without writing it into source control.
+Generate a 10 MiB + 1 byte mock stream for the size boundary without writing it into source control.
 
 - [ ] **Step 2: Run the storage test and observe RED**
 
@@ -1012,7 +1012,7 @@ Correct route wiring, redirects, template model names, or transaction boundaries
 Document:
 
 - `MEDIA_DIRECTORY` and `/data/` Git exclusion;
-- partner photo types and 10 MB limit;
+- partner photo types and 10 MiB limit;
 - Wedding Content editor and admin preview route;
 - draft/publish behavior;
 - rootless Podman test command already established in the development guide.
@@ -1062,7 +1062,9 @@ Verify through the browser:
 
 Expected: health reports `UP` and every listed flow succeeds.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
+
+Completed in `433a55c` (`docs: complete wedding content phase`).
 
 ```bash
 git add README.md docs/installation/development.md \

@@ -194,7 +194,7 @@ Status: approved for implementation planning
   deployment time.
 - Backup restoration is a server operation; dashboard restore is out of
   scope.
-- Photo uploads accept JPG, PNG, or WebP up to 10 MB each and are optimized
+- Photo uploads accept JPG, PNG, or WebP up to 10 MiB each and are optimized
   for web delivery.
 - Background audio accepts one MP3 up to 20 MB.
 - Video and other media uploads are out of scope.
@@ -722,7 +722,7 @@ directly on the server, not through the dashboard.
 
 **Question:** Which media upload limits apply?
 
-**Answer:** JPG/PNG/WebP photos up to 10 MB each with web optimization, and
+**Answer:** JPG/PNG/WebP photos up to 10 MiB each with web optimization, and
 one MP3 up to 20 MB. Video and other media uploads are not supported.
 
 **Question:** Which browsers and devices are supported?

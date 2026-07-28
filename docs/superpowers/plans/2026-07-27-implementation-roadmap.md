@@ -1,8 +1,8 @@
 # Wedding Invitation Implementation Roadmap
 
 Status: Phase 1 complete and accepted on 2026-07-28. Phase 2 implementation
-and its MySQL-backed administrator journey are complete; full verification and
-manual browser acceptance remain before Phase 2 can be accepted.
+and automated full verification are complete; only manual browser acceptance
+remains before Phase 2 can be accepted.
 
 Detailed plans are written and executed one phase at a time. A phase must pass
 its tests and review before the next phase begins.

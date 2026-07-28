@@ -53,7 +53,7 @@ Content starts in draft. Publishing requires two complete partner profiles
 published is live immediately; returning to draft keeps the saved content.
 
 Set `MEDIA_DIRECTORY` in `.env` to the directory for partner photos. The
-default is `./data/media`. Only JPEG, PNG, and WebP uploads up to 10 MB are
+default is `./data/media`. Only JPEG, PNG, and WebP uploads up to 10 MiB are
 accepted. `/data/` is Git-ignored, including the default media location; keep
 real uploaded files untracked.
 

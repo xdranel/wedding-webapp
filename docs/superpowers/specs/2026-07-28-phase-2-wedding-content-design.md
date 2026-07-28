@@ -229,7 +229,7 @@ token and cannot be accessed outside administrator authorization.
 Partner photo upload:
 
 - Is administrator-only
-- Accepts JPG, PNG, or WebP up to 10 MB
+- Accepts JPG, PNG, or WebP up to 10 MiB
 - Validates file signature/content rather than trusting filename or declared
   content type
 - Uses a generated server filename

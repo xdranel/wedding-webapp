@@ -13,11 +13,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.stream.Stream;
 import myweddinginvitation.webapp.account.AccountRole;
 import myweddinginvitation.webapp.account.AccountSecurityService;
 import myweddinginvitation.webapp.account.UserAccount;
 import myweddinginvitation.webapp.account.UserAccountRepository;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,8 +122,8 @@ class WeddingContentJourneyTest {
 	private void saveVisibleCeremony() throws Exception {
 		mockMvc.perform(post("/admin/wedding/events/CEREMONY").session(adminSession).with(csrf())
 				.param("visible", "true").param("eventDate", "2027-05-01").param("startTime", "08:00")
-				.param("venueName", "Gedung Bahagia").param("addressId", "Jakarta")
-				.param("addressEn", "Jakarta").param("mapUrl", "https://maps.example.test"))
+				.param("venueName", "Gedung Bahagia").param("addressId", "Alamat Jakarta")
+				.param("addressEn", "Jakarta address").param("mapUrl", "https://maps.example.test"))
 				.andExpect(redirectedUrl("/admin/wedding?eventsSaved"));
 		assertThat(events.findByType(EventType.CEREMONY).orElseThrow().isVisible()).isTrue();
 	}
@@ -137,11 +140,15 @@ class WeddingContentJourneyTest {
 		mockMvc.perform(get("/admin/wedding/preview/render").session(adminSession)
 				.param("salutation", "Bapak/Ibu").param("guestName", "Nama Tamu").param("language", "ID"))
 				.andExpect(status().isOk()).andExpect(content().string(containsString("Dengan hormat")))
-				.andExpect(content().string(containsString("Awal cerita"))).andExpect(content().string(containsString("Rama Pratama")));
+				.andExpect(content().string(containsString("Awal cerita"))).andExpect(content().string(containsString("Rama Pratama")))
+				.andExpect(content().string(containsString("Gedung Bahagia"))).andExpect(content().string(containsString("Alamat Jakarta")))
+				.andExpect(content().string(containsString("2027-05-01")));
 		mockMvc.perform(get("/admin/wedding/preview/render").session(adminSession)
 				.param("salutation", "Mr/Ms").param("guestName", "Guest Name").param("language", "EN"))
 				.andExpect(status().isOk()).andExpect(content().string(containsString("Welcome")))
-				.andExpect(content().string(containsString("Our beginning"))).andExpect(content().string(containsString("Guest Name")));
+				.andExpect(content().string(containsString("Our beginning"))).andExpect(content().string(containsString("Guest Name")))
+				.andExpect(content().string(containsString("Gedung Bahagia"))).andExpect(content().string(containsString("Jakarta address")))
+				.andExpect(content().string(containsString("2027-05-01")));
 	}
 
 	private void publishAndAssertPublished() throws Exception {
@@ -161,7 +168,9 @@ class WeddingContentJourneyTest {
 	private void returnToDraftAndAssertDraft() throws Exception {
 		mockMvc.perform(post("/admin/wedding/return-to-draft").session(adminSession).with(csrf()))
 				.andExpect(redirectedUrl("/admin/wedding"));
-		assertThat(settings.getSingleton().orElseThrow().getPublicationState()).isEqualTo(PublicationState.DRAFT);
+		WeddingSettings saved = settings.getSingleton().orElseThrow();
+		assertThat(saved.getPublicationState()).isEqualTo(PublicationState.DRAFT);
+		assertThat(saved.getOpeningTextEn()).isEqualTo("Updated opening");
 	}
 
 	private MockHttpSession login(String username) throws Exception {
@@ -177,6 +186,15 @@ class WeddingContentJourneyTest {
 	@DynamicPropertySource
 	static void mediaDirectory(DynamicPropertyRegistry registry) {
 		registry.add("app.media-directory", () -> MEDIA_DIRECTORY.toString());
+	}
+
+	@AfterAll
+	static void deleteMediaDirectory() throws IOException {
+		try (Stream<Path> paths = Files.walk(MEDIA_DIRECTORY)) {
+			for (Path path : paths.sorted(Comparator.reverseOrder()).toList()) {
+				Files.deleteIfExists(path);
+			}
+		}
 	}
 
 	private static Path createMediaDirectory() {
