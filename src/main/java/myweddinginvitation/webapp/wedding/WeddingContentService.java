@@ -128,6 +128,11 @@ public class WeddingContentService {
 		return story.findAllByOrderByDisplayOrderAsc().stream().map(this::storyForm).toList();
 	}
 
+	@Transactional(readOnly = true)
+	public void requireStory(long id) {
+		if (!story.existsById(id)) throw new java.util.NoSuchElementException();
+	}
+
 	@Transactional
 	public long addStory(StoryEntryForm form) {
 		List<StoryEntry> orderedStory = story.findAllByOrderByDisplayOrderAscForUpdate();

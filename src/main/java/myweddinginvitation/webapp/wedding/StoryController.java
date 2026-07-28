@@ -41,6 +41,7 @@ public class StoryController {
 
 	@PostMapping("/admin/wedding/story/{id}")
 	String updateStory(@PathVariable long id, @Valid @ModelAttribute("form") StoryEntryForm form, BindingResult result, Model model) {
+		weddingContent.requireStory(id);
 		if (!result.hasErrors()) {
 			try {
 				weddingContent.updateStory(id, form);

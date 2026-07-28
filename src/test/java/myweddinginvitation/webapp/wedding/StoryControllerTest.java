@@ -193,6 +193,13 @@ class StoryControllerTest {
 				.param("titleId", "Missing")
 				.param("bodyId", "Missing"))
 				.andExpect(status().isNotFound());
+		mockMvc.perform(post("/admin/wedding/story/{id}", missingId)
+				.session(adminSession)
+				.with(csrf())
+				.param("version", "0")
+				.param("titleId", "")
+				.param("bodyId", ""))
+				.andExpect(status().isNotFound());
 		mockMvc.perform(post("/admin/wedding/story/{id}/delete", missingId)
 				.session(adminSession)
 				.with(csrf()))
