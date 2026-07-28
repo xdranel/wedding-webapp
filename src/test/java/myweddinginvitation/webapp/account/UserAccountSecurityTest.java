@@ -41,7 +41,7 @@ class UserAccountSecurityTest {
 	void lockedAccountIsRejectedByAuthentication() {
 		UserAccount account = new UserAccount("staff", "hash", AccountRole.STAFF);
 		for (int attempt = 0; attempt < 5; attempt++) {
-			account.loginFailed(NOW);
+			account.loginFailed(Instant.now());
 		}
 		UserAccountRepository repository = (UserAccountRepository) Proxy.newProxyInstance(
 				UserAccountRepository.class.getClassLoader(),

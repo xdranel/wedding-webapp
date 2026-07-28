@@ -174,10 +174,10 @@ class WeddingPreviewTest {
 
 	@Test
 	void languageAssetRegistersSubmissionBeforeReadingOptionalStorage() throws Exception {
-		String script = Files.readString(Path.of("src/main/resources/static/js/invitation-preview.js"));
+		String script = Files.readString(Path.of("src/main/resources/static/js/invitation-preview.js")).replaceAll("\\s+", " ");
 
 		assertThat(script.indexOf("language.addEventListener")).isLessThan(script.indexOf("localStorage.getItem"));
-		assertThat(script).contains("try {\n      localStorage.setItem", "form.requestSubmit();\n  });", "catch (_) {");
+		assertThat(script).contains("try { localStorage.setItem", "form.requestSubmit(); });", "catch (_) {");
 	}
 
 	private void seedCompleteIndonesianContentWithEnglishMissing() {
