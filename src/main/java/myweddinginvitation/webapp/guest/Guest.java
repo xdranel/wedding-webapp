@@ -82,6 +82,47 @@ public class Guest {
 	protected Guest() {
 	}
 
+	static Guest create(GuestForm form, String normalizedWhatsappNumber, GuestCategory category) {
+		Guest guest = new Guest();
+		guest.publicId = UUID.randomUUID();
+		guest.createdAt = Instant.now();
+		guest.updatedAt = guest.createdAt;
+		guest.update(form, normalizedWhatsappNumber, category);
+		return guest;
+	}
+
+	void update(GuestForm form, String normalizedWhatsappNumber, GuestCategory category) {
+		displayName = form.displayName().strip();
+		salutation = form.salutation().strip();
+		this.normalizedWhatsappNumber = normalizedWhatsappNumber;
+		this.category = category;
+		internalNote = form.internalNote();
+		plusOneAllowed = form.plusOneAllowed();
+		preferredLanguage = form.preferredLanguage();
+		updatedAt = Instant.now();
+	}
+
+	void archive() {
+		archived = true;
+		archivedAt = Instant.now();
+		updatedAt = archivedAt;
+	}
+
+	void restore() {
+		archived = false;
+		archivedAt = null;
+		updatedAt = Instant.now();
+	}
+
+	void confirmSent(Instant sentAt) {
+		deliveryState = DeliveryState.SENT;
+		if (firstSentAt == null) {
+			firstSentAt = sentAt;
+		}
+		lastSentAt = sentAt;
+		updatedAt = sentAt;
+	}
+
 	public Long getId() { return id; }
 	public UUID getPublicId() { return publicId; }
 	public String getDisplayName() { return displayName; }

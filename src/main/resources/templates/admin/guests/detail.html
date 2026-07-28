@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Guest details</title></head>
+<body>
+<main>
+  <h1 th:text="${guest.displayName}">Guest</h1>
+  <p><a th:href="@{/admin/guests}">Back to guests</a> · <a th:href="@{/admin/guests/{id}/edit(id=${guest.id})}">Edit guest</a></p>
+  <p th:if="${guestError}" th:text="${guestError}" role="alert">Guest error</p>
+  <dl><dt>WhatsApp number</dt><dd th:text="${guest.normalizedWhatsappNumber}">+62</dd><dt>Delivery</dt><dd th:text="${guest.deliveryState}">UNSENT</dd><dt>Archived</dt><dd th:text="${guest.archived ? 'Yes' : 'No'}">No</dd></dl>
+  <form th:if="${!guest.archived}" method="post" th:action="@{/admin/guests/{id}/archive(id=${guest.id})}"><input type="hidden" name="version" th:value="${guest.version}"><button type="submit">Archive guest</button></form>
+  <form th:if="${guest.archived}" method="post" th:action="@{/admin/guests/{id}/restore(id=${guest.id})}"><input type="hidden" name="version" th:value="${guest.version}"><button type="submit">Restore guest</button></form>
+  <form method="post" th:action="@{/admin/guests/{id}/delete(id=${guest.id})}" onsubmit="return confirm('Permanently delete this guest?');"><input type="hidden" name="version" th:value="${guest.version}"><button type="submit">Permanently delete</button></form>
+</main>
+</body>
+</html>

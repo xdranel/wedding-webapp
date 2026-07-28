@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Guest</title></head>
+<body>
+<main>
+  <h1 th:text="${guest == null ? 'Add guest' : 'Edit guest'}">Guest</h1>
+  <p><a th:href="@{/admin/guests}">Back to guests</a></p>
+  <p th:if="${duplicateWarning}" role="alert">This WhatsApp number already belongs to another guest. Check confirmation to continue.</p>
+  <form method="post" th:action="${guest == null ? '/admin/guests' : '/admin/guests/' + guest.id}" th:object="${form}">
+    <input th:if="${guest != null}" type="hidden" name="version" th:value="${guest.version}">
+    <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Guest error</p>
+    <label>Name <input th:field="*{displayName}" maxlength="160" required></label><p th:if="${#fields.hasErrors('displayName')}" th:errors="*{displayName}" role="alert">Name error</p>
+    <label>Salutation <input th:field="*{salutation}" maxlength="80" required></label><p th:if="${#fields.hasErrors('salutation')}" th:errors="*{salutation}" role="alert">Salutation error</p>
+    <label>WhatsApp number <input th:field="*{whatsappNumber}" maxlength="40" required></label><p th:if="${#fields.hasErrors('whatsappNumber')}" th:errors="*{whatsappNumber}" role="alert">Number error</p>
+    <label>Category <select th:field="*{categoryId}"><option value="">Uncategorized</option><option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.displayName}">Category</option></select></label>
+    <label><input type="checkbox" th:field="*{plusOneAllowed}"> Plus one allowed</label>
+    <label>Language <select th:field="*{preferredLanguage}"><option value="ID">Indonesian</option><option value="EN">English</option></select></label>
+    <label>Internal note <textarea th:field="*{internalNote}" maxlength="2000"></textarea></label>
+    <label th:if="${duplicateWarning}"><input type="checkbox" name="acceptDuplicate" value="true"> I understand this number is duplicated</label>
+    <button type="submit" th:text="${guest == null ? 'Create guest' : 'Save guest'}">Save guest</button>
+  </form>
+</main>
+</body>
+</html>
