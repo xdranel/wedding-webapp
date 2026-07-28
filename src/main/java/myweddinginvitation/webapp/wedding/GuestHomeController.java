@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class GuestHomeController {
-    @GetMapping("/i/{token}")
+    @GetMapping("/i")
     String home() {
         return "guest/home";
     }

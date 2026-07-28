@@ -61,7 +61,7 @@ class SecurityRoutesTest {
 	void anonymousUsersCanOnlyAccessGuestRoutes() throws Exception {
 		mockMvc.perform(get("/admin")).andExpect(status().is3xxRedirection());
 		mockMvc.perform(get("/check-in")).andExpect(status().is3xxRedirection());
-		mockMvc.perform(get("/i/demo"))
+		mockMvc.perform(get("/i"))
 				.andExpect(status().isOk())
 				.andExpect(view().name("guest/home"))
 				.andExpect(content().string(containsString("Your Invitation")))
