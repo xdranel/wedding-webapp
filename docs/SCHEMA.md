@@ -121,13 +121,19 @@ Primary invitation record containing:
 - `+1` allowance and preferred message language
 - Delivery state and confirmation timestamps
 - RSVP/event reminder timestamps
-- Invitation-token hash and QR-token hash
+- Random public invitation ID and invitation-token version
+- QR-token hash added in the QR phase
 - Token regeneration timestamp
 - Failed-PIN count and temporary lock expiry
 - Archive state and timestamps
 
 Search indexes cover display name, normalized WhatsApp number, category,
 delivery/RSVP/check-in filters, and archive state.
+
+Invitation URLs are signed with an HMAC deployment secret and can be
+reconstructed without storing a raw bearer token. Regeneration increments the
+stored token version. Rotating the deployment secret invalidates every
+existing invitation URL.
 
 ### `rsvp`
 

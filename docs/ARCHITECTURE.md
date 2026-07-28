@@ -28,6 +28,8 @@ MariaDB is not a supported runtime target.
 - Must be suitable for a personal mini-laptop server
 - No WhatsApp Business API integration is required
 - CSV is the only required bulk guest import format
+- Guest CSV parsing uses Apache Commons CSV; international WhatsApp
+  normalization uses Google libphonenumber
 - Venue operation uses one mini-laptop server and one central database over
   local Wi-Fi
 - Multiple staff laptops and phones must support concurrent check-in

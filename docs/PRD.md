@@ -980,3 +980,85 @@ areas and showing completion, without forcing a wizard sequence.
 **Answer:** Yes. Record newly discovered decisions in the relevant project
 documents before implementation and track implementation/deferred progress so
 nothing is silently omitted.
+
+## Phase 3 clarification record
+
+**Question:** Which WhatsApp templates and delivery workflows belong to Phase
+3?
+
+**Answer:** Make invitation, RSVP-reminder, and event-reminder templates
+editable in ID and EN. Activate only initial-invitation delivery in Phase 3;
+later phases activate reminder workflows when their required data exists.
+
+**Question:** Which CSV columns may be imported?
+
+**Answer:** Import only name, WhatsApp number, salutation, existing category,
+`+1`, preferred message language, and internal note. The application always
+generates tokens and operational states.
+
+**Question:** May CSV import create categories or update existing guests?
+
+**Answer:** No. Unknown categories are preview errors and must be created
+first. Import only creates guests because non-unique WhatsApp numbers cannot
+safely identify records for update.
+
+**Question:** How are repeated initial-invitation deliveries recorded?
+
+**Answer:** Keep the first and most recent confirmed delivery times. Opening
+WhatsApp does not change state; manual confirmation does. Do not keep a
+per-send history or counter.
+
+**Question:** What does the complete CSV export include?
+
+**Answer:** Export active and archived guests regardless of screen filters,
+including administrative, archive, and delivery fields, as a consistent
+operational backup.
+
+**Question:** Is the personalized invitation usable before RSVP is built?
+
+**Answer:** Yes. Phase 3 provides a read-only public invitation for a valid
+active guest while wedding content is published. RSVP, PIN, and QR remain
+hidden until Phase 4.
+
+**Question:** How are reconstructable personalized links protected?
+
+**Answer:** Sign a random public guest ID and token version with an HMAC
+deployment secret. Regeneration increments the version. Do not store raw
+bearer tokens or personal data in the link.
+
+**Question:** Can forwarding a valid invitation link be completely prevented?
+
+**Answer:** No. A forwarded valid link may be viewed. Phase 4 requires the last
+four WhatsApp digits for RSVP changes and QR access; regeneration invalidates
+a leaked link.
+
+**Question:** How are category names compared?
+
+**Answer:** Trim whitespace and require case-insensitive uniqueness.
+
+**Question:** How are WhatsApp numbers and CSV syntax handled?
+
+**Answer:** Use Google libphonenumber with the configured default country.
+Use Apache Commons CSV and accept UTF-8 comma- or semicolon-separated files,
+including a BOM. The template uses commas.
+
+**Question:** Which template placeholders are supported?
+
+**Answer:** Support salutation, guest name, couple name, invitation link, RSVP
+deadline, and ceremony/reception date and location. Reject unknown
+placeholders.
+
+**Question:** What happens when an archived guest is restored?
+
+**Answer:** Preserve delivery data and reactivate the current signed link.
+Regeneration remains an explicit administrator action.
+
+**Question:** What limits apply to CSV import and the guest list?
+
+**Answer:** Limit an import to 2 MiB and 2,000 rows. Use database-backed
+pagination with 50 guests per page.
+
+**Question:** Do WhatsApp templates start empty?
+
+**Answer:** No. Seed editable Indonesian and English defaults for all three
+message types.
