@@ -3,6 +3,7 @@ package myweddinginvitation.webapp.wedding;
 import java.time.DateTimeException;
 import java.time.ZoneId;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -56,6 +57,26 @@ public class WeddingContentController {
 		return "redirect:/admin/wedding";
 	}
 
+	@GetMapping("/admin/wedding/preview")
+	String previewForm(Model model) {
+		model.addAttribute("form", new PreviewForm());
+		return "admin/wedding/preview-form";
+	}
+
+	@GetMapping("/admin/wedding/preview/render")
+	String renderPreview(@Valid @ModelAttribute("form") PreviewForm form, BindingResult result, Model model,
+			HttpServletResponse response) {
+		if (result.hasErrors()) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			return "admin/wedding/preview-form";
+		}
+		WeddingPreview preview = weddingContent.preview(form.getSalutation(), form.getGuestName(), form.getLanguage());
+		model.addAttribute("form", form);
+		model.addAttribute("preview", preview);
+		model.addAttribute("accentColor", safeAccent(preview.accentColor()));
+		return "admin/wedding/preview";
+	}
+
 	private void validateTimeZone(WeddingSettingsForm form, BindingResult result) {
 		if (result.hasFieldErrors("timeZone")) return;
 		try {
@@ -63,5 +84,9 @@ public class WeddingContentController {
 		} catch (DateTimeException exception) {
 			result.rejectValue("timeZone", "timeZone.invalid", "Choose a valid time zone");
 		}
+	}
+
+	private String safeAccent(String accentColor) {
+		return accentColor != null && accentColor.matches("#[0-9A-Fa-f]{6}") ? accentColor : "#7A5C48";
 	}
 }

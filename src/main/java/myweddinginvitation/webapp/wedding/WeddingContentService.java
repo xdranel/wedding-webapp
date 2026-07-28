@@ -265,7 +265,8 @@ public class WeddingContentService {
 		List<Partner> orderedPartners = partners.findAllByOrderByDisplayOrderAsc();
 		List<EventPart> orderedEvents = events.findAllByOrderByTypeAsc();
 		return new WeddingPreview(weddingSettings.getPublicationState(), coupleTitle(weddingSettings, orderedPartners), salutation,
-				guestName, coverDate(orderedEvents), localized(weddingSettings.getOpeningTextId(), weddingSettings.getOpeningTextEn(), language),
+				guestName, coverDate(orderedEvents), weddingSettings.getAccentColor(), weddingSettings.getFontPreset(),
+				localized(weddingSettings.getOpeningTextId(), weddingSettings.getOpeningTextEn(), language),
 				localized(weddingSettings.getClosingTextId(), weddingSettings.getClosingTextEn(), language),
 				orderedPartners.stream().map(partner -> new WeddingPreview.PartnerView(partner.getFullName(), partner.getNickname(),
 						partner.getPhotoPath(), localized(partner.getChildOfLabelId(), partner.getChildOfLabelEn(), language),

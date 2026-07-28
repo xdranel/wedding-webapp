@@ -1,0 +1,81 @@
+<!doctype html>
+<html th:lang="${form.language == 'EN'} ? 'en' : 'id'" xmlns:th="https://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title th:text="${#strings.isEmpty(preview.coupleTitle) ? 'Wedding invitation' : preview.coupleTitle}">Wedding invitation</title>
+  <link rel="stylesheet" th:href="@{/css/invitation.css}">
+</head>
+<body th:attr="data-font=${preview.fontPreset}" th:style="|--accent: ${accentColor};|">
+  <header class="preview-controls">
+    <form id="preview-form" method="get" th:action="@{/admin/wedding/preview/render}" th:object="${form}">
+      <label for="salutation">Salutation</label>
+      <input id="salutation" th:field="*{salutation}" required maxlength="120">
+      <label for="guest-name">Guest name</label>
+      <input id="guest-name" th:field="*{guestName}" required maxlength="160">
+      <label for="language">Language</label>
+      <select id="language" th:field="*{language}">
+        <option value="ID">ID</option>
+        <option value="EN">EN</option>
+      </select>
+      <button type="submit">Update preview</button>
+    </form>
+  </header>
+  <main>
+    <section id="cover" class="cover" aria-labelledby="invitation-title">
+      <p th:text="${form.language == 'EN'} ? 'Wedding invitation' : 'Undangan pernikahan'">Wedding invitation</p>
+      <h1 id="invitation-title" th:text="${#strings.isEmpty(preview.coupleTitle) ? 'Wedding invitation' : preview.coupleTitle}">Wedding invitation</h1>
+      <p th:if="${preview.coverDate != null}"><time th:datetime="${preview.coverDate}" th:text="${preview.coverDate}">2027-05-01</time></p>
+      <p th:text="${preview.salutation + ' ' + preview.guestName}">Bapak/Ibu Nama Tamu</p>
+      <button type="button" id="open-invitation" aria-controls="invitation" aria-expanded="false"
+              th:text="${form.language == 'EN'} ? 'Open invitation' : 'Buka Undangan'">Buka Undangan</button>
+    </section>
+
+    <div id="invitation">
+	  <section th:if="${!#strings.isEmpty(preview.openingText)}" aria-labelledby="opening-title">
+		<h2 id="opening-title" th:text="${form.language == 'EN'} ? 'Welcome' : 'Sapaan'">Welcome</h2>
+		<p th:text="${preview.openingText}">Welcome</p>
+	  </section>
+      <section aria-labelledby="partners-title">
+        <h2 id="partners-title" th:text="${form.language == 'EN'} ? 'The couple' : 'Mempelai'">The couple</h2>
+        <article th:each="partner : ${preview.partners}">
+          <img th:if="${!#strings.isEmpty(partner.photoPath)}"
+               th:src="@{/admin/wedding/media/{filename}(filename=${partner.photoPath})}"
+               th:alt="${'Portrait of ' + (partner.fullName ?: partner.nickname ?: 'partner')}">
+          <h3 th:text="${partner.fullName ?: partner.nickname ?: 'Partner'}">Partner</h3>
+          <p th:if="${!#strings.isEmpty(partner.childOfLabel)}" th:text="${partner.childOfLabel}">Child of</p>
+          <p th:if="${!#strings.isEmpty(partner.parentsNames)}" th:text="${partner.parentsNames}">Parents</p>
+          <a th:if="${!#strings.isEmpty(partner.instagramUrl)}" th:href="${partner.instagramUrl}" rel="noopener">Instagram</a>
+        </article>
+      </section>
+
+      <section th:each="event : ${preview.events}" th:aria-labelledby="${'event-' + event.type}">
+        <h2 th:id="${'event-' + event.type}"
+            th:text="${event.type.name() == 'CEREMONY'} ? (${form.language == 'EN'} ? 'Ceremony' : 'Akad') : (${form.language == 'EN'} ? 'Reception' : 'Resepsi')">Ceremony</h2>
+        <p th:if="${event.date != null}"><time th:datetime="${event.date}" th:text="${event.date}">2027-05-01</time></p>
+        <p th:if="${event.startTime != null}" th:text="${event.endTime != null} ? ${event.startTime + '–' + event.endTime} : ${event.startTime}">08:00</p>
+        <h3 th:if="${!#strings.isEmpty(event.venueName)}" th:text="${event.venueName}">Venue</h3>
+        <p th:if="${!#strings.isEmpty(event.address)}" th:text="${event.address}">Address</p>
+        <a th:if="${!#strings.isEmpty(event.mapUrl)}" th:href="${event.mapUrl}" rel="noopener noreferrer" target="_blank"
+           th:text="${form.language == 'EN'} ? 'Open map' : 'Buka peta'">Open map</a>
+      </section>
+
+      <section th:if="${!preview.story.empty}" aria-labelledby="story-title">
+        <h2 id="story-title" th:text="${form.language == 'EN'} ? 'Our story' : 'Kisah kami'">Our story</h2>
+        <article th:each="entry : ${preview.story}">
+          <p th:if="${entry.date != null}"><time th:datetime="${entry.date}" th:text="${entry.date}">2027-05-01</time></p>
+          <h3 th:text="${entry.title}">Story title</h3>
+          <p th:text="${entry.body}">Story body</p>
+        </article>
+      </section>
+
+      <section th:if="${!#strings.isEmpty(preview.closingText)}" aria-labelledby="closing-title">
+        <h2 id="closing-title" th:text="${form.language == 'EN'} ? 'Closing' : 'Penutup'">Closing</h2>
+        <p th:text="${preview.closingText}">Thank you</p>
+      </section>
+    </div>
+  </main>
+  <script th:src="@{/js/invitation-preview.js}" defer></script>
+</body>
+</html>

@@ -10,6 +10,8 @@ public record WeddingPreview(
 		String salutation,
 		String guestName,
 		LocalDate coverDate,
+		String accentColor,
+		FontPreset fontPreset,
 		String openingText,
 		String closingText,
 		List<PartnerView> partners,
