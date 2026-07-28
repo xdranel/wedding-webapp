@@ -968,7 +968,7 @@ git commit -m "feat: add wedding invitation preview"
 - Consumes: all Phase 2 routes and services.
 - Produces: one executable administrator journey and updated operating docs.
 
-- [ ] **Step 1: Write the failing administrator journey**
+- [x] **Step 1: Write the MySQL-backed administrator journey**
 
 The MySQL-backed MockMvc journey must:
 
@@ -988,19 +988,26 @@ void administratorConfiguresPreviewsPublishesEditsAndReturnsToDraft() throws Exc
 
 Use helper methods only to keep requests readable; every helper must assert its response and the final test must assert persisted state after each lifecycle transition.
 
-- [ ] **Step 2: Run the journey and observe RED if any integration is incomplete**
+- [x] **Step 2: Run the journey and verify all integration points**
 
 ```bash
 ./mvnw -q -Dtest=WeddingContentJourneyTest test
 ```
 
-Expected: fail at the first incomplete integration point; if it passes immediately, verify the test asserts every lifecycle transition rather than only HTTP status.
+Result: the journey passes against MySQL 8.4. It asserts administrator and
+staff/anonymous preview access, a missing-CSRF rejection, actual Indonesian
+and English preview content, valid photo uploads, and persisted
+`DRAFT -> PUBLISHED -> DRAFT` state. The first local attempt was blocked only
+by sandbox access to the Podman socket; the authorized rootless-Podman run
+passed.
 
-- [ ] **Step 3: Make only the minimal integration corrections**
+- [x] **Step 3: Make only the minimal integration corrections**
+
+No production correction was required; the real-route journey passed.
 
 Correct route wiring, redirects, template model names, or transaction boundaries exposed by the journey. Do not add Phase 3+ placeholders or refactor unrelated Phase 1 security.
 
-- [ ] **Step 4: Update documentation**
+- [x] **Step 4: Update documentation**
 
 Document:
 
@@ -1012,7 +1019,10 @@ Document:
 
 Change roadmap Phase 2 status to implementation complete only after Step 6 passes.
 
-- [ ] **Step 5: Run clean static and full verification**
+- [x] **Step 5: Run clean static and full verification**
+
+Result: `git diff --check`, `./mvnw -q clean -DskipTests verify`, and the
+complete rootless-Podman MySQL 8.4 suite pass (15 test classes, 75 tests).
 
 ```bash
 git diff --check
@@ -1025,6 +1035,13 @@ export TESTCONTAINERS_RYUK_DISABLED=true
 Expected: build succeeds and every test passes against MySQL 8.4.
 
 - [ ] **Step 6: Perform manual acceptance**
+
+An isolated non-default-environment application probe passed
+`/actuator/health` with `UP` using a temporary MySQL 8.4 container and
+non-default ports, without touching the existing development MySQL container.
+Automated coverage cannot establish browser viewport behavior or manual visual
+acceptance. Browser acceptance remains required before this phase is marked
+accepted.
 
 With non-default `.env` values:
 

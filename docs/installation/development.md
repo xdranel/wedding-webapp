@@ -41,6 +41,22 @@ administrator exists. Re-running it does not create another administrator or
 replace the existing password. Change the bootstrap password at the first
 login.
 
+## Wedding content and media
+
+After signing in as an administrator, open `/admin/wedding` to edit wedding
+settings, the two partner profiles, ceremony/reception sections, and the
+relationship story. `/admin/wedding/preview` is an administrator-only preview
+for checking Indonesian and English content; it is not a public invitation.
+
+Content starts in draft. Publishing requires two complete partner profiles
+(including photos) and one complete visible event. A later edit while
+published is live immediately; returning to draft keeps the saved content.
+
+Set `MEDIA_DIRECTORY` in `.env` to the directory for partner photos. The
+default is `./data/media`. Only JPEG, PNG, and WebP uploads up to 10 MB are
+accepted. `/data/` is Git-ignored, including the default media location; keep
+real uploaded files untracked.
+
 ## Database lifecycle
 
 `docker compose down` stops MySQL but preserves its `mysql-data` volume.
@@ -59,6 +75,14 @@ administrator when the database has no administrator account.
 Tests use a temporary MySQL 8.4 Testcontainer and require Docker access:
 
 ```bash
+./mvnw test
+```
+
+For rootless Podman, use the socket setup above and run the same command:
+
+```bash
+export DOCKER_HOST="unix://${XDG_RUNTIME_DIR}/podman/podman.sock"
+export TESTCONTAINERS_RYUK_DISABLED=true
 ./mvnw test
 ```
 
