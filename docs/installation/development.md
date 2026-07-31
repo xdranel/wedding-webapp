@@ -81,6 +81,11 @@ real uploaded files untracked.
 
 ## Database lifecycle
 
+Flyway migrations that have run anywhere are immutable. Do not reformat or
+edit an existing `V*__*.sql` file; add the next migration version for every
+schema change. A checksum mismatch must be investigated rather than hidden
+with `flyway repair`.
+
 `docker compose down` stops MySQL but preserves its `mysql-data` volume.
 To remove all local MySQL data and start over, run:
 
