@@ -42,12 +42,20 @@ class WhatsappNumberServiceTest {
 				.contains("DE", "ID", "MY", "US");
 		assertThat(numbers.supportedRegions())
 				.extracting(WhatsappNumberService.RegionOption::label)
+				.isSorted()
 				.contains("Germany (+49)", "Indonesia (+62)");
 	}
 
 	@org.junit.jupiter.api.Test
 	void rejectsUnsupportedSubmittedRegion() {
 		assertThatThrownBy(() -> numbers.normalize("+4915123456789", "XX"))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Select a valid phone country.");
+	}
+
+	@org.junit.jupiter.api.Test
+	void rejectsNullSubmittedRegion() {
+		assertThatThrownBy(() -> numbers.normalize("+4915123456789", null))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Select a valid phone country.");
 	}
