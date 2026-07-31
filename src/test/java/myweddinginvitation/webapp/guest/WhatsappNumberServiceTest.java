@@ -11,12 +11,14 @@ class WhatsappNumberServiceTest {
 
 	@ParameterizedTest
 	@CsvSource({
-			"'0812 3456 7890',+6281234567890",
-			"'62-812-3456-7890',+6281234567890",
-			"'+62 812 3456 7890',+6281234567890"
+			"ID,'0812 3456 7890',+6281234567890",
+			"DE,'01512 3456789',+4915123456789",
+			"MY,'012-345 6789',+60123456789",
+			"US,'202-555-0123',+12025550123",
+			"ID,'+49 1512 3456789',+4915123456789"
 	})
-	void normalizesIndonesianNumbers(String raw, String expected) {
-		assertThat(numbers.normalize(raw, "ID")).isEqualTo(expected);
+	void normalizesNationalAndExplicitInternationalNumbers(String region, String raw, String expected) {
+		assertThat(numbers.normalize(raw, region)).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
@@ -25,5 +27,28 @@ class WhatsappNumberServiceTest {
 		assertThatThrownBy(() -> numbers.normalize(raw, "ID"))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Enter a valid WhatsApp number.");
+	}
+
+	@org.junit.jupiter.api.Test
+	void detectsRegionAndFallsBackWhenItCannotBeDetermined() {
+		assertThat(numbers.regionFor("+4915123456789", "ID")).isEqualTo("DE");
+		assertThat(numbers.regionFor("invalid", "ID")).isEqualTo("ID");
+	}
+
+	@org.junit.jupiter.api.Test
+	void exposesEnglishCountryLabelsInStableOrder() {
+		assertThat(numbers.supportedRegions())
+				.extracting(WhatsappNumberService.RegionOption::code)
+				.contains("DE", "ID", "MY", "US");
+		assertThat(numbers.supportedRegions())
+				.extracting(WhatsappNumberService.RegionOption::label)
+				.contains("Germany (+49)", "Indonesia (+62)");
+	}
+
+	@org.junit.jupiter.api.Test
+	void rejectsUnsupportedSubmittedRegion() {
+		assertThatThrownBy(() -> numbers.normalize("+4915123456789", "XX"))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Select a valid phone country.");
 	}
 }
