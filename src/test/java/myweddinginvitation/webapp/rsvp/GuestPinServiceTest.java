@@ -10,7 +10,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import myweddinginvitation.webapp.guest.Guest;
 import myweddinginvitation.webapp.guest.GuestForm;
@@ -81,6 +88,45 @@ class GuestPinServiceTest {
 		assertThat(guests.findById(guest.getId())).get()
 				.extracting(Guest::getFailedPinCount, Guest::getPinLockedUntil)
 				.containsExactly(5, NOW.plusSeconds(15 * 60));
+	}
+
+	@Test
+	void parallelWrongPinsCannotBypassTheFiveAttemptLock() throws Exception {
+		Guest guest = guest("081234567890");
+		int requestCount = 8;
+		CountDownLatch ready = new CountDownLatch(requestCount);
+		CountDownLatch start = new CountDownLatch(1);
+		ExecutorService executor = Executors.newFixedThreadPool(requestCount);
+		List<Future<PinVerificationResult>> futures = new ArrayList<>();
+		try {
+			for (int request = 0; request < requestCount; request++) {
+				futures.add(executor.submit(() -> {
+					ready.countDown();
+					start.await();
+					return pins.verify(guest.getPublicId(), guest.getInvitationTokenVersion(), "0000");
+				}));
+			}
+			assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue();
+			start.countDown();
+
+			List<PinVerificationResult> results = new ArrayList<>();
+			for (Future<PinVerificationResult> future : futures) {
+				results.add(future.get(30, TimeUnit.SECONDS));
+			}
+
+			Instant retryAt = NOW.plusSeconds(15 * 60);
+			assertThat(results).filteredOn(result -> result.status() == INVALID).hasSize(4);
+			assertThat(results).filteredOn(result -> result.status() == LOCKED).hasSize(4)
+					.extracting(PinVerificationResult::retryAt).containsOnly(retryAt);
+			assertThat(guests.findById(guest.getId())).get()
+					.extracting(Guest::getFailedPinCount, Guest::getPinLockedUntil)
+					.containsExactly(5, retryAt);
+			assertThat(pins.verify(guest.getPublicId(), guest.getInvitationTokenVersion(), "7890"))
+					.isEqualTo(new PinVerificationResult(LOCKED, retryAt));
+		} finally {
+			start.countDown();
+			executor.shutdownNow();
+		}
 	}
 
 	@Test
