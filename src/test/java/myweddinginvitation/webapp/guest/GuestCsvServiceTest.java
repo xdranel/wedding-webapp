@@ -50,7 +50,7 @@ class GuestCsvServiceTest {
 
 	@Test
 	void unknownCategoryIsAnErrorAndDatabaseAndFileDuplicatesAreWarnings() {
-		guestsService.create(new GuestForm("Existing", "Ibu", "081234567890", null, false, MessageLanguage.ID, null), false);
+		guestsService.create(new GuestForm("Existing", "Ibu", "ID", "081234567890", null, false, MessageLanguage.ID, null), false);
 
 		GuestCsvPreview preview = service.preview(csv(
 				"Sari,081234567890,Ibu,Unknown,false,ID,",
@@ -81,8 +81,8 @@ class GuestCsvServiceTest {
 
 	@Test
 	void templateAndExportIncludeRequiredColumnsBomAndAllGuests() throws Exception {
-		Guest active = guestsService.create(new GuestForm("Active", "Ibu", "081234567890", null, false, MessageLanguage.ID, "note"), false);
-		Guest archived = guestsService.create(new GuestForm("Archived", "Bapak", "081234567891", null, true, MessageLanguage.EN, null), false);
+		Guest active = guestsService.create(new GuestForm("Active", "Ibu", "ID", "081234567890", null, false, MessageLanguage.ID, "note"), false);
+		Guest archived = guestsService.create(new GuestForm("Archived", "Bapak", "ID", "081234567891", null, true, MessageLanguage.EN, null), false);
 		guestsService.archive(archived.getId(), archived.getVersion());
 		ByteArrayOutputStream template = new ByteArrayOutputStream();
 		ByteArrayOutputStream export = new ByteArrayOutputStream();

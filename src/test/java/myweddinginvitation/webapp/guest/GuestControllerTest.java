@@ -88,6 +88,7 @@ class GuestControllerTest {
 		mockMvc.perform(post("/admin/guests").session(adminSession).with(csrf())
 				.param("displayName", "Sari")
 				.param("salutation", "Ibu")
+				.param("phoneRegion", "ID")
 				.param("whatsappNumber", "081234567890")
 				.param("preferredLanguage", "ID"))
 				.andExpect(status().isOk())
@@ -95,6 +96,44 @@ class GuestControllerTest {
 				.andExpect(model().attribute("duplicateWarning", true));
 
 		assertThat(guests.count()).isEqualTo(1);
+	}
+
+	@Test
+	void newGuestUsesWeddingDefaultAndEditInfersStoredRegion() throws Exception {
+		jdbc.update("update wedding_settings set default_phone_country = 'MY' where id = 1");
+		mockMvc.perform(get("/admin/guests/new").session(adminSession))
+				.andExpect(model().attribute("form", hasProperty("phoneRegion", is("MY"))))
+				.andExpect(model().attributeExists("phoneRegions"));
+
+		Guest guest = service.create(form("Ada", "DE", "01512 3456789"), false);
+		mockMvc.perform(get("/admin/guests/{id}/edit", guest.getId()).session(adminSession))
+				.andExpect(model().attribute("form", hasProperty("phoneRegion", is("DE"))));
+	}
+
+	@Test
+	void invalidNumberRedisplayKeepsSubmittedRegion() throws Exception {
+		mockMvc.perform(post("/admin/guests").session(adminSession).with(csrf())
+				.param("displayName", "Ada")
+				.param("salutation", "Frau")
+				.param("phoneRegion", "DE")
+				.param("whatsappNumber", "123")
+				.param("preferredLanguage", "EN"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("admin/guests/form"))
+				.andExpect(model().attribute("form", hasProperty("phoneRegion", is("DE"))))
+				.andExpect(model().attributeExists("phoneRegions"));
+	}
+
+	@Test
+	void unsupportedSubmittedRegionIsRejected() throws Exception {
+		mockMvc.perform(post("/admin/guests").session(adminSession).with(csrf())
+				.param("displayName", "Ada")
+				.param("salutation", "Ibu")
+				.param("phoneRegion", "ZZ")
+				.param("whatsappNumber", "081234567890")
+				.param("preferredLanguage", "ID"))
+				.andExpect(status().isOk())
+				.andExpect(model().attributeHasFieldErrors("form", "phoneRegion"));
 	}
 
 	@Test
@@ -124,6 +163,7 @@ class GuestControllerTest {
 				.with(csrf())
 				.param("displayName", "Blocked")
 				.param("salutation", "Ibu")
+				.param("phoneRegion", "ID")
 				.param("whatsappNumber", "081234567890")
 				.param("preferredLanguage", "ID"))
 				.andExpect(status().isForbidden());
@@ -131,13 +171,18 @@ class GuestControllerTest {
 		mockMvc.perform(post("/admin/guests").session(adminSession)
 				.param("displayName", "Blocked")
 				.param("salutation", "Ibu")
+				.param("phoneRegion", "ID")
 				.param("whatsappNumber", "081234567890")
 				.param("preferredLanguage", "ID"))
 				.andExpect(status().isForbidden());
 	}
 
 	private GuestForm form(String name, String whatsappNumber) {
-		return new GuestForm(name, "Ibu", whatsappNumber, null, false, MessageLanguage.ID, null);
+		return form(name, "ID", whatsappNumber);
+	}
+
+	private GuestForm form(String name, String phoneRegion, String whatsappNumber) {
+		return new GuestForm(name, "Ibu", phoneRegion, whatsappNumber, null, false, MessageLanguage.ID, null);
 	}
 
 	private MockHttpSession login(String username) throws Exception {

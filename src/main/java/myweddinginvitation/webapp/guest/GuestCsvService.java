@@ -88,6 +88,7 @@ public class GuestCsvService {
 			guestService.create(new GuestForm(
 					row.displayName(),
 					row.salutation(),
+					defaultPhoneCountry(),
 					row.normalizedWhatsappNumber(),
 					row.categoryId(),
 					row.plusOneAllowed(),

@@ -35,12 +35,25 @@ class GuestServiceTest {
 	}
 
 	@Test
-	void normalizesWithConfiguredDefaultPhoneCountry() {
-		jdbc.update("update wedding_settings set default_phone_country = 'GB' where id = 1");
+	void selectedRegionOverridesWeddingDefaultForNationalInput() {
+		Guest guest = service.create(form("Ada", "DE", "01512 3456789"), false);
 
-		Guest guest = service.create(form("Ada", "020 7946 0018"), false);
+		assertThat(guest.getNormalizedWhatsappNumber()).isEqualTo("+4915123456789");
+	}
 
-		assertThat(guest.getNormalizedWhatsappNumber()).isEqualTo("+442079460018");
+	@Test
+	void explicitCallingCodeOverridesSelectedRegion() {
+		Guest guest = service.create(form("Ada", "ID", "+49 1512 3456789"), false);
+
+		assertThat(guest.getNormalizedWhatsappNumber()).isEqualTo("+4915123456789");
+	}
+
+	@Test
+	void duplicateWarningMatchesNationalAndInternationalRepresentations() {
+		service.create(form("Ada", "DE", "01512 3456789"), false);
+
+		assertThatThrownBy(() -> service.create(form("Bela", "ID", "+49 1512 3456789"), false))
+				.isInstanceOf(GuestService.DuplicateWhatsappNumberException.class);
 	}
 
 	@Test
@@ -88,6 +101,10 @@ class GuestServiceTest {
 	}
 
 	private GuestForm form(String name, String whatsappNumber) {
-		return new GuestForm(name, "Ibu", whatsappNumber, null, false, MessageLanguage.ID, null);
+		return form(name, "ID", whatsappNumber);
+	}
+
+	private GuestForm form(String name, String phoneRegion, String whatsappNumber) {
+		return new GuestForm(name, "Ibu", phoneRegion, whatsappNumber, null, false, MessageLanguage.ID, null);
 	}
 }

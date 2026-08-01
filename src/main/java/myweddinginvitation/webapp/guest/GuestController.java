@@ -3,6 +3,7 @@ package myweddinginvitation.webapp.guest;
 import java.util.NoSuchElementException;
 
 import jakarta.validation.Valid;
+import myweddinginvitation.webapp.wedding.WeddingSettingsRepository;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -24,10 +26,15 @@ public class GuestController {
 	private static final String CONFLICT = "This guest changed by another administrator. Reload and try again.";
 	private final GuestService guests;
 	private final GuestCategoryService categories;
+	private final WhatsappNumberService numbers;
+	private final WeddingSettingsRepository settings;
 
-	public GuestController(GuestService guests, GuestCategoryService categories) {
+	public GuestController(GuestService guests, GuestCategoryService categories, WhatsappNumberService numbers,
+			WeddingSettingsRepository settings) {
 		this.guests = guests;
 		this.categories = categories;
+		this.numbers = numbers;
+		this.settings = settings;
 	}
 
 	@GetMapping("/admin/guests")
@@ -47,7 +54,7 @@ public class GuestController {
 
 	@GetMapping("/admin/guests/new")
 	String newGuest(Model model) {
-		formPage(model, new GuestForm("", "", "", null, false, MessageLanguage.ID, null), null, false);
+		formPage(model, new GuestForm("", "", defaultPhoneCountry(), "", null, false, MessageLanguage.ID, null), null, false);
 		return "admin/guests/form";
 	}
 
@@ -61,7 +68,7 @@ public class GuestController {
 				return "admin/guests/form";
 			}
 		} catch (IllegalArgumentException exception) {
-			result.rejectValue("whatsappNumber", "whatsappNumber.invalid", exception.getMessage());
+			rejectInvalidPhoneInput(result, form, exception);
 		}
 		if (!result.hasErrors()) {
 			try {
@@ -71,10 +78,11 @@ public class GuestController {
 				formPage(model, form, null, true);
 				return "admin/guests/form";
 			} catch (IllegalArgumentException exception) {
-				result.rejectValue("whatsappNumber", "whatsappNumber.invalid", exception.getMessage());
+				rejectInvalidPhoneInput(result, form, exception);
 			}
 		}
 		formPage(model, form, null, false);
+		model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "form", result);
 		return "admin/guests/form";
 	}
 
@@ -88,7 +96,8 @@ public class GuestController {
 	String edit(@PathVariable long id, Model model) {
 		Guest guest = guests.get(id);
 		formPage(model, new GuestForm(guest.getDisplayName(), guest.getSalutation(),
-				guest.getNormalizedWhatsappNumber(), guest.getCategory() == null ? null : guest.getCategory().getId(),
+				numbers.regionFor(guest.getNormalizedWhatsappNumber(), defaultPhoneCountry()), guest.getNormalizedWhatsappNumber(),
+				guest.getCategory() == null ? null : guest.getCategory().getId(),
 				guest.isPlusOneAllowed(), guest.getPreferredLanguage(), guest.getInternalNote()), guest, false);
 		return "admin/guests/form";
 	}
@@ -106,12 +115,13 @@ public class GuestController {
 				formPage(model, form, existing, true);
 				return "admin/guests/form";
 			} catch (IllegalArgumentException exception) {
-				result.rejectValue("whatsappNumber", "whatsappNumber.invalid", exception.getMessage());
+				rejectInvalidPhoneInput(result, form, exception);
 			} catch (OptimisticLockingFailureException exception) {
 				result.reject("guest.conflict", CONFLICT);
 			}
 		}
 		formPage(model, form, existing, false);
+		model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "form", result);
 		return "admin/guests/form";
 	}
 
@@ -155,7 +165,20 @@ public class GuestController {
 		model.addAttribute("form", form);
 		model.addAttribute("guest", guest);
 		model.addAttribute("categories", categories.findAll());
+		model.addAttribute("phoneRegions", numbers.supportedRegions());
 		model.addAttribute("duplicateWarning", duplicateWarning);
+	}
+
+	private String defaultPhoneCountry() {
+		return settings.getSingleton().orElseThrow(NoSuchElementException::new).getDefaultPhoneCountry();
+	}
+
+	private void rejectInvalidPhoneInput(BindingResult result, GuestForm form, IllegalArgumentException exception) {
+		String field = numbers.supportedRegions().stream().anyMatch(region -> region.code().equals(form.phoneRegion()))
+				? "whatsappNumber" : "phoneRegion";
+		Object rejectedValue = field.equals("phoneRegion") ? form.phoneRegion() : form.whatsappNumber();
+		result.addError(new FieldError("form", field, rejectedValue, false,
+				null, null, exception.getMessage()));
 	}
 
 	private Sort sort(String value) {

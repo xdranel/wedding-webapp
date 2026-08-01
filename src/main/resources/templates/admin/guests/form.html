@@ -11,7 +11,14 @@
     <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Guest error</p>
     <label>Name <input th:field="*{displayName}" maxlength="160" required></label><p th:if="${#fields.hasErrors('displayName')}" th:errors="*{displayName}" role="alert">Name error</p>
     <label>Salutation <input th:field="*{salutation}" maxlength="80" required></label><p th:if="${#fields.hasErrors('salutation')}" th:errors="*{salutation}" role="alert">Salutation error</p>
-    <label>WhatsApp number <input th:field="*{whatsappNumber}" maxlength="40" required></label><p th:if="${#fields.hasErrors('whatsappNumber')}" th:errors="*{whatsappNumber}" role="alert">Number error</p>
+    <label>Phone country
+      <select th:field="*{phoneRegion}" required>
+        <option th:each="region : ${phoneRegions}" th:value="${region.code}" th:text="${region.label}">Indonesia (+62)</option>
+      </select>
+    </label>
+    <p th:if="${#fields.hasErrors('phoneRegion')}" th:errors="*{phoneRegion}" role="alert">Country error</p>
+    <label>WhatsApp number <input th:field="*{whatsappNumber}" maxlength="40" inputmode="tel" required></label><p th:if="${#fields.hasErrors('whatsappNumber')}" th:errors="*{whatsappNumber}" role="alert">Number error</p>
+    <p>Use a local number for the selected country, or start with + for an international number.</p>
     <label>Category <select th:field="*{categoryId}"><option value="">Uncategorized</option><option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.displayName}">Category</option></select></label>
     <label><input type="checkbox" th:field="*{plusOneAllowed}"> Plus one allowed</label>
     <label>Language <select th:field="*{preferredLanguage}"><option value="ID">Indonesian</option><option value="EN">English</option></select></label>

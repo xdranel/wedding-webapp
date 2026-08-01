@@ -189,7 +189,7 @@ class GuestDeliveryControllerTest {
 
 	private Guest savedGuest() {
 		return guestService.create(new GuestForm(
-				"Sari", "Ibu", "081234567890", null, false, MessageLanguage.ID, null), false);
+				"Sari", "Ibu", "ID", "081234567890", null, false, MessageLanguage.ID, null), false);
 	}
 
 	private Guest reload(Guest guest) {

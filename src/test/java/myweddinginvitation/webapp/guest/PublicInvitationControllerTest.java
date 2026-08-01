@@ -159,7 +159,7 @@ class PublicInvitationControllerTest {
 
 	private Guest savedActiveGuest(MessageLanguage language) {
 		return guestService.create(new GuestForm(
-				GUEST_NAME, "Ibu", WHATSAPP, null, false, language, INTERNAL_NOTE), false);
+				GUEST_NAME, "Ibu", "ID", WHATSAPP, null, false, language, INTERNAL_NOTE), false);
 	}
 
 	private void publishWedding() {
