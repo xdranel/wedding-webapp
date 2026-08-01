@@ -65,6 +65,7 @@ public class GuestController {
 		try {
 			if (!duplicateAccepted && guests.requiresDuplicateConfirmation(form)) {
 				formPage(model, form, null, true);
+				model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "form", result);
 				return "admin/guests/form";
 			}
 		} catch (IllegalArgumentException exception) {

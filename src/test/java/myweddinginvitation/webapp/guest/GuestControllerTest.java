@@ -99,6 +99,23 @@ class GuestControllerTest {
 	}
 
 	@Test
+	void duplicateWarningPreservesSubmittedValidationErrors() throws Exception {
+		service.create(form("Existing", "081234567890"), false);
+
+		mockMvc.perform(post("/admin/guests").session(adminSession).with(csrf())
+				.param("displayName", "Ada")
+				.param("salutation", "Ibu")
+				.param("phoneRegion", "ID")
+				.param("whatsappNumber", "081234567890")
+				.param("plusOneAllowed", "not-a-boolean")
+				.param("preferredLanguage", "ID"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("admin/guests/form"))
+				.andExpect(model().attribute("duplicateWarning", true))
+				.andExpect(model().attributeHasFieldErrors("form", "plusOneAllowed"));
+	}
+
+	@Test
 	void newGuestUsesWeddingDefaultAndEditInfersStoredRegion() throws Exception {
 		jdbc.update("update wedding_settings set default_phone_country = 'MY' where id = 1");
 		mockMvc.perform(get("/admin/guests/new").session(adminSession))
