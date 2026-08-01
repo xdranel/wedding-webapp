@@ -1,6 +1,7 @@
 # Phase 4 RSVP, PIN, Greetings, and QR Design
 
-Status: approved for implementation planning on 2026-08-01
+Status: Implemented; manual acceptance pending (automated verification passed
+on 2026-08-01)
 
 ## Goal
 

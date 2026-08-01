@@ -65,9 +65,55 @@ The database and CSV export use canonical E.164 numbers.
 
 `Open WhatsApp` creates only a redirect to a prefilled WhatsApp message.
 `Confirm sent` is the separate manual action that stores the first and latest
-send timestamps. Public `/i/...` invitations are read-only; unavailable links
-return a neutral page without guest data. RSVP, PIN protection, and QR are
-intentionally deferred to Phase 4.
+send timestamps. Unavailable public `/i/...` links return a neutral page without
+guest data.
+
+## RSVP, PIN, greetings, and QR operations
+
+Configure a future RSVP deadline before expecting guest writes to open. A
+missing deadline means RSVP is not open; at or after the deadline, guest RSVP
+becomes read-only. Administrators may still correct RSVP after the deadline.
+Accepted invitations retain QR access after the deadline while the event and
+invitation remain active.
+
+The guest PIN is the last four digits of the normalized E.164 WhatsApp number.
+It protects RSVP writes and QR access but not ordinary invitation viewing. Five
+consecutive wrong, structurally valid PINs lock protected actions for 15
+minutes. Malformed forms and PINs do not count. The administrator can clear an
+active lock from guest detail. Successful verification is invitation-scoped,
+stored only in the ordinary in-memory HTTP session, and expires at a fixed 30
+minutes without sliding; restart discards it.
+
+The server generates a 320 px display QR and a 1024 px download named
+`wedding-check-in-qr.png`. Every request rechecks current publication, event,
+invitation, RSVP, token-version, and PIN-session state. A saved QR becomes
+unusable after `TIDAK_HADIR`, archive, token regeneration, or event closure.
+`INVITATION_SIGNING_SECRET` also signs a purpose-separated QR payload, so there
+is no additional QR secret. Rotating it invalidates both current invitation
+links and QR payloads.
+
+Greetings appear inside personalized invitations only with guest consent and
+administrator approval. Editing approved text returns it to pending; removing
+consent or hiding it removes it from public display. Private organizer notes
+are visible only to administrators. CSV import remains exactly seven columns;
+the export adds RSVP status/count, greeting consent/moderation, private note,
+update source, and update time, with spreadsheet-formula neutralization.
+
+### Phase 4 manual browser acceptance
+
+Use dummy guests and record these checks separately from automated tests:
+
+- [ ] ID and EN RSVP labels/errors remain usable at mobile width.
+- [ ] `Hadir` stores one or an allowed two; `Tidak hadir` stores zero.
+- [ ] Missing deadline, elapsed deadline, and event closure show the correct guest state.
+- [ ] Four wrong PINs remain retryable; the fifth locks; administrator unlock restores access.
+- [ ] Correct PIN permits QR display/download for 30 minutes only.
+- [ ] Phone change and token regeneration require verification again.
+- [ ] Saved QR is rejected after `Tidak hadir`, archive, regeneration, or event closure.
+- [ ] Greeting consent, approval, edit-to-pending, withdrawal, and hide behave as documented.
+- [ ] Private organizer notes appear only in administrator views and export.
+- [ ] Administrator correction works after deadline and confirmed `+1` reduction changes two planned attendees to one.
+- [ ] Import remains seven columns; extended export opens safely in a spreadsheet.
 
 ## Wedding content and media
 

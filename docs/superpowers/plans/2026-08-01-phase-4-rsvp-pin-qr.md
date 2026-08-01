@@ -850,7 +850,7 @@ git commit -m "feat: moderate RSVP greetings"
 - Consumes: every Phase 4 route/service and the existing signed invitation and admin authentication flows.
 - Produces: one executable lifecycle proof, operator guidance, accurate status, and full regression evidence.
 
-- [ ] **Step 1: Write the failing end-to-end journey**
+- [x] **Step 1: Write the end-to-end journey**
 
 The MySQL/MockMvc journey must:
 
@@ -867,7 +867,7 @@ The MySQL/MockMvc journey must:
    requires a fresh/current PIN session.
 8. Export CSV and assert RSVP/moderation/private-note fields are present.
 
-- [ ] **Step 2: Run the journey and observe any integration RED**
+- [x] **Step 2: Run the journey and observe integration behavior**
 
 ```bash
 ./mvnw -q -Dtest=RsvpQrJourneyTest test
@@ -875,13 +875,18 @@ The MySQL/MockMvc journey must:
 
 Expected before final wiring: at least one route/model/state assertion fails.
 
-- [ ] **Step 3: Make only integration corrections exposed by the journey**
+Result: the complete journey passed on its first MySQL 8.4 execution. It
+exposed no genuine integration defect, so no production correction was made.
+
+- [x] **Step 3: Make only integration corrections exposed by the journey**
 
 Correct route construction, redirects, session handoff, model attributes,
 transaction boundaries, or localized copy. Do not implement Phase 5 scanning,
 reminders, calendar files, reporting, or unrelated UI refactors.
 
-- [ ] **Step 4: Update operator documentation**
+No correction was required.
+
+- [x] **Step 4: Update operator documentation**
 
 Document in README/development guide:
 
@@ -898,7 +903,7 @@ Mark the design `Implemented; manual acceptance pending` and roadmap Phase 4
 `implementation and automated verification complete` only after Step 6 passes.
 Check plan steps only after their named commands succeed.
 
-- [ ] **Step 5: Run formatting and packaging**
+- [x] **Step 5: Run formatting and packaging**
 
 ```bash
 git diff --check
@@ -907,7 +912,7 @@ git diff --check
 
 Expected: no whitespace errors and packaging succeeds.
 
-- [ ] **Step 6: Run the full MySQL 8.4 suite**
+- [x] **Step 6: Run the full MySQL 8.4 suite**
 
 ```bash
 export DOCKER_HOST="unix://${XDG_RUNTIME_DIR}/podman/podman.sock"
@@ -916,6 +921,8 @@ export TESTCONTAINERS_RYUK_DISABLED=true
 ```
 
 Expected: every test passes with zero failures, errors, and skips.
+
+Result: 229 tests passed with zero failures, errors, and skips.
 
 - [ ] **Step 7: Perform manual browser acceptance**
 

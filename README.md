@@ -50,5 +50,25 @@ default country. Stored and exported numbers are always E.164.
 
 Opening WhatsApp only opens a prefilled message; it does not record delivery.
 Use **Confirm sent** after sending to record the timestamps. A public signed
-invitation is read-only and neutral when unavailable. RSVP, PIN protection, and
-QR features are deferred to a later phase.
+invitation is neutral when unavailable.
+
+## RSVP and check-in QR
+
+Set a future RSVP deadline in **Wedding Content** before guest RSVP writes open.
+Guests use the last four digits of their normalized E.164 WhatsApp number to
+submit RSVP changes and view or download their QR. Five wrong valid PINs lock
+protected actions for 15 minutes; an administrator can clear the lock. A
+successful verification is held per invitation in memory for a fixed 30
+minutes and is lost on application restart.
+
+QR access requires a current `HADIR` RSVP and is rechecked on every display or
+download. Changing RSVP to `TIDAK_HADIR`, archiving the guest, regenerating the
+invitation token, or closing the event makes saved QR images unusable. The same
+`INVITATION_SIGNING_SECRET` signs invitation links and purpose-separated QR
+payloads; no separate QR secret is required.
+
+Guest greetings require explicit consent and administrator approval before
+appearing inside another personalized invitation. Private organizer notes are
+administrator-only. CSV import remains the exact seven-column schema above;
+export adds RSVP, moderation, greeting, private-note, update-source, and update-
+time columns.
