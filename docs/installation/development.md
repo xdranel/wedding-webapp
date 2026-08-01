@@ -103,17 +103,17 @@ update source, and update time, with spreadsheet-formula neutralization.
 
 Use dummy guests and record these checks separately from automated tests:
 
-- [ ] ID and EN RSVP labels/errors remain usable at mobile width.
-- [ ] `Hadir` stores one or an allowed two; `Tidak hadir` stores zero.
-- [ ] Missing deadline, elapsed deadline, and event closure show the correct guest state.
-- [ ] Four wrong PINs remain retryable; the fifth locks; administrator unlock restores access.
-- [ ] Correct PIN permits QR display/download for 30 minutes only.
-- [ ] Phone change and token regeneration require verification again.
-- [ ] Saved QR is rejected after `Tidak hadir`, archive, regeneration, or event closure.
-- [ ] Greeting consent, approval, edit-to-pending, withdrawal, and hide behave as documented.
-- [ ] Private organizer notes appear only in administrator views and export.
-- [ ] Administrator correction works after deadline and confirmed `+1` reduction changes two planned attendees to one.
-- [ ] Import remains seven columns; extended export opens safely in a spreadsheet.
+- [x] ID and EN RSVP labels/errors remain usable at mobile width.
+- [x] `Hadir` stores one or an allowed two; `Tidak hadir` stores zero.
+- [x] Missing deadline, elapsed deadline, and event closure show the correct guest state.
+- [x] Four wrong PINs remain retryable; the fifth locks; administrator unlock restores access.
+- [x] Correct PIN permits QR display/download for 30 minutes only.
+- [x] Phone change and token regeneration require verification again.
+- [x] Saved QR is rejected after `Tidak hadir`, archive, regeneration, or event closure.
+- [x] Greeting consent, approval, edit-to-pending, withdrawal, and hide behave as documented.
+- [x] Private organizer notes appear only in administrator views and export.
+- [x] Administrator correction works after deadline and confirmed `+1` reduction changes two planned attendees to one.
+- [x] Import remains seven columns; extended export opens safely in a spreadsheet.
 
 ## Wedding content and media
 

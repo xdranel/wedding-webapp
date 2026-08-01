@@ -924,7 +924,7 @@ Expected: every test passes with zero failures, errors, and skips.
 
 Result: 229 tests passed with zero failures, errors, and skips.
 
-- [ ] **Step 7: Perform manual browser acceptance**
+- [x] **Step 7: Perform manual browser acceptance**
 
 With dummy guests, verify:
 
