@@ -74,6 +74,16 @@ Disabled optional sections are not rendered. Guest language is selected with
 an `ID | EN` switch and stored on the device. Missing English narrative text
 falls back to Indonesian.
 
+RSVP remains unavailable until an administrator configures a future deadline.
+After the deadline, the current response is read-only while accepted guests
+retain PIN-protected QR access until event closure or invitation deactivation.
+Successful PIN verification applies per invitation for a fixed 30 minutes.
+
+Greetings are enabled by default and private organizer notes are disabled by
+default. Public greeting display requires both guest consent and administrator
+approval. Each tokenized invitation shows twenty newest approved greetings and
+may load more; there is no standalone greeting directory.
+
 ## Administrator flow
 
 The administrator interface has:
@@ -90,6 +100,9 @@ The administrator interface has:
 - Settings and local system status
 
 Saved content changes become live immediately while the wedding is published.
+The guest list also provides RSVP filters, response/count columns, individual
+RSVP correction, and PIN-lock clearing. Greeting moderation uses individual
+approve/hide actions with pending, approved, and hidden filters.
 
 ## Check-in flow
 

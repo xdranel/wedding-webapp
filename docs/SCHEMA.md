@@ -122,7 +122,6 @@ Primary invitation record containing:
 - Delivery state and confirmation timestamps
 - RSVP/event reminder timestamps
 - Random public invitation ID and invitation-token version
-- QR-token hash added in the QR phase
 - Token regeneration timestamp
 - Failed-PIN count and temporary lock expiry
 - Archive state and timestamps
@@ -135,14 +134,20 @@ reconstructed without storing a raw bearer token. Regeneration increments the
 stored token version. Rotating the deployment secret invalidates every
 existing invitation URL.
 
+Check-in QR payloads use a separate HMAC purpose over the random public
+invitation ID, invitation-token version, and payload-format version. No QR
+token or image is persisted.
+
 ### `rsvp`
 
 Zero or one row per guest containing `HADIR`/`TIDAK_HADIR`, planned attendee
-count, optional greeting, greeting approval state, optional private organizer
-note, update actor/source, and timestamps.
+count, optional greeting, publication consent, `PENDING`/`APPROVED`/`HIDDEN`
+moderation state, optional private organizer note, update actor/source,
+optional administrator account, timestamps, and optimistic-lock version.
 
-Planned count is one unless the guest currently permits `+1`, in which case it
-may be one or two.
+Planned count is zero for `TIDAK_HADIR`. For `HADIR`, it is one unless the guest
+currently permits `+1`, in which case it may be one or two. Greeting text is at
+most 500 characters; private organizer notes are at most 1,000 characters.
 
 ### `check_in`
 

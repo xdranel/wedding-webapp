@@ -162,3 +162,31 @@ Status: approved for implementation planning
     left only in conversation or source comments.
 100. Newly discovered or revised rules follow the documented change-management
      process.
+101. Guest PIN verification is stored separately per invitation for a fixed 30
+     minutes from successful verification and is not extended by activity.
+102. Guest PIN sessions need not survive application restart.
+103. Changing a guest WhatsApp number resets PIN failures and invalidates prior
+     PIN-session fingerprints without deleting RSVP data.
+104. Structurally invalid RSVP submissions do not count as failed PIN attempts.
+105. An administrator may clear an invitation PIN lock without changing RSVP
+     data.
+106. Without a configured RSVP deadline, invitations remain viewable but guest
+     RSVP writes remain closed.
+107. `TIDAK_HADIR` stores planned attendance as zero and makes QR access
+     unavailable while preserving optional written content.
+108. Greeting publication requires both explicit guest consent and
+     administrator approval.
+109. Editing an approved greeting resets it to pending; removing the greeting
+     or consent hides it immediately.
+110. Administrators may approve or hide guest greetings but must not edit
+     guest-written greetings or private organizer notes.
+111. Greetings are limited to 500 characters and private organizer notes to
+     1,000 characters; both are escaped plain text, not HTML.
+112. Concurrent RSVP changes use optimistic locking and must not silently
+     overwrite a newer guest or administrator change.
+113. QR payloads use a versioned, purpose-separated HMAC over the random public
+     invitation ID and invitation-token version; no QR token or image is
+     persisted.
+114. The seven-column CSV import schema remains unchanged; administrator export
+     includes RSVP, moderation, greeting, and private-note fields with formula
+     injection protection.

@@ -2,7 +2,7 @@
 
 Status: Phases 1 and 2 complete and accepted on 2026-07-28. Phase 3
 implementation and automated verification complete; manual browser acceptance
-pending.
+pending. Phase 4 design approved on 2026-08-01; implementation plan pending.
 
 Detailed plans are written and executed one phase at a time. A phase must pass
 its tests and review before the next phase begins.
@@ -12,7 +12,7 @@ its tests and review before the next phase begins.
 | 1 | Bootable MySQL-backed application, Flyway, admin/staff authentication, and three protected web areas | `2026-07-27-foundation.md` |
 | 2 | Wedding settings, bilingual content, partner/event/story sections, and guest invitation shell | Plan: `2026-07-28-phase-2-wedding-content.md` |
 | 3 | Categories, guest CRUD/archive, CSV import/export, WhatsApp templates, and manual delivery tracking | Plan: `2026-07-28-phase-3-guest-delivery.md` |
-| 4 | RSVP, PIN protection/rate limits, greetings, private notes, and QR display/save | Written after Phase 3 |
+| 4 | RSVP, PIN protection/rate limits, greetings, private notes, and QR display/save | Design: `../specs/2026-08-01-phase-4-rsvp-pin-qr-design.md`; plan pending |
 | 5 | Restricted staff scan/search, atomic check-in, duplicate handling, and administrator corrections | Written after Phase 4 |
 | 6 | Gallery/audio/media processing, reports, moderation, calendar files, reminders, and system status | Written after Phase 5 |
 | 7 | Docker/Cloudflare production packaging, backup/restore/erasure scripts, installation docs, accessibility/performance/security verification | Written after Phase 6 |

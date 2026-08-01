@@ -126,11 +126,15 @@ directly to web forms.
 - CSRF protection remains enabled for state-changing web requests.
 - Administrator and staff permissions are role-separated.
 - Account passwords use a strong password encoder.
-- Invitation and QR credentials are independent random values stored as
-  hashes.
+- Invitation links and check-in QR payloads use purpose-separated HMAC
+  signatures. QR payloads contain only the random public invitation ID, token
+  version, format version, and signature; no raw QR secret or image is stored.
 - Current server-side state is always checked before RSVP, QR, or check-in
   action.
 - Rate limits apply to guest PIN and account-login failures.
+- Successful guest PIN verification is held per invitation in the ordinary
+  in-memory HTTP session for a fixed 30 minutes. It is revalidated against the
+  current invitation-token version and WhatsApp-number fingerprint.
 
 ## Deployment topology
 

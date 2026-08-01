@@ -1062,3 +1062,80 @@ pagination with 50 guests per page.
 
 **Answer:** No. Seed editable Indonesian and English defaults for all three
 message types.
+
+## Phase 4 clarification record
+
+**Question:** Does a successful PIN need to be entered again immediately to
+show the QR?
+
+**Answer:** No. Store verification separately per invitation in the browser
+session for a fixed 30 minutes. It does not slide and need not survive an
+application restart. Multiple verified invitations may coexist without
+granting access to each other.
+
+**Question:** What count is stored for `Tidak hadir`?
+
+**Answer:** Store zero, hide the attendee selector, and make QR access
+unavailable. Preserve existing greeting and private organizer-note content.
+
+**Question:** What controls public greeting visibility?
+
+**Answer:** Require both explicit guest consent and administrator approval.
+Text edits reset approval to pending; removal or withdrawn consent hides the
+greeting. Administrators approve or hide but do not edit guest text.
+
+**Question:** How are greetings presented?
+
+**Answer:** Show twenty newest approved and consented greetings inside valid
+tokenized invitations, with `Lihat lainnya`. Show only invitation display name,
+greeting, and date; never create a public directory.
+
+**Question:** What are the written-field limits?
+
+**Answer:** Greeting is at most 500 characters and private organizer note at
+most 1,000. Trim values, store blanks as null, prohibit HTML, and escape output.
+Greetings are enabled by default; the private-note field is disabled by default.
+
+**Question:** How are QR images generated and stored?
+
+**Answer:** Generate display and downloadable PNG images on the server from a
+versioned, purpose-separated HMAC payload. It contains only the random public
+invitation ID, token version, format version, and signature. Do not store a QR
+token or image and do not use an external QR service.
+
+**Question:** What invalidates a successful PIN session?
+
+**Answer:** Thirty-minute expiry, invitation-token regeneration, archiving,
+event closure, or a changed WhatsApp-number fingerprint. Changing the number
+also resets PIN failures without changing RSVP data.
+
+**Question:** Which invalid input counts toward PIN lockout?
+
+**Answer:** Only a structurally valid four-digit PIN that does not match.
+Malformed forms and PIN formats show validation errors without incrementing the
+counter. Five failures lock protected actions for 15 minutes; the admin may
+clear the lock.
+
+**Question:** What happens when no RSVP deadline is configured?
+
+**Answer:** The invitation remains viewable but RSVP displays as not yet open.
+A future deadline opens writes. Removing it closes writes without deleting old
+RSVP data, while accepted guests retain QR access until event closure or
+invitation deactivation.
+
+**Question:** How are concurrent RSVP writes handled?
+
+**Answer:** Use optimistic locking. The first write succeeds; stale guest or
+administrator writes show current state and require explicit resubmission.
+
+**Question:** Where does the administrator manage RSVP and moderation?
+
+**Answer:** Extend the existing guest list with RSVP filters, response/count,
+individual correction, and PIN-lock clearing. Use one greeting moderation page
+with pending, approved, and hidden filters and individual approve/hide actions.
+
+**Question:** Does Phase 4 change CSV import?
+
+**Answer:** No. Keep the exact seven-column template/import contract. Extend
+only administrator export with RSVP status/count, greeting, consent, moderation,
+private note, update source, and update time, retaining formula protection.
