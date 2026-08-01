@@ -74,7 +74,8 @@ class GuestControllerTest {
 		jdbc.update("""
 				update wedding_settings set default_phone_country = 'ID',
 				publication_state = 'PUBLISHED', event_closed = false,
-				time_zone = 'Asia/Jakarta', rsvp_deadline = '2030-08-01 08:00:00'
+				time_zone = 'Asia/Jakarta', rsvp_deadline = '2030-08-01 08:00:00',
+				private_organizer_note_enabled = false
 				where id = 1
 				""");
 		accounts.deleteAll();
@@ -164,6 +165,25 @@ class GuestControllerTest {
 		assertThat(reduced.plannedAttendeeCount()).isEqualTo(1);
 		assertThat(reduced.updateSource()).isEqualTo(RsvpUpdateSource.ADMIN);
 		assertThat(reduced.version()).isGreaterThan(rsvp.version());
+	}
+
+	@Test
+	void privateOrganizerNoteIsEscapedOnAdminDetailAndUnavailableToStaff() throws Exception {
+		jdbc.update("update wedding_settings set private_organizer_note_enabled = true where id = 1");
+		Guest guest = service.create(form("Private Note Guest", "081234567897"), false);
+		rsvps.submitGuest(guest.getId(), -1,
+				new RsvpSubmission(AttendanceResponse.HADIR, 1, null, false,
+						"<script>private-organizer-note</script>"));
+
+		mockMvc.perform(get("/admin/guests/{id}", guest.getId()).session(adminSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Private organizer note")))
+				.andExpect(content().string(containsString("&lt;script&gt;private-organizer-note&lt;/script&gt;")))
+				.andExpect(content().string(not(containsString("<script>private-organizer-note</script>"))));
+
+		mockMvc.perform(get("/admin/guests/{id}", guest.getId()).session(staffSession))
+				.andExpect(status().isForbidden())
+				.andExpect(content().string(not(containsString("private-organizer-note"))));
 	}
 
 	@Test

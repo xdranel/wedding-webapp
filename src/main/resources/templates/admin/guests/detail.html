@@ -22,6 +22,8 @@
       <dt>Planned attendees</dt><dd th:text="${rsvp.plannedAttendeeCount}">1</dd>
       <dt>Updated by</dt><dd th:text="${rsvp.updateSource}">GUEST</dd>
       <dt>Updated at</dt><dd th:text="${rsvp.updatedAt}">Time</dd>
+      <dt th:if="${!#strings.isEmpty(rsvp.privateOrganizerNote)}">Private organizer note</dt>
+      <dd th:if="${!#strings.isEmpty(rsvp.privateOrganizerNote)}" th:text="${rsvp.privateOrganizerNote}">Private note</dd>
     </dl>
     <p th:if="${!guest.archived}"><a th:href="@{/admin/guests/{id}/rsvp(id=${guest.id})}">Edit RSVP</a></p>
   </section>

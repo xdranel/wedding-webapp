@@ -19,6 +19,7 @@ public interface RsvpRepository extends JpaRepository<Rsvp, Long> {
     @EntityGraph(attributePaths = "guest")
     Page<Rsvp> findByGreetingModerationStateAndGreetingPublicConsentTrueAndGreetingIsNotNull(
             GreetingModerationState state, Pageable pageable);
+	@EntityGraph(attributePaths = "guest")
 	Page<Rsvp> findByGreetingModerationStateAndGreetingPublicConsentTrueAndGreetingIsNotNullAndGuestArchivedFalse(
 			GreetingModerationState state, Pageable pageable);
     long countByResponse(AttendanceResponse response);

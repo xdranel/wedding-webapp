@@ -4,6 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Instant;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import myweddinginvitation.webapp.rsvp.AttendanceResponse;
@@ -16,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootTest(properties = {
 		"app.bootstrap-admin.username=test-admin",
@@ -34,6 +44,9 @@ class GuestServiceTest {
 
 	@Autowired
 	JdbcTemplate jdbc;
+
+	@Autowired
+	PlatformTransactionManager transactions;
 
 	@BeforeEach
 	void clearGuests() {
@@ -141,6 +154,48 @@ class GuestServiceTest {
 				form("Sari", "081234567890"), false))
 				.isInstanceOf(IllegalStateException.class)
 				.hasMessageContaining("planned attendance");
+
+		assertThat(guests.findById(guest.getId())).get().extracting(Guest::isPlusOneAllowed).isEqualTo(true);
+		assertThat(rsvps.view(guest.getId())).get().extracting(RsvpView::plannedAttendeeCount).isEqualTo(2);
+	}
+
+	@Test
+	void concurrentAllowanceDisableAndPublicRsvpWriteCannotPersistTwoPeopleWithoutPlusOne() throws Exception {
+		Guest guest = service.create(new GuestForm("Sari", "Ibu", "ID", "081234567890",
+				null, true, MessageLanguage.ID, null), false);
+		RsvpView initial = rsvps.submitGuest(guest.getId(), -1,
+				new RsvpSubmission(AttendanceResponse.HADIR, 1, null, false, null));
+		CountDownLatch publicWriteStarted = new CountDownLatch(1);
+		try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
+			AtomicReference<Future<RsvpView>> publicWrite = new AtomicReference<>();
+			AtomicReference<Future<Guest>> allowanceDisable = new AtomicReference<>();
+			new TransactionTemplate(transactions).executeWithoutResult(status -> {
+				jdbc.queryForObject("select id from rsvp where guest_id = ? for update",
+						Long.class, guest.getId());
+				publicWrite.set(executor.submit(() -> {
+					publicWriteStarted.countDown();
+					return rsvps.submitGuest(guest.getId(), initial.version(),
+							new RsvpSubmission(AttendanceResponse.HADIR, 2, null, false, null));
+				}));
+				try {
+					assertThat(publicWriteStarted.await(1, TimeUnit.SECONDS)).isTrue();
+					assertThatThrownBy(() -> publicWrite.get().get(1, TimeUnit.SECONDS))
+							.isInstanceOf(TimeoutException.class);
+					allowanceDisable.set(executor.submit(() -> service.update(guest.getId(), guest.getVersion(),
+							form("Sari", "081234567890"), false, false, "test-admin")));
+					assertThatThrownBy(() -> allowanceDisable.get().get(1, TimeUnit.SECONDS))
+							.isInstanceOf(TimeoutException.class);
+				} catch (InterruptedException exception) {
+					Thread.currentThread().interrupt();
+					throw new IllegalStateException(exception);
+				}
+			});
+
+			assertThat(publicWrite.get().get(5, TimeUnit.SECONDS).plannedAttendeeCount()).isEqualTo(2);
+			assertThatThrownBy(() -> allowanceDisable.get().get(5, TimeUnit.SECONDS))
+					.isInstanceOf(ExecutionException.class)
+					.hasRootCauseInstanceOf(GuestService.PlannedAttendanceReductionRequiredException.class);
+		}
 
 		assertThat(guests.findById(guest.getId())).get().extracting(Guest::isPlusOneAllowed).isEqualTo(true);
 		assertThat(rsvps.view(guest.getId())).get().extracting(RsvpView::plannedAttendeeCount).isEqualTo(2);

@@ -15,6 +15,10 @@ public interface GuestRepository extends JpaRepository<Guest, Long>, JpaSpecific
 	Optional<Guest> findByPublicId(UUID publicId);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("select g from Guest g where g.id = :id")
+	Optional<Guest> findByIdForUpdate(@Param("id") long id);
+
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("select g from Guest g where g.publicId = :publicId")
 	Optional<Guest> findByPublicIdForUpdate(@Param("publicId") UUID publicId);
 

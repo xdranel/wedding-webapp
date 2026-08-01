@@ -57,7 +57,7 @@ public class GuestService {
 	@Transactional
 	public Guest update(long id, long version, GuestForm form, boolean acceptDuplicate,
 			boolean reducePlannedAttendance, String username) {
-		Guest guest = guest(id);
+		Guest guest = guests.findByIdForUpdate(id).orElseThrow(NoSuchElementException::new);
 		requireVersion(guest, version);
 		String normalizedNumber = numbers.normalize(form.whatsappNumber(), form.phoneRegion());
 		requireDuplicateAccepted(!normalizedNumber.equals(guest.getNormalizedWhatsappNumber())

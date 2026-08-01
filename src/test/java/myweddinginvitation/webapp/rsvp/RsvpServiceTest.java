@@ -7,6 +7,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 
+import jakarta.persistence.EntityManagerFactory;
+
 import myweddinginvitation.webapp.guest.Guest;
 import myweddinginvitation.webapp.guest.GuestForm;
 import myweddinginvitation.webapp.guest.GuestRepository;
@@ -15,6 +17,7 @@ import myweddinginvitation.webapp.guest.MessageLanguage;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -27,7 +30,8 @@ import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(properties = {
 		"app.bootstrap-admin.username=test-admin",
-		"app.bootstrap-admin.password=Test-Only-Password-2026"
+		"app.bootstrap-admin.password=Test-Only-Password-2026",
+		"spring.jpa.properties.hibernate.generate_statistics=true"
 })
 @Import({MySqlTestConfiguration.class, RsvpServiceTest.FixedClockConfig.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
@@ -38,6 +42,7 @@ class RsvpServiceTest {
 	@Autowired GuestService guestService;
 	@Autowired GuestRepository guests;
 	@Autowired JdbcTemplate jdbc;
+	@Autowired EntityManagerFactory entityManagerFactory;
 
 	private int phoneSuffix;
 
@@ -234,6 +239,21 @@ class RsvpServiceTest {
 		guestService.archive(archived.getId(), archived.getVersion());
 
 		assertThat(service.summary()).isEqualTo(new RsvpSummary(1, 1, 1, 2, 1));
+	}
+
+	@Test
+	void approvedGreetingPageFetchesGuestDisplayNamesWithoutPerGreetingQueries() {
+		for (int index = 1; index <= 3; index++) {
+			Guest guest = guest("Ucapan " + index, false);
+			RsvpView rsvp = submitGreeting(guest, -1, "Selamat " + index, true);
+			service.approveGreeting(rsvp.id(), rsvp.version());
+		}
+		var statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
+		statistics.clear();
+
+		assertThat(service.approvedGreetings(0).getContent()).hasSize(3);
+
+		assertThat(statistics.getPrepareStatementCount()).isLessThanOrEqualTo(2);
 	}
 
 	private RsvpView submitGreeting(Guest guest, long version, String greeting, boolean consent) {

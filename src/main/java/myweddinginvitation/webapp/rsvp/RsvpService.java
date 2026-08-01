@@ -116,7 +116,7 @@ public class RsvpService {
 
 	private RsvpView write(long guestId, long version, RsvpSubmission submission,
 			WeddingSettings wedding, UserAccount account) {
-		Guest guest = guests.findById(guestId).orElseThrow(NoSuchElementException::new);
+		Guest guest = guests.findByIdForUpdate(guestId).orElseThrow(NoSuchElementException::new);
 		if (guest.isArchived()) throw new IllegalStateException("RSVP is unavailable for archived guests.");
 		if (submission == null || submission.response() == null) {
 			throw new IllegalArgumentException("Attendance response is required.");
