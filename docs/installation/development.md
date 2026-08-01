@@ -57,6 +57,12 @@ An upload is limited to 2 MiB and 2,000 rows. Preview before confirmation;
 warnings need explicit acceptance, while any error blocks the transaction, so
 no rows are imported.
 
+For individual guest forms, select the country that applies to a
+national-format WhatsApp number. A number beginning with `+` is international
+and overrides the selector. CSV keeps its seven columns: international numbers
+should begin with `+`, while national-format rows use `Default phone country`.
+The database and CSV export use canonical E.164 numbers.
+
 `Open WhatsApp` creates only a redirect to a prefilled WhatsApp message.
 `Confirm sent` is the separate manual action that stores the first and latest
 send timestamps. Public `/i/...` invitations are read-only; unavailable links

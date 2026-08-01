@@ -65,6 +65,7 @@ class GuestCsvControllerTest {
 	void setUp() throws Exception {
 		jdbc.update("delete from guest");
 		jdbc.update("delete from guest_category");
+		jdbc.update("update wedding_settings set default_phone_country = 'ID' where id = 1");
 		jdbc.update("insert into guest_category (display_name, normalized_name) values ('Keluarga', 'keluarga')");
 		accounts.deleteAll();
 		accounts.save(new UserAccount("admin", "{noop}" + PASSWORD, AccountRole.ADMIN));

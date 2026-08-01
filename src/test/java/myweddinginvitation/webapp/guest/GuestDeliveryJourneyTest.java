@@ -66,6 +66,7 @@ class GuestDeliveryJourneyTest {
 	void setUp() throws Exception {
 		jdbc.update("delete from guest");
 		jdbc.update("delete from guest_category");
+		jdbc.update("update wedding_settings set default_phone_country = 'ID' where id = 1");
 		resetWeddingContent();
 		accounts.deleteAll();
 		accounts.save(new UserAccount("admin", "{noop}" + PASSWORD, AccountRole.ADMIN));

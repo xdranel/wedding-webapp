@@ -1,6 +1,6 @@
 # International WhatsApp Input Design
 
-**Status:** Approved design, pending implementation plan
+**Status:** Implemented; manual acceptance pending
 
 ## Context
 
@@ -114,3 +114,6 @@ international E.164 values.
 - Existing E.164 numbers and CSV files remain compatible.
 - No database migration or new dependency is introduced.
 - All normalized, duplicate-warning, CSV, and delivery tests pass.
+
+Manual acceptance remains pending: an administrator must exercise the form and
+WhatsApp links in a running deployment before release.

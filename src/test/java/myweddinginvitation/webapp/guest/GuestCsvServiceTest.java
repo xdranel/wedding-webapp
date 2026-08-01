@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.ByteArrayOutputStream;
 
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,6 +33,11 @@ class GuestCsvServiceTest {
 		jdbc.update("delete from guest");
 		jdbc.update("delete from guest_category");
 		jdbc.update("insert into guest_category (display_name, normalized_name) values ('Keluarga', 'keluarga')");
+	}
+
+	@AfterEach
+	void resetPhoneCountry() {
+		jdbc.update("update wedding_settings set default_phone_country = 'ID' where id = 1");
 	}
 
 	@ParameterizedTest
@@ -99,6 +105,34 @@ class GuestCsvServiceTest {
 				.contains("archive_state,archived_at,delivery_state,first_sent_at,last_sent_at,created_at,updated_at")
 				.doesNotContain("signing-secret");
 		assertThat(active.getId()).isNotNull();
+	}
+
+	@Test
+	void internationalCsvNumberIgnoresWeddingDefaultAndExportStaysE164() throws Exception {
+		jdbc.update("update wedding_settings set default_phone_country = 'ID' where id = 1");
+		GuestCsvPreview preview = service.preview((header()
+				+ "Ada,+49 1512 3456789,Frau,,false,EN,\n").getBytes(UTF_8));
+
+		assertThat(preview.hasErrors()).isFalse();
+		service.importAll(preview);
+		assertThat(guests.findAll()).singleElement()
+				.extracting(Guest::getNormalizedWhatsappNumber)
+				.isEqualTo("+4915123456789");
+
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		service.exportAll(output);
+		assertThat(output.toString(UTF_8)).contains("+4915123456789");
+	}
+
+	@Test
+	void nationalCsvNumberStillUsesWeddingDefault() {
+		jdbc.update("update wedding_settings set default_phone_country = 'DE' where id = 1");
+		GuestCsvPreview preview = service.preview((header()
+				+ "Ada,01512 3456789,Frau,,false,EN,\n").getBytes(UTF_8));
+
+		assertThat(preview.rows()).singleElement()
+				.extracting(GuestCsvRow::normalizedWhatsappNumber)
+				.isEqualTo("+4915123456789");
 	}
 
 	private byte[] csv(String... rows) {

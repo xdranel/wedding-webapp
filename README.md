@@ -43,6 +43,10 @@ comma or semicolon delimiters, and exactly these columns:
 `display_name, whatsapp_number, salutation, category, plus_one_allowed,
 preferred_language, internal_note`. Files are limited to 2 MiB and 2,000 rows;
 every row is validated before the atomic import, so one error imports nothing.
+For the guest form, choose a country for national-format numbers; a number
+starting with `+` takes precedence over that selector. In CSV, international
+numbers should start with `+`, while national-format numbers use the wedding
+default country. Stored and exported numbers are always E.164.
 
 Opening WhatsApp only opens a prefilled message; it does not record delivery.
 Use **Confirm sent** after sending to record the timestamps. A public signed

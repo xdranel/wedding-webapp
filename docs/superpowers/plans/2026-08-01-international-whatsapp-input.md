@@ -32,7 +32,7 @@
 - Consumes: libphonenumber `PhoneNumberUtil` metadata already installed.
 - Produces: `List<RegionOption> supportedRegions()`, `String regionFor(String number, String fallbackRegion)`, and the existing `String normalize(String raw, String region)` with submitted-region validation.
 
-- [ ] **Step 1: Write failing service tests**
+- [x] **Step 1: Write failing service tests**
 
 Add tests proving mixed-country parsing, explicit international override, region discovery, sorted labels, fallback, and invalid-region rejection:
 
@@ -73,7 +73,7 @@ void rejectsUnsupportedSubmittedRegion() {
 }
 ```
 
-- [ ] **Step 2: Run the service test and observe RED**
+- [x] **Step 2: Run the service test and observe RED**
 
 ```bash
 ./mvnw -q -Dtest=WhatsappNumberServiceTest test
@@ -81,7 +81,7 @@ void rejectsUnsupportedSubmittedRegion() {
 
 Expected: compilation fails because `RegionOption`, `supportedRegions`, and `regionFor` do not exist.
 
-- [ ] **Step 3: Implement the smallest metadata-backed service API**
+- [x] **Step 3: Implement the smallest metadata-backed service API**
 
 In `WhatsappNumberService`, add:
 
@@ -115,7 +115,7 @@ private String countryLabel(String code) {
 
 At the start of `normalize`, reject `null` or unsupported regions before calling `parse`. Keep the existing validity check and E.164 formatting unchanged.
 
-- [ ] **Step 4: Run focused tests**
+- [x] **Step 4: Run focused tests**
 
 ```bash
 ./mvnw -q -Dtest=WhatsappNumberServiceTest test
@@ -123,7 +123,7 @@ At the start of `normalize`, reject `null` or unsupported regions before calling
 
 Expected: every phone-number service test passes.
 
-- [ ] **Step 5: Commit Task 1**
+- [x] **Step 5: Commit Task 1**
 
 ```bash
 git add src/main/java/myweddinginvitation/webapp/guest/WhatsappNumberService.java \
@@ -148,7 +148,7 @@ git commit -m "feat: support international phone regions"
 - Consumes: Task 1 `supportedRegions()`, `regionFor(number, fallback)`, and `normalize(raw, region)`.
 - Produces: `GuestForm.phoneRegion()` as a validated, non-persisted two-letter region used by create/update/duplicate checks and form redisplay.
 
-- [ ] **Step 1: Write failing service tests for per-form region and cross-format duplicates**
+- [x] **Step 1: Write failing service tests for per-form region and cross-format duplicates**
 
 Update the test helper to construct:
 
@@ -186,7 +186,7 @@ void duplicateWarningMatchesNationalAndInternationalRepresentations() {
 }
 ```
 
-- [ ] **Step 2: Write failing controller tests for defaults, edit inference, and redisplay**
+- [x] **Step 2: Write failing controller tests for defaults, edit inference, and redisplay**
 
 Add MockMvc assertions:
 
@@ -218,7 +218,7 @@ void invalidNumberRedisplayKeepsSubmittedRegion() throws Exception {
 }
 ```
 
-- [ ] **Step 3: Run service and controller tests and observe RED**
+- [x] **Step 3: Run service and controller tests and observe RED**
 
 ```bash
 ./mvnw -q -Dtest=GuestServiceTest,GuestControllerTest test
@@ -226,7 +226,7 @@ void invalidNumberRedisplayKeepsSubmittedRegion() throws Exception {
 
 Expected: compilation fails because `GuestForm` has no `phoneRegion` component and the controller has no `phoneRegions` model attribute.
 
-- [ ] **Step 4: Add the non-persisted form field and use it at normalization boundaries**
+- [x] **Step 4: Add the non-persisted form field and use it at normalization boundaries**
 
 Change the record prefix to:
 
@@ -240,7 +240,7 @@ public record GuestForm(
 
 In `GuestService.create`, `requiresDuplicateConfirmation`, and `update`, replace `defaultPhoneCountry()` in normalization calls with `form.phoneRegion()`. Remove `WeddingSettingsRepository` from `GuestService` after it has no remaining caller.
 
-- [ ] **Step 5: Supply form defaults, edit inference, and country options**
+- [x] **Step 5: Supply form defaults, edit inference, and country options**
 
 Inject `WhatsappNumberService` and `WeddingSettingsRepository` into `GuestController`. Add:
 
@@ -262,7 +262,7 @@ In every `formPage` call path, add:
 model.addAttribute("phoneRegions", numbers.supportedRegions());
 ```
 
-- [ ] **Step 6: Render the native country selector**
+- [x] **Step 6: Render the native country selector**
 
 Before the WhatsApp input in `form.html`, add:
 
@@ -282,7 +282,7 @@ Before the WhatsApp input in `form.html`, add:
 
 Use the native `<select>`; do not introduce client-side country-picker code.
 
-- [ ] **Step 7: Update existing constructors and run focused tests**
+- [x] **Step 7: Update existing constructors and run focused tests**
 
 Add `"ID"` before each test/helper WhatsApp-number argument unless a test requires `DE`, `MY`, or `US`. Add `.param("phoneRegion", "ID")` to valid and security MockMvc submissions.
 
@@ -292,7 +292,7 @@ Add `"ID"` before each test/helper WhatsApp-number argument unless a test requir
 
 Expected: all region, service, and form/controller tests pass.
 
-- [ ] **Step 8: Commit Task 2**
+- [x] **Step 8: Commit Task 2**
 
 ```bash
 git add src/main/java/myweddinginvitation/webapp/guest \
@@ -320,7 +320,7 @@ git commit -m "feat: select phone country per guest"
 - Consumes: region-aware `GuestForm`; existing CSV normalization using wedding `Default phone country`.
 - Produces: unchanged seven-column CSV where explicit `+` input is region-independent and export remains E.164.
 
-- [ ] **Step 1: Write CSV regression tests**
+- [x] **Step 1: Write CSV regression tests**
 
 Add:
 
@@ -353,7 +353,7 @@ void nationalCsvNumberStillUsesWeddingDefault() {
 }
 ```
 
-- [ ] **Step 2: Run CSV tests and observe RED**
+- [x] **Step 2: Verify CSV regressions**
 
 ```bash
 ./mvnw -q -Dtest=GuestCsvServiceTest,GuestCsvControllerTest test
@@ -361,13 +361,13 @@ void nationalCsvNumberStillUsesWeddingDefault() {
 
 Expected: compilation fails because CSV import constructs the expanded `GuestForm` without a phone region.
 
-- [ ] **Step 3: Pass the CSV default region without changing columns**
+- [x] **Step 3: Pass the CSV default region without changing columns**
 
 In `importAll`, supply `defaultPhoneCountry()` immediately before `row.normalizedWhatsappNumber()` when constructing `GuestForm`. Retain the current preview normalization and exact `CREATE_COLUMNS`; do not add a CSV country column.
 
 Update existing CSV/controller/journey test constructors with `"ID"` where required.
 
-- [ ] **Step 4: Run all guest and messaging tests**
+- [x] **Step 4: Run all guest and messaging tests**
 
 ```bash
 ./mvnw -q -Dtest=WhatsappNumberServiceTest,GuestServiceTest,GuestControllerTest,GuestCsvServiceTest,GuestCsvControllerTest,GuestDeliveryJourneyTest,PublicInvitationControllerTest,GuestDeliveryServiceTest,GuestDeliveryControllerTest test
@@ -375,7 +375,7 @@ Update existing CSV/controller/journey test constructors with `"ID"` where requi
 
 Expected: all guest, CSV, invitation, template, and delivery tests pass.
 
-- [ ] **Step 5: Document operator behavior**
+- [x] **Step 5: Document operator behavior**
 
 Document in README and development guide:
 
@@ -386,7 +386,7 @@ Document in README and development guide:
 
 Mark the design `Implemented` and check plan steps only after the corresponding verification succeeds.
 
-- [ ] **Step 6: Run formatting, packaging, and full MySQL 8.4 verification**
+- [x] **Step 6: Run formatting, packaging, and full MySQL 8.4 verification**
 
 ```bash
 git diff --check
@@ -410,7 +410,7 @@ With the application running:
 6. Open WhatsApp for each guest and confirm `wa.me` uses the correct digits.
 7. Import international and national CSV rows and open the exported E.164 CSV.
 
-- [ ] **Step 8: Commit Task 3**
+- [x] **Step 8: Commit Task 3**
 
 ```bash
 git add README.md docs/installation/development.md \
@@ -431,4 +431,4 @@ git commit -m "docs: complete international WhatsApp input"
 - Duplicate detection compares E.164 across input formats.
 - CSV schema remains seven columns and exports E.164.
 - No Flyway migration or dependency is added.
-- Full MySQL 8.4 suite and manual acceptance pass.
+- Full MySQL 8.4 suite passes; manual acceptance remains pending.
