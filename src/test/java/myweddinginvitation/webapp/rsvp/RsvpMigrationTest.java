@@ -18,12 +18,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(properties = {
 		"app.bootstrap-admin.username=test-admin",
 		"app.bootstrap-admin.password=Test-Only-Password-2026"
 })
 @Import(MySqlTestConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class RsvpMigrationTest {
 	@Autowired
 	JdbcTemplate jdbc;
@@ -41,10 +43,6 @@ class RsvpMigrationTest {
 	void clearRsvpsAndGuests() {
 		jdbc.update("delete from rsvp");
 		jdbc.update("delete from guest");
-		jdbc.update("""
-				update wedding_settings set event_closed = false, greetings_enabled = true,
-				private_organizer_note_enabled = false where id = 1
-				""");
 	}
 
 	@Test
@@ -61,6 +59,21 @@ class RsvpMigrationTest {
 				.containsEntry("event_closed", false)
 				.containsEntry("greetings_enabled", true)
 				.containsEntry("private_organizer_note_enabled", false);
+		assertThat(jdbc.queryForObject("""
+				select column_default from information_schema.columns
+				where table_schema = database() and table_name = 'wedding_settings'
+				and column_name = 'event_closed'
+				""", String.class)).isEqualTo("0");
+		assertThat(jdbc.queryForObject("""
+				select column_default from information_schema.columns
+				where table_schema = database() and table_name = 'wedding_settings'
+				and column_name = 'greetings_enabled'
+				""", String.class)).isEqualTo("1");
+		assertThat(jdbc.queryForObject("""
+				select column_default from information_schema.columns
+				where table_schema = database() and table_name = 'wedding_settings'
+				and column_name = 'private_organizer_note_enabled'
+				""", String.class)).isEqualTo("0");
 	}
 
 	@Test
@@ -74,8 +87,11 @@ class RsvpMigrationTest {
 		assertThat(saved.getVersion()).isZero();
 
 		saved.update(AttendanceResponse.HADIR, 2, "Selamat", true,
-				GreetingModerationState.PENDING, null, RsvpUpdateSource.GUEST, null);
+				GreetingModerationState.PENDING, null, RsvpUpdateSource.ADMIN, null);
 		assertThat(rsvps.saveAndFlush(saved).getVersion()).isEqualTo(1);
+		assertThat(saved.getUpdateSource()).isEqualTo(RsvpUpdateSource.ADMIN);
+		assertThat(jdbc.queryForObject("select update_source from rsvp where id = ?", String.class, saved.getId()))
+				.isEqualTo("ADMIN");
 		assertThatThrownBy(() -> jdbc.update("""
 				insert into rsvp (guest_id, response, planned_attendee_count, greeting_public_consent,
 				                  greeting_moderation_state, update_source)

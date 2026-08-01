@@ -64,7 +64,7 @@
         <p id="font-preset-error" th:if="${#fields.hasErrors('fontPreset')}" th:errors="*{fontPreset}">Font preset
             error</p>
         <input id="event-closed" type="checkbox" th:field="*{eventClosed}">
-        <label for="event-closed">Close RSVP submissions</label>
+        <label for="event-closed">Close the event: guest RSVP and QR access are disabled</label>
         <input id="greetings-enabled" type="checkbox" th:field="*{greetingsEnabled}">
         <label for="greetings-enabled">Enable greetings</label>
         <input id="private-organizer-note-enabled" type="checkbox" th:field="*{privateOrganizerNoteEnabled}">

@@ -99,6 +99,13 @@ class WeddingContentControllerTest {
 	}
 
 	@Test
+	void eventClosureExplainsThatRsvpAndQrGuestAccessAreDisabled() throws Exception {
+		mockMvc.perform(get("/admin/wedding/settings").session(adminSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Close the event: guest RSVP and QR access are disabled")));
+	}
+
+	@Test
 	void staffCannotChangeWeddingSettings() throws Exception {
 		mockMvc.perform(post("/admin/wedding/settings")
 				.session(staffSession)
