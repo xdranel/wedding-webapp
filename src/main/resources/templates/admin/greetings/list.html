@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Greeting moderation</title>
+</head>
+<body>
+<main>
+  <h1>Greeting moderation</h1>
+  <p><a th:href="@{/admin}">Back to administrator home</a></p>
+  <p th:if="${greetingError}" th:text="${greetingError}" role="alert">Greeting error</p>
+  <nav aria-label="Greeting state">
+    <a th:href="@{/admin/greetings(state='PENDING')}">Pending</a>
+    <a th:href="@{/admin/greetings(state='APPROVED')}">Approved</a>
+    <a th:href="@{/admin/greetings(state='HIDDEN')}">Hidden</a>
+  </nav>
+  <p th:if="${page.empty}">No greetings found.</p>
+  <table th:unless="${page.empty}">
+    <thead><tr><th>Guest</th><th>Greeting</th><th>State</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr th:each="greeting : ${page.content}">
+        <td th:text="${greeting.displayName}">Guest</td>
+        <td th:text="${greeting.greeting}">Greeting</td>
+        <td th:text="${greeting.moderationState}">PENDING</td>
+        <td>
+          <form th:if="${greeting.moderationState != T(myweddinginvitation.webapp.rsvp.GreetingModerationState).APPROVED}"
+                method="post" th:action="@{/admin/greetings/{id}/approve(id=${greeting.id})}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="version" th:value="${greeting.version}">
+            <button type="submit">Approve</button>
+          </form>
+          <form th:if="${greeting.moderationState != T(myweddinginvitation.webapp.rsvp.GreetingModerationState).HIDDEN}"
+                method="post" th:action="@{/admin/greetings/{id}/hide(id=${greeting.id})}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="version" th:value="${greeting.version}">
+            <button type="submit">Hide</button>
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p th:if="${page.hasPrevious()}"><a th:href="@{/admin/greetings(state=${state},page=${page.number - 1})}">Previous</a></p>
+  <p th:if="${page.hasNext()}"><a th:href="@{/admin/greetings(state=${state},page=${page.number + 1})}">Next</a></p>
+</main>
+</body>
+</html>

@@ -25,6 +25,17 @@
         <label for="guest-search">Search guests</label>
         <input id="guest-search" type="search" placeholder="Search by guest name">
     </section>
+    <section id="rsvp-summary">
+        <h2>RSVP summary</h2>
+        <dl>
+            <dt>Accepted invitations</dt><dd th:text="${rsvpSummary.hadir}">0</dd>
+            <dt>Declined invitations</dt><dd th:text="${rsvpSummary.tidakHadir}">0</dd>
+            <dt>No RSVP</dt><dd th:text="${rsvpSummary.noRsvp}">0</dd>
+            <dt>Planned people</dt><dd th:text="${rsvpSummary.plannedPeople}">0</dd>
+            <dt>Pending greetings</dt><dd th:text="${rsvpSummary.pendingGreetings}">0</dd>
+        </dl>
+        <p><a th:href="@{/admin/greetings}">Moderate greetings</a></p>
+    </section>
     <section id="settings">
         <h2>Wedding settings</h2>
         <p><a th:href="@{/admin/wedding}">Manage wedding content</a></p>

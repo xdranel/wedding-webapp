@@ -13,9 +13,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import myweddinginvitation.webapp.rsvp.Rsvp;
+import myweddinginvitation.webapp.rsvp.RsvpRepository;
 import myweddinginvitation.webapp.wedding.WeddingSettingsRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -50,7 +54,15 @@ public class GuestCsvService {
 			"first_sent_at",
 			"last_sent_at",
 			"created_at",
-			"updated_at"
+			"updated_at",
+			"rsvp_status",
+			"planned_attendee_count",
+			"greeting",
+			"greeting_public_consent",
+			"greeting_moderation_status",
+			"private_organizer_note",
+			"rsvp_updated_by",
+			"rsvp_updated_at"
 	};
 
 	private final GuestRepository guests;
@@ -58,14 +70,16 @@ public class GuestCsvService {
 	private final GuestService guestService;
 	private final WhatsappNumberService numbers;
 	private final WeddingSettingsRepository settings;
+	private final RsvpRepository rsvps;
 
 	public GuestCsvService(GuestRepository guests, GuestCategoryRepository categories, GuestService guestService,
-			WhatsappNumberService numbers, WeddingSettingsRepository settings) {
+			WhatsappNumberService numbers, WeddingSettingsRepository settings, RsvpRepository rsvps) {
 		this.guests = guests;
 		this.categories = categories;
 		this.guestService = guestService;
 		this.numbers = numbers;
 		this.settings = settings;
+		this.rsvps = rsvps;
 	}
 
 	@Transactional(readOnly = true)
@@ -107,10 +121,13 @@ public class GuestCsvService {
 
 	@Transactional(readOnly = true)
 	public void exportAll(OutputStream output) throws IOException {
+		List<Guest> allGuests = guests.findAllByOrderByDisplayNameAscIdAsc();
+		Map<Long, Rsvp> rsvpByGuest = rsvps.findByGuestIdIn(allGuests.stream().map(Guest::getId).toList()).stream()
+				.collect(Collectors.toMap(rsvp -> rsvp.getGuest().getId(), rsvp -> rsvp));
 		try (Writer writer = utf8BomWriter(output);
 				CSVPrinter printer = new CSVPrinter(writer, outputFormat(EXPORT_COLUMNS))) {
-			for (Guest guest : guests.findAllByOrderByDisplayNameAscIdAsc()) {
-				printer.printRecord(
+			for (Guest guest : allGuests) {
+				List<Object> row = new ArrayList<>(List.of(
 						spreadsheetText(guest.getDisplayName()),
 						guest.getNormalizedWhatsappNumber(),
 						spreadsheetText(guest.getSalutation()),
@@ -124,7 +141,22 @@ public class GuestCsvService {
 						blankIfNull(guest.getFirstSentAt()),
 						blankIfNull(guest.getLastSentAt()),
 						guest.getCreatedAt(),
-						guest.getUpdatedAt());
+						guest.getUpdatedAt()));
+				Rsvp rsvp = rsvpByGuest.get(guest.getId());
+				if (rsvp == null) {
+					row.addAll(List.of("", "", "", "", "", "", "", ""));
+				} else {
+					row.addAll(List.of(
+							rsvp.getResponse(),
+							rsvp.getPlannedAttendeeCount(),
+							spreadsheetText(rsvp.getGreeting()),
+							rsvp.isGreetingPublicConsent(),
+							rsvp.getGreetingModerationState(),
+							spreadsheetText(rsvp.getPrivateOrganizerNote()),
+							rsvp.getUpdateSource(),
+							rsvp.getUpdatedAt()));
+				}
+				printer.printRecord(row);
 			}
 		}
 	}

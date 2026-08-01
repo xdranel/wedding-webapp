@@ -94,6 +94,16 @@ public class RsvpService {
 	}
 
 	@Transactional(readOnly = true)
+	public Page<GreetingModerationView> moderation(GreetingModerationState state, int page) {
+		return rsvps.findByGreetingModerationStateAndGreetingPublicConsentTrueAndGreetingIsNotNull(
+				state, PageRequest.of(Math.max(0, page), 50,
+						Sort.by(Sort.Direction.DESC, "updatedAt", "id")))
+				.map(rsvp -> new GreetingModerationView(rsvp.getId(), rsvp.getVersion(),
+						rsvp.getGuest().getDisplayName(), rsvp.getGreeting(),
+						rsvp.getGreetingModerationState(), rsvp.getUpdatedAt()));
+	}
+
+	@Transactional(readOnly = true)
 	public Page<PublicGreetingView> approvedGreetings(int page) {
 		WeddingSettings wedding = settings.getSingleton().orElseThrow();
 		ZoneId zone = ZoneId.of(wedding.getTimeZone());
@@ -196,5 +206,9 @@ public class RsvpService {
 				rsvp.getPlannedAttendeeCount(), rsvp.getGreeting(), rsvp.isGreetingPublicConsent(),
 				rsvp.getGreetingModerationState(), rsvp.getPrivateOrganizerNote(), rsvp.getUpdateSource(),
 				rsvp.getUpdatedAt());
+	}
+
+	public record GreetingModerationView(Long id, long version, String displayName, String greeting,
+			GreetingModerationState moderationState, Instant updatedAt) {
 	}
 }

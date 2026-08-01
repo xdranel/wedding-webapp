@@ -5,8 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
+import java.util.List;
 
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -109,6 +114,63 @@ class GuestCsvServiceTest {
 	}
 
 	@Test
+	void exportAppendsRsvpFieldsAndNeutralizesWrittenContent() throws Exception {
+		Guest attending = guestsService.create(new GuestForm("Attending", "Ibu", "ID", "081234567890",
+				null, true, MessageLanguage.ID, null), false);
+		Guest declined = guestsService.create(new GuestForm("Declined", "Bapak", "ID", "081234567891",
+				null, false, MessageLanguage.EN, null), false);
+		guestsService.create(new GuestForm("No RSVP", "Saudara", "ID", "081234567892",
+				null, false, MessageLanguage.ID, null), false);
+		jdbc.update("""
+				insert into rsvp (guest_id, response, planned_attendee_count, greeting,
+				    greeting_public_consent, greeting_moderation_state, private_organizer_note,
+				    update_source, created_at, updated_at)
+				values (?, 'HADIR', 2, '=greeting', true, 'APPROVED', '+private note',
+				    'ADMIN', '2026-08-01 00:00:00', '2026-08-01 00:00:00')
+				""", attending.getId());
+		jdbc.update("""
+				insert into rsvp (guest_id, response, planned_attendee_count, greeting,
+				    greeting_public_consent, greeting_moderation_state, private_organizer_note,
+				    update_source, created_at, updated_at)
+				values (?, 'TIDAK_HADIR', 0, '-greeting', false, 'HIDDEN', '@private note',
+				    'GUEST', '2026-08-01 01:00:00', '2026-08-01 01:00:00')
+				""", declined.getId());
+
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		service.exportAll(output);
+		try (CSVParser parser = CSVFormat.RFC4180.builder().setHeader().setSkipHeaderRecord(true).get()
+				.parse(new StringReader(output.toString(UTF_8).substring(1)))) {
+			assertThat(parser.getHeaderNames()).containsExactly(
+					"display_name", "whatsapp_number", "salutation", "category", "plus_one_allowed",
+					"preferred_language", "internal_note", "archive_state", "archived_at", "delivery_state",
+					"first_sent_at", "last_sent_at", "created_at", "updated_at",
+					"rsvp_status", "planned_attendee_count", "greeting", "greeting_public_consent",
+					"greeting_moderation_status", "private_organizer_note", "rsvp_updated_by", "rsvp_updated_at");
+			List<CSVRecord> records = parser.getRecords();
+			CSVRecord attendingRow = row(records, "Attending");
+			assertThat(attendingRow.get("rsvp_status")).isEqualTo("HADIR");
+			assertThat(attendingRow.get("planned_attendee_count")).isEqualTo("2");
+			assertThat(attendingRow.get("greeting")).isEqualTo("'=greeting");
+			assertThat(attendingRow.get("greeting_public_consent")).isEqualTo("true");
+			assertThat(attendingRow.get("greeting_moderation_status")).isEqualTo("APPROVED");
+			assertThat(attendingRow.get("private_organizer_note")).isEqualTo("'+private note");
+			assertThat(attendingRow.get("rsvp_updated_by")).isEqualTo("ADMIN");
+			assertThat(attendingRow.get("rsvp_updated_at")).isEqualTo("2026-08-01T00:00:00Z");
+
+			CSVRecord declinedRow = row(records, "Declined");
+			assertThat(declinedRow.get("greeting")).isEqualTo("'-greeting");
+			assertThat(declinedRow.get("private_organizer_note")).isEqualTo("'@private note");
+			assertThat(declinedRow.get("rsvp_updated_by")).isEqualTo("GUEST");
+
+			CSVRecord blankRow = row(records, "No RSVP");
+			assertThat(List.of("rsvp_status", "planned_attendee_count", "greeting",
+					"greeting_public_consent", "greeting_moderation_status", "private_organizer_note",
+					"rsvp_updated_by", "rsvp_updated_at"))
+					.allSatisfy(column -> assertThat(blankRow.get(column)).isBlank());
+		}
+	}
+
+	@Test
 	void internationalCsvNumberIgnoresWeddingDefaultAndExportStaysE164() throws Exception {
 		jdbc.update("update wedding_settings set default_phone_country = 'ID' where id = 1");
 		GuestCsvPreview preview = service.preview((header()
@@ -142,5 +204,9 @@ class GuestCsvServiceTest {
 
 	private String header() {
 		return "display_name,whatsapp_number,salutation,category,plus_one_allowed,preferred_language,internal_note\n";
+	}
+
+	private CSVRecord row(List<CSVRecord> records, String name) {
+		return records.stream().filter(record -> name.equals(record.get("display_name"))).findFirst().orElseThrow();
 	}
 }

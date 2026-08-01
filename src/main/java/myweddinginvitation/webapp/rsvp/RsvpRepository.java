@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,7 @@ public interface RsvpRepository extends JpaRepository<Rsvp, Long> {
     Optional<Rsvp> findByGuestId(long guestId);
     List<Rsvp> findByGuestIdIn(Collection<Long> guestIds);
     Optional<Rsvp> findByGuestPublicId(UUID publicId);
+    @EntityGraph(attributePaths = "guest")
     Page<Rsvp> findByGreetingModerationStateAndGreetingPublicConsentTrueAndGreetingIsNotNull(
             GreetingModerationState state, Pageable pageable);
 	Page<Rsvp> findByGreetingModerationStateAndGreetingPublicConsentTrueAndGreetingIsNotNullAndGuestArchivedFalse(

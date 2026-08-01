@@ -129,19 +129,29 @@ class GuestCsvControllerTest {
 				.andExpect(header().string("Content-Disposition", "attachment; filename=\"guests-template.csv\""));
 		mockMvc.perform(get("/admin/guests/export.csv").session(adminSession))
 				.andExpect(status().isOk())
-				.andExpect(header().string("Content-Disposition", "attachment; filename=\"guests.csv\""));
+				.andExpect(header().string("Content-Disposition", "attachment; filename=\"guests.csv\""))
+				.andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(
+						org.hamcrest.Matchers.containsString(
+								"rsvp_status,planned_attendee_count,greeting,greeting_public_consent,greeting_moderation_status,private_organizer_note,rsvp_updated_by,rsvp_updated_at")));
 	}
 
 	@Test
 	void exportNeutralizesSpreadsheetFormulasInUserText() throws Exception {
-		service.create(new GuestForm("=HYPERLINK(\"https://example.test\")", "+salutation", "ID", "081234567890",
+		Guest guest = service.create(new GuestForm("=HYPERLINK(\"https://example.test\")", "+salutation", "ID", "081234567890",
 				null, false, MessageLanguage.ID, "@note"), false);
+		jdbc.update("""
+				insert into rsvp (guest_id, response, planned_attendee_count, greeting,
+				    greeting_public_consent, greeting_moderation_state, private_organizer_note,
+				    update_source, created_at, updated_at)
+				values (?, 'HADIR', 1, '-greeting', true, 'PENDING', '+private note',
+				    'GUEST', current_timestamp(6), current_timestamp(6))
+				""", guest.getId());
 
 		String export = mockMvc.perform(get("/admin/guests/export.csv").session(adminSession))
 				.andExpect(status().isOk())
 				.andReturn().getResponse().getContentAsString(UTF_8);
 
-		assertThat(export).contains("'=HYPERLINK", "'+salutation", "'@note")
+		assertThat(export).contains("'=HYPERLINK", "'+salutation", "'@note", "'-greeting", "'+private note")
 				.doesNotContain("\n=HYPERLINK");
 	}
 
