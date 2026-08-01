@@ -74,7 +74,7 @@ public class CheckInCorrection {
         correction.action = action;
         correction.beforeActualAttendeeCount = beforeActualAttendeeCount;
         correction.afterActualAttendeeCount = afterActualAttendeeCount;
-        correction.reason = reason;
+        correction.reason = reason.strip();
         correction.correctedByAccount = correctedByAccount;
         correction.correctedAt = correctedAt;
         correction.originalCheckedInAt = originalCheckedInAt;

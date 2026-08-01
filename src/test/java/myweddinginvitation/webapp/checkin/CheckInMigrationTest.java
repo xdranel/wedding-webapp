@@ -88,6 +88,14 @@ class CheckInMigrationTest {
 				.isInstanceOf(RuntimeException.class);
 	}
 
+	@Test
+	void correctionFactoryStripsItsReason() {
+		CheckInCorrection correction = CheckInCorrection.create(null, null, CheckInCorrectionAction.CORRECT,
+				1, 2, "  Count corrected  ", null, Instant.EPOCH, Instant.EPOCH, null, "test-admin");
+
+		assertThat(correction.getReason()).isEqualTo("Count corrected");
+	}
+
 	private long insertCheckIn(Guest guest, int actualCount, long accountId) {
 		jdbc.update("""
 				insert into check_in
