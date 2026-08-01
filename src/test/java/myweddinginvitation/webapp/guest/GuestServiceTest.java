@@ -96,6 +96,27 @@ class GuestServiceTest {
 						Instant.parse("2026-07-28T06:00:00Z"));
 	}
 
+	@Test
+	void updateResetsPinSecurityOnlyWhenNormalizedNumberChanges() {
+		Guest guest = savedGuest("Sari", "081234567890");
+		for (int attempt = 0; attempt < 5; attempt++) {
+			guest.pinFailed(Instant.parse("2026-08-01T00:00:00Z"));
+		}
+		guest = guests.saveAndFlush(guest);
+
+		Guest sameNumber = service.update(guest.getId(), guest.getVersion(),
+				form("Sari", "+62 812-3456-7890"), false);
+
+		assertThat(sameNumber.getFailedPinCount()).isEqualTo(5);
+		assertThat(sameNumber.getPinLockedUntil()).isNotNull();
+
+		Guest changedNumber = service.update(sameNumber.getId(), sameNumber.getVersion(),
+				form("Sari", "+49 1512 3456789"), false);
+
+		assertThat(changedNumber.getFailedPinCount()).isZero();
+		assertThat(changedNumber.getPinLockedUntil()).isNull();
+	}
+
 	private Guest savedGuest(String name, String whatsappNumber) {
 		return service.create(form(name, whatsappNumber), false);
 	}

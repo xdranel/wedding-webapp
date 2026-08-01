@@ -12,4 +12,5 @@ public interface GuestRepository extends JpaRepository<Guest, Long>, JpaSpecific
 	boolean existsByNormalizedWhatsappNumber(String normalizedWhatsappNumber);
 	List<Guest> findAllByOrderByDisplayNameAscIdAsc();
 	long countByCategoryIsNull();
+	long countByArchivedFalse();
 }

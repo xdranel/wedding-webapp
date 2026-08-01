@@ -80,14 +80,16 @@ class RsvpMigrationTest {
 	void rsvpEnforcesItsGuestRelationshipAndVersion() {
 		Guest guest = guest("Rama");
 		Rsvp saved = rsvps.saveAndFlush(Rsvp.create(guest, AttendanceResponse.HADIR, 1,
-				null, false, GreetingModerationState.HIDDEN, null, RsvpUpdateSource.GUEST, null));
+				null, false, GreetingModerationState.HIDDEN, null, RsvpUpdateSource.GUEST, null,
+				Instant.parse("2026-08-01T00:00:00Z")));
 
 		assertThat(rsvps.findByGuestId(guest.getId())).map(Rsvp::getId).contains(saved.getId());
 		assertThat(rsvps.findByGuestPublicId(guest.getPublicId())).map(Rsvp::getId).contains(saved.getId());
 		assertThat(saved.getVersion()).isZero();
 
 		saved.update(AttendanceResponse.HADIR, 2, "Selamat", true,
-				GreetingModerationState.PENDING, null, RsvpUpdateSource.ADMIN, null);
+				GreetingModerationState.PENDING, null, RsvpUpdateSource.ADMIN, null,
+				Instant.parse("2026-08-01T00:01:00Z"));
 		assertThat(rsvps.saveAndFlush(saved).getVersion()).isEqualTo(1);
 		assertThat(saved.getUpdateSource()).isEqualTo(RsvpUpdateSource.ADMIN);
 		assertThat(jdbc.queryForObject("select update_source from rsvp where id = ?", String.class, saved.getId()))

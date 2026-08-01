@@ -46,7 +46,9 @@ public class GuestService {
 		String normalizedNumber = numbers.normalize(form.whatsappNumber(), form.phoneRegion());
 		requireDuplicateAccepted(!normalizedNumber.equals(guest.getNormalizedWhatsappNumber())
 				&& guests.existsByNormalizedWhatsappNumber(normalizedNumber), acceptDuplicate);
+		boolean phoneChanged = !normalizedNumber.equals(guest.getNormalizedWhatsappNumber());
 		guest.update(form, normalizedNumber, category(form.categoryId()));
+		if (phoneChanged) guest.resetPinSecurity();
 		return guests.saveAndFlush(guest);
 	}
 

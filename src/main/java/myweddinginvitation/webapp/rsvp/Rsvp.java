@@ -70,18 +70,20 @@ public class Rsvp {
 
     static Rsvp create(Guest guest, AttendanceResponse response, int plannedAttendeeCount, String greeting,
                        boolean greetingPublicConsent, GreetingModerationState greetingModerationState,
-                       String privateOrganizerNote, RsvpUpdateSource updateSource, UserAccount updatedByAccount) {
+                       String privateOrganizerNote, RsvpUpdateSource updateSource, UserAccount updatedByAccount,
+                       Instant now) {
         Rsvp rsvp = new Rsvp();
         rsvp.guest = guest;
-        rsvp.createdAt = Instant.now();
+        rsvp.createdAt = now;
         rsvp.update(response, plannedAttendeeCount, greeting, greetingPublicConsent, greetingModerationState,
-                privateOrganizerNote, updateSource, updatedByAccount);
+                privateOrganizerNote, updateSource, updatedByAccount, now);
         return rsvp;
     }
 
     void update(AttendanceResponse response, int plannedAttendeeCount, String greeting,
                 boolean greetingPublicConsent, GreetingModerationState greetingModerationState,
-                String privateOrganizerNote, RsvpUpdateSource updateSource, UserAccount updatedByAccount) {
+                String privateOrganizerNote, RsvpUpdateSource updateSource, UserAccount updatedByAccount,
+                Instant now) {
         this.response = response;
         this.plannedAttendeeCount = plannedAttendeeCount;
         this.greeting = greeting;
@@ -90,7 +92,12 @@ public class Rsvp {
         this.privateOrganizerNote = privateOrganizerNote;
         this.updateSource = updateSource;
         this.updatedByAccount = updatedByAccount;
-        updatedAt = Instant.now();
+        updatedAt = now;
+    }
+
+    void moderate(GreetingModerationState state, Instant now) {
+        greetingModerationState = state;
+        updatedAt = now;
     }
 
     public Long getId() { return id; }
