@@ -16,6 +16,7 @@ import myweddinginvitation.webapp.account.AccountSecurityService;
 import myweddinginvitation.webapp.account.UserAccount;
 import myweddinginvitation.webapp.account.UserAccountRepository;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,7 @@ class GuestControllerTest {
 	@BeforeEach
 	void clearGuests() throws Exception {
 		jdbc.update("delete from guest");
+		jdbc.update("update wedding_settings set default_phone_country = 'ID' where id = 1");
 		accounts.deleteAll();
 		accounts.save(new UserAccount("admin", "{noop}" + PASSWORD, AccountRole.ADMIN));
 		accounts.save(new UserAccount("staff", "{noop}" + PASSWORD, AccountRole.STAFF));
@@ -65,6 +67,11 @@ class GuestControllerTest {
 		accountSecurity.changePassword("staff", PASSWORD, PASSWORD);
 		adminSession = login("admin");
 		staffSession = login("staff");
+	}
+
+	@AfterEach
+	void resetPhoneCountry() {
+		jdbc.update("update wedding_settings set default_phone_country = 'ID' where id = 1");
 	}
 
 	@Test

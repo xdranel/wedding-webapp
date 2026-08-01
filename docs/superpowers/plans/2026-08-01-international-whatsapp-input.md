@@ -359,7 +359,9 @@ void nationalCsvNumberStillUsesWeddingDefault() {
 ./mvnw -q -Dtest=GuestCsvServiceTest,GuestCsvControllerTest test
 ```
 
-Expected: compilation fails because CSV import constructs the expanded `GuestForm` without a phone region.
+Expected: the CSV regressions pass because Task 2 already supplies the
+expanded form's default phone region; they protect that compatibility without
+adding a CSV column.
 
 - [x] **Step 3: Pass the CSV default region without changing columns**
 
