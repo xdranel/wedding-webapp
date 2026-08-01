@@ -2,6 +2,8 @@ package myweddinginvitation.webapp.rsvp;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +14,10 @@ import myweddinginvitation.webapp.guest.PublicInvitationController;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,14 +60,14 @@ public class PublicRsvpController {
 					? text(access, "RSVP belum dibuka", "RSVP is not open yet")
 					: text(access, "Batas waktu RSVP telah lewat", "The RSVP deadline has passed"));
 		}
-		if (errors.hasErrors()) return invitationPage.render(access, path, form, 0, model, request.getSession());
+		if (errors.hasErrors()) return redisplay(access, path, form, errors, model, request);
 
 		PinVerificationResult pin = pins.verify(access.guest().getPublicId(),
 				access.guest().getInvitationTokenVersion(), form.pin());
 		if (pin.status() != PinVerificationResult.Status.SUCCESS) {
 			if (pin.status() == PinVerificationResult.Status.UNAVAILABLE) return invitationPage.unavailable(response);
 			addPinError(pin, access, errors);
-			return invitationPage.render(access, path, form, 0, model, request.getSession());
+			return redisplay(access, path, form, errors, model, request);
 		}
 
 		try {
@@ -70,15 +75,20 @@ public class PublicRsvpController {
 					form.plannedAttendeeCount(), form.greeting(), form.greetingPublicConsent(),
 					form.privateOrganizerNote()));
 		} catch (OptimisticLockingFailureException exception) {
-			errors.reject("rsvp.conflict", text(access, "RSVP telah berubah. Periksa lalu kirim kembali.",
+			long currentVersion = rsvps.view(access.guest().getId()).map(RsvpView::version).orElse(-1L);
+			GuestRsvpForm retry = form.retry(currentVersion);
+			BindingResult retryErrors = new BeanPropertyBindingResult(retry, "rsvpForm");
+			retryErrors.reject("rsvp.conflict", text(access, "RSVP telah berubah. Periksa lalu kirim kembali.",
 					"RSVP has changed. Review it and submit again."));
-			return invitationPage.render(access, path, form, 0, model, request.getSession());
+			model.addAttribute("rsvpForm", retry);
+			model.addAttribute(BindingResult.MODEL_KEY_PREFIX + "rsvpForm", retryErrors);
+			return redisplay(access, path, retry, retryErrors, model, request);
 		} catch (IllegalArgumentException exception) {
 			errors.reject("rsvp.invalid", text(access, "Data RSVP tidak valid.", "RSVP data is invalid."));
-			return invitationPage.render(access, path, form, 0, model, request.getSession());
+			return redisplay(access, path, form, errors, model, request);
 		} catch (IllegalStateException exception) {
 			errors.reject("rsvp.closed", text(access, "RSVP tidak dapat diubah.", "RSVP cannot be changed."));
-			return invitationPage.render(access, path, form, 0, model, request.getSession());
+			return redisplay(access, path, form, errors, model, request);
 		}
 
 		verification.grant(request.getSession(), access.guest().getPublicId(),
@@ -139,6 +149,63 @@ public class PublicRsvpController {
 		if (errors.hasFieldErrors("pin")) {
 			errors.reject("pin.format", text(language, "Masukkan PIN empat digit.", "Enter a four-digit PIN."));
 		}
+	}
+
+	private String redisplay(Access access, String path, GuestRsvpForm form, BindingResult errors,
+			Model model, HttpServletRequest request) {
+		model.addAttribute("rsvpErrors", guestErrors(form, errors, access.language()));
+		return invitationPage.render(access, path, form, 0, model, request.getSession());
+	}
+
+	private List<String> guestErrors(GuestRsvpForm form, BindingResult errors, String language) {
+		LinkedHashSet<String> messages = new LinkedHashSet<>();
+		for (ObjectError error : errors.getAllErrors()) messages.add(guestMessage(error, language));
+		if (form.response() == null) messages.add(responseMessage(language));
+		if (form.plannedAttendeeCount() != null
+				&& (form.plannedAttendeeCount() < 0 || form.plannedAttendeeCount() > 2)) {
+			messages.add(countMessage(language));
+		}
+		if (form.greeting() != null && form.greeting().length() > 500) {
+			messages.add(text(language, "Ucapan maksimal 500 karakter.",
+					"Greeting must be at most 500 characters."));
+		}
+		if (form.privateOrganizerNote() != null && form.privateOrganizerNote().length() > 1000) {
+			messages.add(text(language, "Catatan privat maksimal 1000 karakter.",
+					"Private note must be at most 1000 characters."));
+		}
+		if (form.pin() == null || !form.pin().matches("[0-9]{4}")) {
+			messages.add(text(language, "Masukkan PIN empat digit.", "Enter a four-digit PIN."));
+		}
+		return List.copyOf(messages);
+	}
+
+	private String guestMessage(ObjectError error, String language) {
+		if (error instanceof FieldError field) {
+			return switch (field.getField()) {
+				case "response" -> responseMessage(language);
+				case "plannedAttendeeCount" -> "count.companion".equals(field.getCode())
+						? field.getDefaultMessage() : countMessage(language);
+				case "greeting" -> text(language, "Ucapan maksimal 500 karakter.",
+						"Greeting must be at most 500 characters.");
+				case "privateOrganizerNote" -> text(language, "Catatan privat maksimal 1000 karakter.",
+						"Private note must be at most 1000 characters.");
+				case "pin" -> "pin.invalid".equals(field.getCode()) ? field.getDefaultMessage()
+						: text(language, "Masukkan PIN empat digit.", "Enter a four-digit PIN.");
+				default -> text(language, "Data RSVP tidak valid.", "RSVP data is invalid.");
+			};
+		}
+		return error.getCode() != null && (error.getCode().startsWith("rsvp.")
+				|| error.getCode().equals("response.required") || error.getCode().equals("pin.format"))
+				? error.getDefaultMessage()
+				: text(language, "Data RSVP tidak valid.", "RSVP data is invalid.");
+	}
+
+	private String responseMessage(String language) {
+		return text(language, "Pilih Hadir atau Tidak hadir.", "Choose attending or not attending.");
+	}
+
+	private String countMessage(String language) {
+		return text(language, "Jumlah hadir harus satu atau dua.", "Attendance must be one or two.");
 	}
 
 	private void addPinError(PinVerificationResult result, Access access, BindingResult errors) {

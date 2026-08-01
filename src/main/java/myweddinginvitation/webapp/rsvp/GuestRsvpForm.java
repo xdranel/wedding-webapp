@@ -18,4 +18,9 @@ public record GuestRsvpForm(
 	public GuestRsvpForm {
 		greetingPublicConsent = Boolean.TRUE.equals(greetingPublicConsent);
 	}
+
+	GuestRsvpForm retry(long currentVersion) {
+		return new GuestRsvpForm(response, plannedAttendeeCount, greeting, greetingPublicConsent,
+				privateOrganizerNote, null, currentVersion);
+	}
 }

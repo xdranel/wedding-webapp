@@ -205,17 +205,51 @@ class PublicRsvpControllerTest {
 	}
 
 	@Test
-	void staleVersionShowsCurrentStateAndRequiresResubmission() throws Exception {
+	void staleVersionRedisplayUsesCurrentVersionAndImmediateResubmissionSucceeds() throws Exception {
 		Guest guest = guest("Konflik", false, MessageLanguage.ID, "+62 812 3456 7890");
 		RsvpView current = rsvps.submitGuest(guest.getId(), -1,
 				new RsvpSubmission(AttendanceResponse.HADIR, 1, "Saat ini", true, null));
+		String path = path(guest);
 
-		mockMvc.perform(post(path(guest) + "/rsvp").with(csrf())
+		mockMvc.perform(post(path + "/rsvp").with(csrf())
 				.param("response", "TIDAK_HADIR").param("plannedAttendeeCount", "0")
+				.param("greeting", "Tetap dikirim").param("greetingPublicConsent", "true")
+				.param("privateOrganizerNote", "Tetap privat")
 				.param("pin", "7890").param("version", Long.toString(current.version() - 1)))
 				.andExpect(status().isOk())
 				.andExpect(content().string(containsString("RSVP telah berubah")))
-				.andExpect(model().attribute("rsvp", current));
+				.andExpect(model().attribute("rsvp", current))
+				.andExpect(content().string(containsString(
+						"id=\"version\" name=\"version\" value=\"" + current.version() + "\"")))
+				.andExpect(content().string(containsString("Tetap dikirim")))
+				.andExpect(content().string(containsString("Tetap privat")))
+				.andExpect(content().string(not(containsString("value=\"7890\""))));
+
+		mockMvc.perform(post(path + "/rsvp").with(csrf())
+				.param("response", "TIDAK_HADIR").param("plannedAttendeeCount", "0")
+				.param("greeting", "Tetap dikirim").param("greetingPublicConsent", "true")
+				.param("privateOrganizerNote", "Tetap privat")
+				.param("pin", "7890").param("version", Long.toString(current.version())))
+				.andExpect(redirectedUrl(path + "?rsvpSaved"));
+
+		RsvpView updated = rsvps.view(guest.getId()).orElseThrow();
+		assertThat(updated.response()).isEqualTo(AttendanceResponse.TIDAK_HADIR);
+		assertThat(updated.greeting()).isEqualTo("Tetap dikirim");
+		assertThat(updated.privateOrganizerNote()).isEqualTo("Tetap privat");
+	}
+
+	@Test
+	void structuralValidationUsesOnlyIndonesianGuestMessages() throws Exception {
+		assertLocalizedValidation("ID", "Pilih Hadir atau Tidak hadir.",
+				"Jumlah hadir harus satu atau dua.", "Ucapan maksimal 500 karakter.",
+				"Catatan privat maksimal 1000 karakter.", "Masukkan PIN empat digit.");
+	}
+
+	@Test
+	void structuralValidationUsesOnlyEnglishGuestMessages() throws Exception {
+		assertLocalizedValidation("EN", "Choose attending or not attending.",
+				"Attendance must be one or two.", "Greeting must be at most 500 characters.",
+				"Private note must be at most 1000 characters.", "Enter a four-digit PIN.");
 	}
 
 	@Test
@@ -305,6 +339,42 @@ class PublicRsvpControllerTest {
 
 	private Guest guest(String name, boolean plusOne, MessageLanguage language, String number) {
 		return guestService.create(new GuestForm(name, "Bapak/Ibu", "ID", number, null, plusOne, language, null), false);
+	}
+
+	private void assertLocalizedValidation(String language, String responseError, String countError,
+			String greetingError, String noteError, String pinError) throws Exception {
+		Guest guest = guest("Validation " + language, true, MessageLanguage.ID, "+62 812 3456 7890");
+		String path = path(guest);
+
+		mockMvc.perform(post(path + "/rsvp").with(csrf())
+				.param("response", "INVALID").param("plannedAttendeeCount", "many")
+				.param("pin", "12x").param("version", "-1").param("language", language))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString(responseError)))
+				.andExpect(content().string(containsString(countError)))
+				.andExpect(content().string(containsString(pinError)))
+				.andExpect(content().string(not(containsString("Failed to convert value of type"))))
+				.andExpect(content().string(not(containsString("must match"))))
+				.andExpect(content().string(not(containsString("must not be blank"))));
+
+		mockMvc.perform(post(path + "/rsvp").with(csrf())
+				.param("plannedAttendeeCount", "3")
+				.param("greeting", "g".repeat(501))
+				.param("privateOrganizerNote", "n".repeat(1001))
+				.param("pin", "12x").param("version", "-1").param("language", language))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString(responseError)))
+				.andExpect(content().string(containsString(countError)))
+				.andExpect(content().string(containsString(greetingError)))
+				.andExpect(content().string(containsString(noteError)))
+				.andExpect(content().string(containsString(pinError)))
+				.andExpect(content().string(not(containsString("must not be null"))))
+				.andExpect(content().string(not(containsString("must be less than or equal to"))))
+				.andExpect(content().string(not(containsString("size must be between"))))
+				.andExpect(content().string(not(containsString("must match"))));
+
+		assertThat(guests.findById(guest.getId()).orElseThrow().getFailedPinCount()).isZero();
+		assertThat(rsvps.view(guest.getId())).isEmpty();
 	}
 
 	private void addGreeting(int index, String state, boolean consent, String greeting) {

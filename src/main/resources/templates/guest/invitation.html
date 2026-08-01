@@ -100,8 +100,8 @@
 
         <form th:if="${rsvpWritable}" th:action="${invitationPath + '/rsvp'}" method="post"
               th:object="${rsvpForm}" class="rsvp-form">
-            <div th:if="${#fields.hasAnyErrors()}" class="form-errors" role="alert" aria-live="polite">
-                <p th:each="error : ${#fields.allErrors()}" th:text="${error}">Data tidak valid</p>
+            <div th:if="${rsvpErrors != null && !rsvpErrors.empty}" class="form-errors" role="alert" aria-live="polite">
+                <p th:each="error : ${rsvpErrors}" th:text="${error}">Data tidak valid</p>
             </div>
 
             <fieldset>
