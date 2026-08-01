@@ -7,6 +7,13 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import myweddinginvitation.webapp.rsvp.AttendanceResponse;
+import myweddinginvitation.webapp.rsvp.Rsvp;
+import myweddinginvitation.webapp.rsvp.RsvpService;
+import myweddinginvitation.webapp.rsvp.RsvpSubmission;
+import myweddinginvitation.webapp.rsvp.RsvpView;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,11 +27,14 @@ public class GuestService {
 	private final GuestRepository guests;
 	private final GuestCategoryRepository categories;
 	private final WhatsappNumberService numbers;
+	private final RsvpService rsvps;
 
-	public GuestService(GuestRepository guests, GuestCategoryRepository categories, WhatsappNumberService numbers) {
+	public GuestService(GuestRepository guests, GuestCategoryRepository categories, WhatsappNumberService numbers,
+			RsvpService rsvps) {
 		this.guests = guests;
 		this.categories = categories;
 		this.numbers = numbers;
+		this.rsvps = rsvps;
 	}
 
 	@Transactional
@@ -41,12 +51,29 @@ public class GuestService {
 
 	@Transactional
 	public Guest update(long id, long version, GuestForm form, boolean acceptDuplicate) {
+		return update(id, version, form, acceptDuplicate, false, null);
+	}
+
+	@Transactional
+	public Guest update(long id, long version, GuestForm form, boolean acceptDuplicate,
+			boolean reducePlannedAttendance, String username) {
 		Guest guest = guest(id);
 		requireVersion(guest, version);
 		String normalizedNumber = numbers.normalize(form.whatsappNumber(), form.phoneRegion());
 		requireDuplicateAccepted(!normalizedNumber.equals(guest.getNormalizedWhatsappNumber())
 				&& guests.existsByNormalizedWhatsappNumber(normalizedNumber), acceptDuplicate);
 		boolean phoneChanged = !normalizedNumber.equals(guest.getNormalizedWhatsappNumber());
+		RsvpView rsvp = rsvps.view(id).orElse(null);
+		boolean reductionRequired = guest.isPlusOneAllowed() && !form.plusOneAllowed()
+				&& rsvp != null && rsvp.response() == AttendanceResponse.HADIR
+				&& rsvp.plannedAttendeeCount() == 2;
+		if (reductionRequired && !reducePlannedAttendance) {
+			throw new PlannedAttendanceReductionRequiredException();
+		}
+		if (reductionRequired) {
+			rsvps.correctByAdmin(id, rsvp.version(),
+					new RsvpSubmission(AttendanceResponse.HADIR, 1, null, false, null), username);
+		}
 		guest.update(form, normalizedNumber, category(form.categoryId()));
 		if (phoneChanged) guest.resetPinSecurity();
 		return guests.saveAndFlush(guest);
@@ -123,6 +150,18 @@ public class GuestService {
 			if (filters.categoryId() != null) {
 				predicates.add(builder.equal(root.get("category").get("id"), filters.categoryId()));
 			}
+			if (filters.rsvp() != null || filters.noRsvp()) {
+				Subquery<Long> matchingRsvp = query.subquery(Long.class);
+				Root<Rsvp> rsvp = matchingRsvp.from(Rsvp.class);
+				List<Predicate> rsvpPredicates = new ArrayList<>();
+				rsvpPredicates.add(builder.equal(rsvp.get("guest"), root));
+				if (filters.rsvp() != null) {
+					rsvpPredicates.add(builder.equal(rsvp.get("response"), filters.rsvp()));
+				}
+				matchingRsvp.select(rsvp.get("id")).where(rsvpPredicates.toArray(Predicate[]::new));
+				predicates.add(filters.noRsvp() ? builder.not(builder.exists(matchingRsvp))
+						: builder.exists(matchingRsvp));
+			}
 			return builder.and(predicates.toArray(Predicate[]::new));
 		};
 	}
@@ -156,6 +195,12 @@ public class GuestService {
 	static class DuplicateWhatsappNumberException extends IllegalStateException {
 		DuplicateWhatsappNumberException() {
 			super(DUPLICATE);
+		}
+	}
+
+	static class PlannedAttendanceReductionRequiredException extends IllegalStateException {
+		PlannedAttendanceReductionRequiredException() {
+			super("Confirm reducing planned attendance to one before disabling +1.");
 		}
 	}
 }

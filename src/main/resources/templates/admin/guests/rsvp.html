@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Edit RSVP</title></head>
+<body>
+<main>
+  <h1>Edit RSVP</h1>
+  <p><a th:href="@{/admin/guests/{id}(id=${guest.id})}">Back to guest</a></p>
+  <p><strong>Guest:</strong> <span th:text="${guest.displayName}">Guest</span></p>
+  <p th:if="${rsvp != null}">Last update: <span th:text="${rsvp.updateSource}">GUEST</span> at <span th:text="${rsvp.updatedAt}">Time</span></p>
+  <p th:unless="${rsvp != null}">No RSVP has been submitted.</p>
+  <form method="post" th:action="@{/admin/guests/{id}/rsvp(id=${guest.id})}" th:object="${form}">
+    <input type="hidden" th:field="*{version}">
+    <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">RSVP error</p>
+    <label>Response
+      <select th:field="*{response}" required>
+        <option value="HADIR">Hadir</option>
+        <option value="TIDAK_HADIR">Tidak hadir</option>
+      </select>
+    </label>
+    <p th:if="${#fields.hasErrors('response')}" th:errors="*{response}" role="alert">Response error</p>
+    <label>Planned attendees
+      <select th:field="*{plannedAttendeeCount}">
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option th:if="${guest.plusOneAllowed}" value="2">2</option>
+      </select>
+    </label>
+    <p th:if="${#fields.hasErrors('plannedAttendeeCount')}" th:errors="*{plannedAttendeeCount}" role="alert">Count error</p>
+    <button type="submit">Save RSVP</button>
+  </form>
+</main>
+</body>
+</html>

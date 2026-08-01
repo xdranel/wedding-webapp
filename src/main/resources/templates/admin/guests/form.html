@@ -6,6 +6,7 @@
   <h1 th:text="${guest == null ? 'Add guest' : 'Edit guest'}">Guest</h1>
   <p><a th:href="@{/admin/guests}">Back to guests</a></p>
   <p th:if="${duplicateWarning}" role="alert">This WhatsApp number already belongs to another guest. Check confirmation to continue.</p>
+  <p th:if="${reducePlannedAttendanceWarning}" role="alert">This RSVP plans two attendees. Confirm reducing planned attendance to one before disabling +1.</p>
   <form method="post" th:action="${guest == null ? '/admin/guests' : '/admin/guests/' + guest.id}" th:object="${form}">
     <input th:if="${guest != null}" type="hidden" name="version" th:value="${guest.version}">
     <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Guest error</p>
@@ -24,6 +25,9 @@
     <label>Language <select th:field="*{preferredLanguage}"><option value="ID">Indonesian</option><option value="EN">English</option></select></label>
     <label>Internal note <textarea th:field="*{internalNote}" maxlength="2000"></textarea></label>
     <label th:if="${duplicateWarning}"><input type="checkbox" name="acceptDuplicate" value="true"> I understand this number is duplicated</label>
+    <input th:if="${duplicateAccepted}" type="hidden" name="acceptDuplicate" value="true">
+    <label th:if="${reducePlannedAttendanceWarning}"><input type="checkbox" name="reducePlannedAttendance" value="true" required> Reduce planned attendance to one</label>
+    <input th:if="${reducePlannedAttendanceAccepted}" type="hidden" name="reducePlannedAttendance" value="true">
     <button type="submit" th:text="${guest == null ? 'Create guest' : 'Save guest'}">Save guest</button>
   </form>
 </main>

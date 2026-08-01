@@ -1,11 +1,14 @@
 package myweddinginvitation.webapp.guest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -15,6 +18,11 @@ import myweddinginvitation.webapp.account.AccountRole;
 import myweddinginvitation.webapp.account.AccountSecurityService;
 import myweddinginvitation.webapp.account.UserAccount;
 import myweddinginvitation.webapp.account.UserAccountRepository;
+import myweddinginvitation.webapp.rsvp.AttendanceResponse;
+import myweddinginvitation.webapp.rsvp.RsvpService;
+import myweddinginvitation.webapp.rsvp.RsvpSubmission;
+import myweddinginvitation.webapp.rsvp.RsvpUpdateSource;
+import myweddinginvitation.webapp.rsvp.RsvpView;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +53,9 @@ class GuestControllerTest {
 	GuestRepository guests;
 
 	@Autowired
+	RsvpService rsvps;
+
+	@Autowired
 	JdbcTemplate jdbc;
 
 	@Autowired
@@ -58,8 +69,14 @@ class GuestControllerTest {
 
 	@BeforeEach
 	void clearGuests() throws Exception {
+		jdbc.update("delete from rsvp");
 		jdbc.update("delete from guest");
-		jdbc.update("update wedding_settings set default_phone_country = 'ID' where id = 1");
+		jdbc.update("""
+				update wedding_settings set default_phone_country = 'ID',
+				publication_state = 'PUBLISHED', event_closed = false,
+				time_zone = 'Asia/Jakarta', rsvp_deadline = '2030-08-01 08:00:00'
+				where id = 1
+				""");
 		accounts.deleteAll();
 		accounts.save(new UserAccount("admin", "{noop}" + PASSWORD, AccountRole.ADMIN));
 		accounts.save(new UserAccount("staff", "{noop}" + PASSWORD, AccountRole.STAFF));
@@ -85,6 +102,86 @@ class GuestControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/guests/list"))
 				.andExpect(model().attribute("page", hasProperty("size", is(50))));
+	}
+
+	@Test
+	void filtersAndDisplaysCurrentRsvpState() throws Exception {
+		Guest attending = service.create(form("Hadir Guest", "081234567891", true), false);
+		Guest declined = service.create(form("Declined Guest", "081234567892"), false);
+		service.create(form("No Reply Guest", "081234567893"), false);
+		rsvps.submitGuest(attending.getId(), -1,
+				new RsvpSubmission(AttendanceResponse.HADIR, 2, null, false, null));
+		rsvps.submitGuest(declined.getId(), -1,
+				new RsvpSubmission(AttendanceResponse.TIDAK_HADIR, 0, null, false, null));
+
+		mockMvc.perform(get("/admin/guests").session(adminSession).param("rsvpStatus", "HADIR"))
+				.andExpect(content().string(containsString("Hadir Guest")))
+				.andExpect(content().string(not(containsString("Declined Guest"))))
+				.andExpect(content().string(not(containsString("No Reply Guest"))))
+				.andExpect(content().string(containsString("HADIR")))
+				.andExpect(content().string(containsString(">2<")))
+				.andExpect(content().string(containsString("Edit RSVP")));
+
+		mockMvc.perform(get("/admin/guests").session(adminSession).param("rsvpStatus", "TIDAK_HADIR"))
+				.andExpect(content().string(containsString("Declined Guest")))
+				.andExpect(content().string(not(containsString("Hadir Guest"))));
+
+		mockMvc.perform(get("/admin/guests").session(adminSession).param("rsvpStatus", "NONE"))
+				.andExpect(content().string(containsString("No Reply Guest")))
+				.andExpect(content().string(not(containsString("Hadir Guest"))))
+				.andExpect(content().string(not(containsString("Declined Guest"))));
+	}
+
+	@Test
+	void disablingPlusOneRequiresConfirmationAndReducesRsvpAtomically() throws Exception {
+		Guest guest = service.create(form("Plus One Guest", "081234567894", true), false);
+		RsvpView rsvp = rsvps.submitGuest(guest.getId(), -1,
+				new RsvpSubmission(AttendanceResponse.HADIR, 2, null, false, null));
+
+		mockMvc.perform(post("/admin/guests/{id}", guest.getId()).session(adminSession).with(csrf())
+				.param("version", Long.toString(guest.getVersion()))
+				.param("displayName", guest.getDisplayName()).param("salutation", guest.getSalutation())
+				.param("phoneRegion", "ID").param("whatsappNumber", guest.getNormalizedWhatsappNumber())
+				.param("preferredLanguage", "ID").param("_plusOneAllowed", "on"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("admin/guests/form"))
+				.andExpect(model().attribute("reducePlannedAttendanceWarning", true));
+
+		assertThat(guests.findById(guest.getId())).get().extracting(Guest::isPlusOneAllowed).isEqualTo(true);
+		assertThat(rsvps.view(guest.getId())).get().extracting(RsvpView::plannedAttendeeCount).isEqualTo(2);
+
+		Guest current = guests.findById(guest.getId()).orElseThrow();
+		mockMvc.perform(post("/admin/guests/{id}", guest.getId()).session(adminSession).with(csrf())
+				.param("version", Long.toString(current.getVersion()))
+				.param("displayName", current.getDisplayName()).param("salutation", current.getSalutation())
+				.param("phoneRegion", "ID").param("whatsappNumber", current.getNormalizedWhatsappNumber())
+				.param("preferredLanguage", "ID").param("_plusOneAllowed", "on")
+				.param("reducePlannedAttendance", "true"))
+				.andExpect(redirectedUrl("/admin/guests/" + guest.getId()));
+
+		assertThat(guests.findById(guest.getId())).get().extracting(Guest::isPlusOneAllowed).isEqualTo(false);
+		RsvpView reduced = rsvps.view(guest.getId()).orElseThrow();
+		assertThat(reduced.plannedAttendeeCount()).isEqualTo(1);
+		assertThat(reduced.updateSource()).isEqualTo(RsvpUpdateSource.ADMIN);
+		assertThat(reduced.version()).isGreaterThan(rsvp.version());
+	}
+
+	@Test
+	void plusOneWarningPreservesAcceptedDuplicateConfirmation() throws Exception {
+		service.create(form("Existing", "081234567895"), false);
+		Guest guest = service.create(form("Target", "081234567896", true), false);
+		rsvps.submitGuest(guest.getId(), -1,
+				new RsvpSubmission(AttendanceResponse.HADIR, 2, null, false, null));
+
+		mockMvc.perform(post("/admin/guests/{id}", guest.getId()).session(adminSession).with(csrf())
+				.param("version", Long.toString(guest.getVersion()))
+				.param("displayName", guest.getDisplayName()).param("salutation", guest.getSalutation())
+				.param("phoneRegion", "ID").param("whatsappNumber", "081234567895")
+				.param("preferredLanguage", "ID").param("_plusOneAllowed", "on")
+				.param("acceptDuplicate", "true"))
+				.andExpect(status().isOk())
+				.andExpect(model().attribute("reducePlannedAttendanceWarning", true))
+				.andExpect(content().string(containsString("name=\"acceptDuplicate\" value=\"true\"")));
 	}
 
 	@Test
@@ -203,6 +300,10 @@ class GuestControllerTest {
 
 	private GuestForm form(String name, String whatsappNumber) {
 		return form(name, "ID", whatsappNumber);
+	}
+
+	private GuestForm form(String name, String whatsappNumber, boolean plusOne) {
+		return new GuestForm(name, "Ibu", "ID", whatsappNumber, null, plusOne, MessageLanguage.ID, null);
 	}
 
 	private GuestForm form(String name, String phoneRegion, String whatsappNumber) {

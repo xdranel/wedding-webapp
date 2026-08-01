@@ -6,6 +6,9 @@ import java.time.ZoneId;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import myweddinginvitation.webapp.account.UserAccount;
 import myweddinginvitation.webapp.account.UserAccountRepository;
@@ -42,6 +45,12 @@ public class RsvpService {
 	@Transactional(readOnly = true)
 	public Optional<RsvpView> view(long guestId) {
 		return rsvps.findByGuestId(guestId).map(this::view);
+	}
+
+	@Transactional(readOnly = true)
+	public Map<Long, RsvpView> views(Collection<Long> guestIds) {
+		return rsvps.findByGuestIdIn(guestIds).stream()
+				.collect(Collectors.toMap(rsvp -> rsvp.getGuest().getId(), this::view));
 	}
 
 	@Transactional

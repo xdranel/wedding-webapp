@@ -1,13 +1,17 @@
 package myweddinginvitation.webapp.guest;
 
+import java.time.Clock;
 import java.util.NoSuchElementException;
 
 import jakarta.validation.Valid;
+import myweddinginvitation.webapp.rsvp.AttendanceResponse;
+import myweddinginvitation.webapp.rsvp.RsvpService;
 import myweddinginvitation.webapp.wedding.WeddingSettingsRepository;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -28,13 +32,17 @@ public class GuestController {
 	private final GuestCategoryService categories;
 	private final WhatsappNumberService numbers;
 	private final WeddingSettingsRepository settings;
+	private final RsvpService rsvps;
+	private final Clock clock;
 
 	public GuestController(GuestService guests, GuestCategoryService categories, WhatsappNumberService numbers,
-			WeddingSettingsRepository settings) {
+			WeddingSettingsRepository settings, RsvpService rsvps, Clock clock) {
 		this.guests = guests;
 		this.categories = categories;
 		this.numbers = numbers;
 		this.settings = settings;
+		this.rsvps = rsvps;
+		this.clock = clock;
 	}
 
 	@GetMapping("/admin/guests")
@@ -42,12 +50,17 @@ public class GuestController {
 			@RequestParam(required = false) DeliveryState delivery,
 			@RequestParam(required = false) Boolean archived,
 			@RequestParam(required = false) Long categoryId,
+			@RequestParam(required = false) String rsvpStatus,
 			@RequestParam(defaultValue = "updatedAt,desc") String sort,
 			@RequestParam(defaultValue = "0") int page, Model model) {
-		GuestListQuery filters = new GuestListQuery(query, delivery, archived, categoryId);
+		AttendanceResponse rsvp = attendance(rsvpStatus);
+		GuestListQuery filters = new GuestListQuery(query, delivery, archived, categoryId,
+				rsvp, "NONE".equals(rsvpStatus));
+		var pageOfGuests = guests.search(filters, PageRequest.of(Math.max(page, 0), 50, sort(sort)));
 		model.addAttribute("filters", filters);
 		model.addAttribute("sort", sort);
-		model.addAttribute("page", guests.search(filters, PageRequest.of(Math.max(page, 0), 50, sort(sort))));
+		model.addAttribute("page", pageOfGuests);
+		model.addAttribute("rsvps", rsvps.views(pageOfGuests.getContent().stream().map(Guest::getId).toList()));
 		model.addAttribute("categories", categories.findAll());
 		return "admin/guests/list";
 	}
@@ -89,7 +102,11 @@ public class GuestController {
 
 	@GetMapping("/admin/guests/{id}")
 	String detail(@PathVariable long id, Model model) {
-		model.addAttribute("guest", guests.get(id));
+		Guest guest = guests.get(id);
+		model.addAttribute("guest", guest);
+		model.addAttribute("rsvp", rsvps.view(id).orElse(null));
+		model.addAttribute("pinLocked", guest.getPinLockedUntil() != null
+				&& clock.instant().isBefore(guest.getPinLockedUntil()));
 		return "admin/guests/detail";
 	}
 
@@ -105,15 +122,23 @@ public class GuestController {
 
 	@PostMapping("/admin/guests/{id}")
 	String update(@PathVariable long id, @RequestParam long version, @Valid @ModelAttribute("form") GuestForm form,
-			BindingResult result, @RequestParam(required = false) Boolean acceptDuplicate, Model model) {
+			BindingResult result, @RequestParam(required = false) Boolean acceptDuplicate,
+			@RequestParam(required = false) Boolean reducePlannedAttendance,
+			Authentication authentication, Model model) {
 		Guest existing = guests.get(id);
 		boolean duplicateAccepted = Boolean.TRUE.equals(acceptDuplicate);
 		if (!result.hasErrors()) {
 			try {
-				Guest guest = guests.update(id, version, form, duplicateAccepted);
+				Guest guest = guests.update(id, version, form, duplicateAccepted,
+						Boolean.TRUE.equals(reducePlannedAttendance), authentication.getName());
 				return "redirect:/admin/guests/" + guest.getId();
 			} catch (GuestService.DuplicateWhatsappNumberException exception) {
 				formPage(model, form, existing, true);
+				model.addAttribute("reducePlannedAttendanceAccepted", Boolean.TRUE.equals(reducePlannedAttendance));
+				return "admin/guests/form";
+			} catch (GuestService.PlannedAttendanceReductionRequiredException exception) {
+				formPage(model, form, existing, false, true);
+				model.addAttribute("duplicateAccepted", duplicateAccepted);
 				return "admin/guests/form";
 			} catch (IllegalArgumentException exception) {
 				rejectInvalidPhoneInput(result, form, exception);
@@ -163,11 +188,26 @@ public class GuestController {
 	}
 
 	private void formPage(Model model, GuestForm form, Guest guest, boolean duplicateWarning) {
+		formPage(model, form, guest, duplicateWarning, false);
+	}
+
+	private void formPage(Model model, GuestForm form, Guest guest, boolean duplicateWarning,
+			boolean reductionWarning) {
 		model.addAttribute("form", form);
 		model.addAttribute("guest", guest);
 		model.addAttribute("categories", categories.findAll());
 		model.addAttribute("phoneRegions", numbers.supportedRegions());
 		model.addAttribute("duplicateWarning", duplicateWarning);
+		model.addAttribute("reducePlannedAttendanceWarning", reductionWarning);
+	}
+
+	private AttendanceResponse attendance(String value) {
+		if (value == null || value.equals("NONE")) return null;
+		try {
+			return AttendanceResponse.valueOf(value);
+		} catch (IllegalArgumentException exception) {
+			return null;
+		}
 	}
 
 	private String defaultPhoneCountry() {

@@ -6,6 +6,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.Instant;
 
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
+import myweddinginvitation.webapp.rsvp.AttendanceResponse;
+import myweddinginvitation.webapp.rsvp.RsvpService;
+import myweddinginvitation.webapp.rsvp.RsvpSubmission;
+import myweddinginvitation.webapp.rsvp.RsvpView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +30,21 @@ class GuestServiceTest {
 	GuestRepository guests;
 
 	@Autowired
+	RsvpService rsvps;
+
+	@Autowired
 	JdbcTemplate jdbc;
 
 	@BeforeEach
 	void clearGuests() {
+		jdbc.update("delete from rsvp");
 		jdbc.update("delete from guest");
-		jdbc.update("update wedding_settings set default_phone_country = 'ID' where id = 1");
+		jdbc.update("""
+				update wedding_settings set default_phone_country = 'ID',
+				publication_state = 'PUBLISHED', event_closed = false,
+				time_zone = 'Asia/Jakarta', rsvp_deadline = '2030-08-01 08:00:00'
+				where id = 1
+				""");
 	}
 
 	@Test
@@ -115,6 +128,22 @@ class GuestServiceTest {
 
 		assertThat(changedNumber.getFailedPinCount()).isZero();
 		assertThat(changedNumber.getPinLockedUntil()).isNull();
+	}
+
+	@Test
+	void disablingPlusOneWithoutConfirmationPreservesGuestAndRsvp() {
+		Guest guest = service.create(new GuestForm("Sari", "Ibu", "ID", "081234567890",
+				null, true, MessageLanguage.ID, null), false);
+		rsvps.submitGuest(guest.getId(), -1,
+				new RsvpSubmission(AttendanceResponse.HADIR, 2, null, false, null));
+
+		assertThatThrownBy(() -> service.update(guest.getId(), guest.getVersion(),
+				form("Sari", "081234567890"), false))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("planned attendance");
+
+		assertThat(guests.findById(guest.getId())).get().extracting(Guest::isPlusOneAllowed).isEqualTo(true);
+		assertThat(rsvps.view(guest.getId())).get().extracting(RsvpView::plannedAttendeeCount).isEqualTo(2);
 	}
 
 	private Guest savedGuest(String name, String whatsappNumber) {

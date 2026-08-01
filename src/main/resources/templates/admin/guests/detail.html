@@ -14,6 +14,24 @@
     <dt>Invitation link regenerated</dt><dd th:text="${guest.tokenRegeneratedAt ?: 'Never'}">Never</dd>
     <dt>Archived</dt><dd th:text="${guest.archived ? 'Yes' : 'No'}">No</dd>
   </dl>
+  <section aria-labelledby="rsvp-heading">
+    <h2 id="rsvp-heading">RSVP</h2>
+    <p th:if="${rsvp == null}">No RSVP</p>
+    <dl th:if="${rsvp != null}">
+      <dt>Response</dt><dd th:text="${rsvp.response}">HADIR</dd>
+      <dt>Planned attendees</dt><dd th:text="${rsvp.plannedAttendeeCount}">1</dd>
+      <dt>Updated by</dt><dd th:text="${rsvp.updateSource}">GUEST</dd>
+      <dt>Updated at</dt><dd th:text="${rsvp.updatedAt}">Time</dd>
+    </dl>
+    <p th:if="${!guest.archived}"><a th:href="@{/admin/guests/{id}/rsvp(id=${guest.id})}">Edit RSVP</a></p>
+  </section>
+  <section aria-labelledby="pin-heading">
+    <h2 id="pin-heading">Invitation PIN</h2>
+    <p th:text="${pinLocked ? 'Locked until ' + guest.pinLockedUntil : 'Not locked'}">Not locked</p>
+    <form th:if="${pinLocked}" method="post" th:action="@{/admin/guests/{id}/clear-pin-lock(id=${guest.id})}">
+      <button type="submit">Clear PIN lock</button>
+    </form>
+  </section>
   <section th:if="${!guest.archived}" aria-labelledby="delivery-heading">
     <h2 id="delivery-heading">Invitation delivery</h2>
     <form method="post" th:action="@{/admin/guests/{id}/open-whatsapp(id=${guest.id})}">

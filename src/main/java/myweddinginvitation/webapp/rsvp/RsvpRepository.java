@@ -1,5 +1,7 @@
 package myweddinginvitation.webapp.rsvp;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface RsvpRepository extends JpaRepository<Rsvp, Long> {
     Optional<Rsvp> findByGuestId(long guestId);
+    List<Rsvp> findByGuestIdIn(Collection<Long> guestIds);
     Optional<Rsvp> findByGuestPublicId(UUID publicId);
     Page<Rsvp> findByGreetingModerationStateAndGreetingPublicConsentTrueAndGreetingIsNotNull(
             GreetingModerationState state, Pageable pageable);

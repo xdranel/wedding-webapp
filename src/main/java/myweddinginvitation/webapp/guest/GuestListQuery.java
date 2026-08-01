@@ -1,4 +1,10 @@
 package myweddinginvitation.webapp.guest;
 
-public record GuestListQuery(String query, DeliveryState delivery, Boolean archived, Long categoryId) {
+import myweddinginvitation.webapp.rsvp.AttendanceResponse;
+
+public record GuestListQuery(String query, DeliveryState delivery, Boolean archived, Long categoryId,
+		AttendanceResponse rsvp, boolean noRsvp) {
+	public String rsvpStatus() {
+		return noRsvp ? "NONE" : rsvp == null ? null : rsvp.name();
+	}
 }
