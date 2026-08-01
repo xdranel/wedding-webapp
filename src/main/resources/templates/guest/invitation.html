@@ -166,8 +166,18 @@
 
     <section th:if="${rsvp != null && rsvp.response.name() == 'HADIR'}" aria-labelledby="qr-access-title">
         <h2 id="qr-access-title" th:text="${language == 'EN'} ? 'Check-in QR' : 'QR check-in'">QR check-in</h2>
+        <p th:if="${param.qrPinRequired}" role="alert"
+           th:text="${language == 'EN'} ? 'Verify your PIN to view the QR.' : 'Verifikasi PIN untuk melihat QR.'">
+            Verifikasi PIN untuk melihat QR.
+        </p>
         <p th:if="${qrVerified}" role="status"
            th:text="${language == 'EN'} ? 'PIN verified.' : 'PIN terverifikasi.'">PIN terverifikasi.</p>
+        <div th:if="${qrVerified}">
+            <img th:src="${invitationPath + '/qr.png?language=' + language}" width="320" height="320"
+                 th:alt="${language == 'EN'} ? 'Wedding check-in QR' : 'QR check-in pernikahan'">
+            <a th:href="${invitationPath + '/qr-download.png?language=' + language}"
+               th:text="${language == 'EN'} ? 'Download QR' : 'Unduh QR'">Unduh QR</a>
+        </div>
         <form th:if="${!qrVerified}" th:action="${invitationPath + '/verify-qr'}" method="post" class="rsvp-form">
             <label for="qr-pin" th:text="${language == 'EN'} ? 'Four-digit PIN' : 'PIN empat digit'">PIN empat digit</label>
             <input id="qr-pin" name="pin" type="password" inputmode="numeric" autocomplete="one-time-code"
