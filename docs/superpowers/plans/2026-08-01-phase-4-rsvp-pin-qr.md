@@ -944,7 +944,7 @@ With dummy guests, verify:
 11. Import remains seven columns; export contains Phase 4 fields and opens in a
     spreadsheet without formula execution.
 
-- [ ] **Step 8: Commit Task 8**
+- [x] **Step 8: Commit Task 8**
 
 ```bash
 git add README.md docs/installation/development.md \

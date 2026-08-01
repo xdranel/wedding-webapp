@@ -111,7 +111,9 @@ class RsvpQrJourneyTest {
 		mockMvc.perform(get(primaryPath).param("language", "EN"))
 				.andExpect(status().isOk())
 				.andExpect(view().name("guest/invitation"))
-				.andExpect(content().string(containsString("Journey Guest")));
+				.andExpect(content().string(containsString("Journey Guest")))
+				.andExpect(content().string(containsString("Welcome")))
+				.andExpect(content().string(not(containsString("Dengan hormat"))));
 
 		MvcResult saved = mockMvc.perform(post(primaryPath + "/rsvp").with(csrf())
 				.param("language", "EN")
@@ -126,11 +128,18 @@ class RsvpQrJourneyTest {
 		byte[] displayPng = mockMvc.perform(get(primaryPath + "/qr.png").session(guestSession))
 				.andExpect(status().isOk()).andExpect(content().contentType("image/png"))
 				.andReturn().getResponse().getContentAsByteArray();
-		mockMvc.perform(get(primaryPath + "/qr-download.png").session(guestSession))
+		byte[] downloadPng = mockMvc.perform(get(primaryPath + "/qr-download.png").session(guestSession))
 				.andExpect(status().isOk())
+				.andExpect(content().contentType("image/png"))
 				.andExpect(header().string("Content-Disposition",
-						"attachment; filename=\"wedding-check-in-qr.png\""));
+						"attachment; filename=\"wedding-check-in-qr.png\""))
+				.andReturn().getResponse().getContentAsByteArray();
 		String savedPayload = decode(displayPng);
+		assertThat(downloadPng).isNotEmpty();
+		BufferedImage downloaded = ImageIO.read(new ByteArrayInputStream(downloadPng));
+		assertThat(downloaded.getWidth()).isEqualTo(1024);
+		assertThat(downloaded.getHeight()).isEqualTo(1024);
+		assertThat(decode(downloadPng)).isEqualTo(savedPayload);
 		assertThat(qrSigner.verify(savedPayload)).get()
 				.extracting(QrReference::publicId, QrReference::tokenVersion)
 				.containsExactly(primary.getPublicId(), primary.getInvitationTokenVersion());
