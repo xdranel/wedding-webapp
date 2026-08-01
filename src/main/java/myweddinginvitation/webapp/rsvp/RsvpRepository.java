@@ -14,6 +14,8 @@ public interface RsvpRepository extends JpaRepository<Rsvp, Long> {
     Optional<Rsvp> findByGuestPublicId(UUID publicId);
     Page<Rsvp> findByGreetingModerationStateAndGreetingPublicConsentTrueAndGreetingIsNotNull(
             GreetingModerationState state, Pageable pageable);
+	Page<Rsvp> findByGreetingModerationStateAndGreetingPublicConsentTrueAndGreetingIsNotNullAndGuestArchivedFalse(
+			GreetingModerationState state, Pageable pageable);
     long countByResponse(AttendanceResponse response);
     long countByGreetingModerationState(GreetingModerationState state);
     long countByResponseAndGuestArchivedFalse(AttendanceResponse response);

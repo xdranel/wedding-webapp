@@ -16,6 +16,9 @@ import myweddinginvitation.webapp.wedding.WeddingSettings;
 import myweddinginvitation.webapp.wedding.WeddingSettingsRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,6 +82,17 @@ public class RsvpService {
 		return new RsvpSummary(hadir, tidakHadir, noRsvp,
 				rsvps.sumPlannedAttendanceForActiveGuests(),
 				rsvps.countByGreetingModerationStateAndGuestArchivedFalse(GreetingModerationState.PENDING));
+	}
+
+	@Transactional(readOnly = true)
+	public Page<PublicGreetingView> approvedGreetings(int page) {
+		WeddingSettings wedding = settings.getSingleton().orElseThrow();
+		ZoneId zone = ZoneId.of(wedding.getTimeZone());
+		return rsvps.findByGreetingModerationStateAndGreetingPublicConsentTrueAndGreetingIsNotNullAndGuestArchivedFalse(
+				GreetingModerationState.APPROVED,
+				PageRequest.of(Math.max(0, page), 20, Sort.by(Sort.Direction.DESC, "updatedAt", "id")))
+				.map(rsvp -> new PublicGreetingView(rsvp.getGuest().getDisplayName(), rsvp.getGreeting(),
+						rsvp.getUpdatedAt().atZone(zone).toLocalDate()));
 	}
 
 	private RsvpView write(long guestId, long version, RsvpSubmission submission,

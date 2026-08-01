@@ -11,6 +11,10 @@
 </head>
 <body th:attr="data-font=${preview.fontPreset}" th:style="|--accent: ${accentColor};|">
 <main>
+    <nav class="language-switch" th:aria-label="${language == 'EN'} ? 'Invitation language' : 'Bahasa undangan'">
+        <a th:href="${invitationPath + '?language=ID'}" lang="id">Indonesia</a>
+        <a th:href="${invitationPath + '?language=EN'}" lang="en">English</a>
+    </nav>
     <section id="cover" class="cover" aria-labelledby="invitation-title">
         <p th:text="${language == 'EN'} ? 'Wedding invitation' : 'Undangan pernikahan'">Undangan pernikahan</p>
         <h1 id="invitation-title"
@@ -71,6 +75,118 @@
     <section th:if="${!#strings.isEmpty(preview.closingText)}" aria-labelledby="closing-title">
         <h2 id="closing-title" th:text="${language == 'EN'} ? 'Closing' : 'Penutup'">Penutup</h2>
         <p th:text="${preview.closingText}">Terima kasih</p>
+    </section>
+
+    <section class="rsvp" aria-labelledby="rsvp-title">
+        <h2 id="rsvp-title">RSVP</h2>
+        <p th:if="${qrError != null}" role="alert" th:text="${qrError}">PIN tidak cocok.</p>
+        <p th:if="${param.rsvpSaved}" role="status"
+           th:text="${language == 'EN'} ? 'Your RSVP has been saved.' : 'RSVP Anda telah disimpan.'">
+            RSVP Anda telah disimpan.
+        </p>
+
+        <div th:if="${rsvp != null}" class="rsvp-current">
+            <h3 th:text="${language == 'EN'} ? 'Current response' : 'Jawaban saat ini'">Jawaban saat ini</h3>
+            <p th:text="${rsvp.response.name() == 'HADIR'} ? (${language == 'EN'} ? 'Attending' : 'Hadir') : (${language == 'EN'} ? 'Not attending' : 'Tidak hadir')">
+                Hadir
+            </p>
+            <p th:if="${rsvp.response.name() == 'HADIR'}"
+               th:text="${(language == 'EN' ? 'Planned guests: ' : 'Jumlah rencana hadir: ') + rsvp.plannedAttendeeCount}">
+                Jumlah rencana hadir: 1
+            </p>
+        </div>
+
+        <p th:if="${!rsvpWritable}" class="notice" th:text="${rsvpClosedReason}">RSVP belum dibuka</p>
+
+        <form th:if="${rsvpWritable}" th:action="${invitationPath + '/rsvp'}" method="post"
+              th:object="${rsvpForm}" class="rsvp-form">
+            <div th:if="${#fields.hasAnyErrors()}" class="form-errors" role="alert" aria-live="polite">
+                <p th:each="error : ${#fields.allErrors()}" th:text="${error}">Data tidak valid</p>
+            </div>
+
+            <fieldset>
+                <legend th:text="${language == 'EN'} ? 'Will you attend?' : 'Apakah Anda akan hadir?'">
+                    Apakah Anda akan hadir?
+                </legend>
+                <label>
+                    <input type="radio" th:field="*{response}" value="HADIR">
+                    <span th:text="${language == 'EN'} ? 'Attending' : 'Hadir'">Hadir</span>
+                </label>
+                <label>
+                    <input type="radio" th:field="*{response}" value="TIDAK_HADIR">
+                    <span th:text="${language == 'EN'} ? 'Not attending' : 'Tidak hadir'">Tidak hadir</span>
+                </label>
+            </fieldset>
+
+            <label class="attendance-count">
+                <span th:text="${language == 'EN'} ? 'Planned attendance' : 'Jumlah rencana hadir'">
+                    Jumlah rencana hadir
+                </span>
+                <select th:field="*{plannedAttendeeCount}">
+                    <option value="1">1</option>
+                    <option th:if="${plusOneAllowed}" value="2">2</option>
+                </select>
+            </label>
+
+            <div th:if="${greetingsEnabled}">
+                <label for="greeting" th:text="${language == 'EN'} ? 'Greeting (optional)' : 'Ucapan (opsional)'">
+                    Ucapan (opsional)
+                </label>
+                <textarea id="greeting" th:field="*{greeting}" maxlength="500" rows="4"></textarea>
+                <label>
+                    <input type="checkbox" th:field="*{greetingPublicConsent}">
+                    <span th:text="${language == 'EN'} ? 'I allow this greeting to be shown after administrator approval.' : 'Saya mengizinkan ucapan ini ditampilkan setelah disetujui admin.'">
+                        Saya mengizinkan ucapan ini ditampilkan setelah disetujui admin.
+                    </span>
+                </label>
+            </div>
+
+            <div th:if="${privateNoteEnabled}">
+                <label for="private-note"
+                       th:text="${language == 'EN'} ? 'Private note for the organizer (optional)' : 'Catatan privat untuk penyelenggara (opsional)'">
+                    Catatan privat untuk penyelenggara (opsional)
+                </label>
+                <textarea id="private-note" th:field="*{privateOrganizerNote}" maxlength="1000" rows="4"></textarea>
+            </div>
+
+            <label for="rsvp-pin" th:text="${language == 'EN'} ? 'Four-digit PIN' : 'PIN empat digit'">
+                PIN empat digit
+            </label>
+            <input id="rsvp-pin" name="pin" type="password" inputmode="numeric" autocomplete="one-time-code"
+                   pattern="[0-9]{4}" maxlength="4" required aria-describedby="pin-help">
+            <small id="pin-help"
+                   th:text="${language == 'EN'} ? 'Use the last four digits of the invited WhatsApp number.' : 'Gunakan empat digit terakhir nomor WhatsApp yang diundang.'">
+                Gunakan empat digit terakhir nomor WhatsApp yang diundang.
+            </small>
+            <input type="hidden" th:field="*{version}">
+            <input type="hidden" name="language" th:value="${language}">
+            <button type="submit" th:text="${language == 'EN'} ? 'Save RSVP' : 'Simpan RSVP'">Simpan RSVP</button>
+        </form>
+    </section>
+
+    <section th:if="${rsvp != null && rsvp.response.name() == 'HADIR'}" aria-labelledby="qr-access-title">
+        <h2 id="qr-access-title" th:text="${language == 'EN'} ? 'Check-in QR' : 'QR check-in'">QR check-in</h2>
+        <p th:if="${qrVerified}" role="status"
+           th:text="${language == 'EN'} ? 'PIN verified.' : 'PIN terverifikasi.'">PIN terverifikasi.</p>
+        <form th:if="${!qrVerified}" th:action="${invitationPath + '/verify-qr'}" method="post" class="rsvp-form">
+            <label for="qr-pin" th:text="${language == 'EN'} ? 'Four-digit PIN' : 'PIN empat digit'">PIN empat digit</label>
+            <input id="qr-pin" name="pin" type="password" inputmode="numeric" autocomplete="one-time-code"
+                   pattern="[0-9]{4}" maxlength="4" required>
+            <input type="hidden" name="language" th:value="${language}">
+            <button type="submit" th:text="${language == 'EN'} ? 'Verify PIN' : 'Verifikasi PIN'">Verifikasi PIN</button>
+        </form>
+    </section>
+
+    <section th:if="${greetingsEnabled && !greetings.empty}" aria-labelledby="greetings-title">
+        <h2 id="greetings-title" th:text="${language == 'EN'} ? 'Greetings' : 'Ucapan'">Ucapan</h2>
+        <article th:each="item : ${greetings}" class="greeting">
+            <h3 th:text="${item.displayName}">Nama tamu</h3>
+            <p th:text="${item.greeting}">Ucapan</p>
+            <time th:datetime="${item.date}" th:text="${item.date}">2026-08-01</time>
+        </article>
+        <a th:if="${greetingHasNext}"
+           th:href="${invitationPath + '?language=' + language + '&page=' + (greetingPage + 1)}"
+           th:text="${language == 'EN'} ? 'Load more' : 'Lihat lainnya'">Lihat lainnya</a>
     </section>
 </main>
 </body>

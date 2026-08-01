@@ -22,7 +22,7 @@ body[data-font="MODERN"] {
     font-family: system-ui, sans-serif;
 }
 
-a, button, input, select {
+a, button, input, select, textarea {
     font: inherit;
 }
 
@@ -64,6 +64,55 @@ button {
 
 section {
     margin-block: 3rem;
+}
+
+.language-switch {
+    display: flex;
+    gap: 1rem;
+    justify-content: end;
+}
+
+.rsvp-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.rsvp-form fieldset,
+.rsvp-form label {
+    display: grid;
+    gap: .4rem;
+}
+
+.rsvp-form fieldset label {
+    align-items: center;
+    display: flex;
+}
+
+.rsvp-form input,
+.rsvp-form select,
+.rsvp-form textarea {
+    border: 1px solid #777;
+    border-radius: .2rem;
+    padding: .65rem;
+}
+
+.rsvp-form .attendance-count {
+    display: none;
+}
+
+.rsvp-form:has(input[value="HADIR"]:checked) .attendance-count {
+    display: grid;
+}
+
+.form-errors,
+.notice {
+    border-inline-start: .25rem solid var(--accent);
+    padding-inline-start: 1rem;
+}
+
+.neutral-page {
+    min-height: 70vh;
+    align-content: center;
 }
 
 article {

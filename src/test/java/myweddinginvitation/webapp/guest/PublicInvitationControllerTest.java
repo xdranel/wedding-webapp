@@ -59,7 +59,9 @@ class PublicInvitationControllerTest {
 		jdbc.update("""
 				update wedding_settings set publication_state = 'DRAFT', couple_title = null,
 				opening_text_id = null, opening_text_en = null, closing_text_id = null,
-				closing_text_en = null, accent_color = '#7A5C48', font_preset = 'CLASSIC'
+				closing_text_en = null, rsvp_deadline = '2027-04-30 23:59:59', event_closed = false,
+				greetings_enabled = true, private_organizer_note_enabled = false,
+				accent_color = '#7A5C48', font_preset = 'CLASSIC'
 				where id = 1
 				""");
 		seedWeddingContent();
@@ -81,8 +83,8 @@ class PublicInvitationControllerTest {
 				.andExpect(content().string(containsString("noindex, nofollow")))
 				.andExpect(content().string(not(containsString(WHATSAPP))))
 				.andExpect(content().string(not(containsString(INTERNAL_NOTE))))
-				.andExpect(content().string(not(containsString("RSVP"))))
-				.andExpect(content().string(not(containsString("PIN"))))
+				.andExpect(content().string(containsString("RSVP")))
+				.andExpect(content().string(containsString("PIN")))
 				.andExpect(content().string(not(containsString("QRCode"))))
 				.andExpect(content().string(not(containsString("/admin/"))));
 	}

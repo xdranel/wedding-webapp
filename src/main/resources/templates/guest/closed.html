@@ -1,0 +1,18 @@
+<!doctype html>
+<html th:lang="${language == 'EN'} ? 'en' : 'id'" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title th:text="${language == 'EN'} ? 'Event completed' : 'Acara telah selesai'">Acara telah selesai</title>
+    <link rel="stylesheet" th:href="@{/css/invitation.css}">
+</head>
+<body>
+<main class="neutral-page">
+    <h1 th:text="${language == 'EN'} ? 'The event has ended' : 'Acara telah selesai'">Acara telah selesai</h1>
+    <p th:text="${language == 'EN'} ? 'Thank you for being part of our celebration.' : 'Terima kasih telah menjadi bagian dari perayaan kami.'">
+        Terima kasih telah menjadi bagian dari perayaan kami.
+    </p>
+</main>
+</body>
+</html>
