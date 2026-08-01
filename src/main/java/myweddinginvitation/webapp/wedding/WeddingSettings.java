@@ -55,6 +55,15 @@ public class WeddingSettings {
     @Column(name = "font_preset", nullable = false, length = 30)
     private FontPreset fontPreset = FontPreset.CLASSIC;
 
+    @Column(name = "event_closed", nullable = false)
+    private boolean eventClosed;
+
+    @Column(name = "greetings_enabled", nullable = false)
+    private boolean greetingsEnabled = true;
+
+    @Column(name = "private_organizer_note_enabled", nullable = false)
+    private boolean privateOrganizerNoteEnabled;
+
     protected WeddingSettings() {
     }
 
@@ -114,6 +123,18 @@ public class WeddingSettings {
         return fontPreset;
     }
 
+    public boolean isEventClosed() {
+        return eventClosed;
+    }
+
+    public boolean isGreetingsEnabled() {
+        return greetingsEnabled;
+    }
+
+    public boolean isPrivateOrganizerNoteEnabled() {
+        return privateOrganizerNoteEnabled;
+    }
+
     void publish() {
         publicationState = PublicationState.PUBLISHED;
     }
@@ -133,5 +154,8 @@ public class WeddingSettings {
         defaultPhoneCountry = form.getDefaultPhoneCountry();
         accentColor = form.getAccentColor();
         fontPreset = form.getFontPreset();
+        eventClosed = form.isEventClosed();
+        greetingsEnabled = form.isGreetingsEnabled();
+        privateOrganizerNoteEnabled = form.isPrivateOrganizerNoteEnabled();
     }
 }

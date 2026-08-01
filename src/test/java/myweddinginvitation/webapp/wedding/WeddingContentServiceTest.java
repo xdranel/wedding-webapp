@@ -136,6 +136,21 @@ class WeddingContentServiceTest {
 	}
 
 	@Test
+	void settingsRoundTripPhaseFourSwitches() {
+		WeddingSettingsForm form = service.settingsForm();
+		form.setEventClosed(true);
+		form.setGreetingsEnabled(false);
+		form.setPrivateOrganizerNoteEnabled(true);
+
+		service.saveSettings(form);
+
+		assertThat(service.settingsForm())
+				.extracting(WeddingSettingsForm::isEventClosed, WeddingSettingsForm::isGreetingsEnabled,
+						WeddingSettingsForm::isPrivateOrganizerNoteEnabled)
+				.containsExactly(true, false, true);
+	}
+
+	@Test
 	void staleSettingsEditDoesNotUndoPublication() {
 		completePartners("Rama", "Shinta");
 		visibleEvent(EventType.CEREMONY, LocalDate.of(2027, 5, 1), null);

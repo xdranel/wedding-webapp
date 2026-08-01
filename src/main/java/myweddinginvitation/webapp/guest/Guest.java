@@ -1,5 +1,6 @@
 package myweddinginvitation.webapp.guest;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -70,6 +71,12 @@ public class Guest {
 	@Column(name = "archived_at")
 	private Instant archivedAt;
 
+	@Column(name = "failed_pin_count", nullable = false)
+	private int failedPinCount;
+
+	@Column(name = "pin_locked_until")
+	private Instant pinLockedUntil;
+
 	@Version
 	private long version;
 
@@ -132,6 +139,26 @@ public class Guest {
 		updatedAt = regeneratedAt;
 	}
 
+	public void pinFailed(Instant now) {
+		if (pinLockedUntil != null && !now.isBefore(pinLockedUntil)) clearPinLock();
+		if (pinLockedUntil != null) return;
+		failedPinCount++;
+		if (failedPinCount == 5) pinLockedUntil = now.plus(Duration.ofMinutes(15));
+	}
+
+	public void pinSucceeded() {
+		resetPinSecurity();
+	}
+
+	public void clearPinLock() {
+		failedPinCount = 0;
+		pinLockedUntil = null;
+	}
+
+	public void resetPinSecurity() {
+		clearPinLock();
+	}
+
 	public Long getId() { return id; }
 	public UUID getPublicId() { return publicId; }
 	public String getDisplayName() { return displayName; }
@@ -148,6 +175,8 @@ public class Guest {
 	public Instant getLastSentAt() { return lastSentAt; }
 	public boolean isArchived() { return archived; }
 	public Instant getArchivedAt() { return archivedAt; }
+	public int getFailedPinCount() { return failedPinCount; }
+	public Instant getPinLockedUntil() { return pinLockedUntil; }
 	public long getVersion() { return version; }
 	public Instant getCreatedAt() { return createdAt; }
 	public Instant getUpdatedAt() { return updatedAt; }

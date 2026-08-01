@@ -62,6 +62,9 @@ public class WeddingContentService {
         form.setDefaultPhoneCountry(source.getDefaultPhoneCountry());
         form.setAccentColor(source.getAccentColor());
         form.setFontPreset(source.getFontPreset());
+        form.setEventClosed(source.isEventClosed());
+        form.setGreetingsEnabled(source.isGreetingsEnabled());
+        form.setPrivateOrganizerNoteEnabled(source.isPrivateOrganizerNoteEnabled());
         return form;
     }
 

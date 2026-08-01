@@ -83,13 +83,19 @@ class WeddingContentControllerTest {
 				.param("timeZone", "Asia/Jakarta")
 				.param("defaultPhoneCountry", "ID")
 				.param("accentColor", "#7a5c48")
-				.param("fontPreset", "CLASSIC"))
+				.param("fontPreset", "CLASSIC")
+				.param("eventClosed", "true")
+				.param("_greetingsEnabled", "on")
+				.param("privateOrganizerNoteEnabled", "true"))
 				.andExpect(redirectedUrl("/admin/wedding?settingsSaved"));
 
 		WeddingSettings saved = settings.getSingleton().orElseThrow();
 		assertThat(saved.getCoupleTitle()).isEqualTo("Rama & Shinta");
 		assertThat(saved.getOpeningTextId()).isEqualTo("Dengan hormat");
 		assertThat(saved.getClosingTextId()).isEqualTo("Terima kasih");
+		assertThat(saved.isEventClosed()).isTrue();
+		assertThat(saved.isGreetingsEnabled()).isFalse();
+		assertThat(saved.isPrivateOrganizerNoteEnabled()).isTrue();
 	}
 
 	@Test
