@@ -35,4 +35,22 @@ class CheckInQrSignerTest {
 		assertThat(signer.verify("W1." + PUBLIC_ID + ".7." + SIGNATURE + ".extra")).isEmpty();
 		assertThat(signer.verify(null)).isEmpty();
 	}
+
+	@Test
+	void rejectsNonCanonicalComponentEncodings() {
+		String payload = signer.payload(PUBLIC_ID, 7);
+		UUID shortFormId = UUID.fromString("1-1-1-1-1");
+		String shortFormPayload = signer.payload(shortFormId, 7)
+				.replace(shortFormId.toString(), "1-1-1-1-1");
+
+		assertThat(signer.verify(payload.replace(PUBLIC_ID.toString(), PUBLIC_ID.toString().toUpperCase())))
+				.isEmpty();
+		assertThat(signer.verify("W1.{" + PUBLIC_ID + "}.7." + SIGNATURE)).isEmpty();
+		assertThat(signer.verify(shortFormPayload)).isEmpty();
+		assertThat(signer.verify(payload.replace(".7.", ".+7."))).isEmpty();
+		assertThat(signer.verify(payload.replace(".7.", ".007."))).isEmpty();
+		assertThat(signer.verify(payload + "=")).isEmpty();
+		assertThat(signer.verify("W1." + PUBLIC_ID + ".7." + SIGNATURE.replace('-', '+').replace('_', '/')))
+				.isEmpty();
+	}
 }

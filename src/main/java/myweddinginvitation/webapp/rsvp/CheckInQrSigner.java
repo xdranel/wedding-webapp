@@ -46,6 +46,9 @@ public class CheckInQrSigner {
 			long tokenVersion = Long.parseLong(parts[2]);
 			if (tokenVersion < 1) return Optional.empty();
 			byte[] supplied = Base64.getUrlDecoder().decode(parts[3]);
+			String canonical = FORMAT + "." + publicId + "." + tokenVersion + "."
+					+ Base64.getUrlEncoder().withoutPadding().encodeToString(supplied);
+			if (!canonical.equals(payload)) return Optional.empty();
 			return MessageDigest.isEqual(signature(publicId, tokenVersion), supplied)
 					? Optional.of(new QrReference(publicId, tokenVersion)) : Optional.empty();
 		} catch (IllegalArgumentException exception) {
