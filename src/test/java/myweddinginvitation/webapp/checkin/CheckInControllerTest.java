@@ -130,6 +130,29 @@ class CheckInControllerTest {
 	}
 
 	@Test
+	void checkInHomeOffersLocalCameraScanningAlongsideManualInput() throws Exception {
+		mockMvc.perform(get("/check-in").session(staffSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("id=\"qr-preview-form\"")))
+				.andExpect(content().string(containsString("id=\"scanner-start\"")))
+				.andExpect(content().string(containsString("id=\"scanner-stop\"")))
+				.andExpect(content().string(containsString("id=\"scanner-video\"")))
+				.andExpect(content().string(containsString("id=\"scanner-status\"")))
+				.andExpect(content().string(containsString("/webjars/qr-scanner/1.4.2/qr-scanner.min.js")))
+				.andExpect(content().string(containsString("/js/check-in-scanner.js")))
+				.andExpect(content().string(not(containsString("https://cdn"))))
+				.andExpect(content().string(not(containsString("http://cdn"))));
+	}
+
+	@Test
+	void anonymousUsersCanLoadLocalCameraScannerResources() throws Exception {
+		mockMvc.perform(get("/webjars/qr-scanner/1.4.2/qr-scanner.min.js"))
+				.andExpect(status().isOk());
+		mockMvc.perform(get("/js/check-in-scanner.js"))
+				.andExpect(status().isOk());
+	}
+
+	@Test
 	void previewsNeverWriteAndConfirmationUsesPrg() throws Exception {
 		Guest guest = attendingGuest("Preview guest", false, "+62811115555");
 		String payload = qrSigner.payload(guest.getPublicId(), guest.getInvitationTokenVersion());

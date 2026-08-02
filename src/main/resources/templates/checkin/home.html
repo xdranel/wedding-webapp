@@ -11,7 +11,11 @@
   <p th:if="${checkInError}" th:text="${checkInError}" role="alert">Check-in error</p>
   <section aria-labelledby="scan-heading">
     <h2 id="scan-heading">Scan invitation</h2>
-    <form method="post" th:action="@{/check-in/preview/qr}">
+    <p id="scanner-status" role="status" aria-live="polite">Use a USB scanner or enter the invitation code manually.</p>
+    <button id="scanner-start" type="button">Start camera</button>
+    <button id="scanner-stop" type="button" disabled>Stop camera</button>
+    <video id="scanner-video" hidden muted playsinline></video>
+    <form id="qr-preview-form" method="post" th:action="@{/check-in/preview/qr}">
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
       <label for="scanner-input">Scanner input</label>
       <input id="scanner-input" name="payload" type="text" inputmode="text" autocomplete="off" autofocus required>
@@ -36,5 +40,7 @@
     </ul>
   </section>
 </main>
+<script type="module" src="/webjars/qr-scanner/1.4.2/qr-scanner.min.js"></script>
+<script type="module" src="/js/check-in-scanner.js"></script>
 </body>
 </html>
