@@ -150,6 +150,22 @@ class CheckInControllerTest {
 	}
 
 	@Test
+	void knownDuplicatePreviewIsReadOnly() throws Exception {
+		Guest guest = attendingGuest("Already checked in", false, "+62811117777");
+		mockMvc.perform(post("/check-in/confirm/guest/{id}", guest.getId()).session(staffSession).with(csrf())
+				.param("guestVersion", Long.toString(guest.getVersion())).param("actualCount", "1"))
+				.andExpect(redirectedUrl("/check-in/result"));
+
+		mockMvc.perform(get("/check-in/preview/guest/{id}", guest.getId()).session(staffSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Current check-in")))
+				.andExpect(content().string(containsString("staff")))
+				.andExpect(content().string(not(containsString("/check-in/confirm/"))))
+				.andExpect(content().string(not(containsString("Actual attendees"))))
+				.andExpect(content().string(not(containsString("<button type=\"submit\">Confirm check-in"))));
+	}
+
+	@Test
 	void staffPagesNeverRenderPrivateGuestData() throws Exception {
 		Guest guest = guest("Private guest", "+62811116666", "internal-note-secret");
 		rsvps.submitGuest(guest.getId(), -1, new RsvpSubmission(AttendanceResponse.HADIR, 1,

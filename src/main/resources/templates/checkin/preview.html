@@ -18,7 +18,7 @@
     <p>Checked in at <time th:text="${preview.currentCheckIn.checkedInAt}">Time</time> by <span th:text="${preview.currentCheckIn.checkedInByUsername}">Staff</span>; count <span th:text="${preview.currentCheckIn.actualAttendeeCount}">1</span>.</p>
   </section>
   <p th:if="${preview.rsvpChangeRequired}" role="alert">This guest's RSVP will be changed to attending when you confirm.</p>
-  <form method="post" th:action="${qr} ? @{/check-in/confirm/qr} : @{/check-in/confirm/guest/{id}(id=${preview.guestId})}" th:object="${form}">
+  <form th:if="${preview.currentCheckIn == null}" method="post" th:action="${qr} ? @{/check-in/confirm/qr} : @{/check-in/confirm/guest/{id}(id=${preview.guestId})}" th:object="${form}">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
     <input th:if="${qr}" type="hidden" th:field="*{payload}">
     <input th:unless="${qr}" type="hidden" th:field="*{guestVersion}">
