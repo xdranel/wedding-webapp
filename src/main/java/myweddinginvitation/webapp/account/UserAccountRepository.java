@@ -1,5 +1,6 @@
 package myweddinginvitation.webapp.account;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,6 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, Long> 
     Optional<UserAccount> findByUsernameForUpdate(@Param("username") String username);
 
     long countByRole(AccountRole role);
+
+    List<UserAccount> findAllByRoleOrderByUsernameAsc(AccountRole role);
 }

@@ -124,4 +124,14 @@ public class UserAccount {
             sessionVersion++;
         }
     }
+
+    void enable() {
+        enabled = true;
+    }
+
+    void resetPassword(String passwordHash) {
+        this.passwordHash = passwordHash;
+        passwordChangeRequired = true;
+        sessionVersion++;
+    }
 }
