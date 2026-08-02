@@ -159,6 +159,20 @@ class CheckInServiceTest {
 	}
 
 	@Test
+	void qrConfirmationRejectsTokenRegeneratedAfterPreview() {
+		Guest guest = attendingGuest("Regenerated QR", false, 1);
+		String payload = qrSigner.payload(guest.getPublicId(), guest.getInvitationTokenVersion());
+		service.previewQr(payload);
+
+		jdbc.update("update guest set invitation_token_version = invitation_token_version + 1 where id = ?",
+				guest.getId());
+
+		assertFailure(CheckInFailure.EXPIRED_QR,
+				() -> service.confirmQr(payload, 1, false, "test-admin"));
+		assertThat(checkIns.findByGuestId(guest.getId())).isEmpty();
+	}
+
+	@Test
 	void validCurrentQrChecksInAttendingGuest() {
 		Guest guest = attendingGuest("QR arrival", true, 2);
 		String payload = qrSigner.payload(guest.getPublicId(), guest.getInvitationTokenVersion());

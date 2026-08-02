@@ -19,11 +19,20 @@ import myweddinginvitation.webapp.rsvp.Rsvp;
 import myweddinginvitation.webapp.rsvp.RsvpRepository;
 import myweddinginvitation.webapp.rsvp.RsvpUpdateSource;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Role;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -31,7 +40,7 @@ import org.springframework.test.annotation.DirtiesContext;
 		"app.bootstrap-admin.username=test-admin",
 		"app.bootstrap-admin.password=Test-Only-Password-2026"
 })
-@Import(MySqlTestConfiguration.class)
+@Import({MySqlTestConfiguration.class, CheckInConcurrencyTest.LockBarrierConfig.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class CheckInConcurrencyTest {
 	@Autowired CheckInService service;
@@ -39,6 +48,7 @@ class CheckInConcurrencyTest {
 	@Autowired RsvpRepository rsvps;
 	@Autowired GuestService guestService;
 	@Autowired JdbcTemplate jdbc;
+	@Autowired GuestLockBarrier guestLockBarrier;
 
 	@BeforeEach
 	void resetData() {
@@ -57,19 +67,14 @@ class CheckInConcurrencyTest {
 	void simultaneousConfirmationsCreateOneCheckInAndPromoteRsvpOnce() throws Exception {
 		Guest guest = guestService.create(new GuestForm("Concurrent guest", "Bapak/Ibu", "ID",
 				"+6281234567890", null, false, MessageLanguage.ID, null), false);
-		CountDownLatch ready = new CountDownLatch(2);
-		CountDownLatch start = new CountDownLatch(1);
-		Callable<CheckInOutcome> confirmation = () -> {
-			ready.countDown();
-			if (!start.await(5, TimeUnit.SECONDS)) throw new AssertionError("Confirmation start timed out");
-			return service.confirmGuest(guest.getId(), guest.getVersion(), 1, true, "test-admin");
-		};
+		Callable<CheckInOutcome> confirmation = () ->
+				service.confirmGuest(guest.getId(), guest.getVersion(), 1, true, "test-admin");
 		ExecutorService executor = Executors.newFixedThreadPool(2);
 		try {
 			Future<CheckInOutcome> first = executor.submit(confirmation);
 			Future<CheckInOutcome> second = executor.submit(confirmation);
-			assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue();
-			start.countDown();
+			assertThat(guestLockBarrier.awaitBoth()).isTrue();
+			guestLockBarrier.release();
 
 			List<CheckInOutcome> outcomes = List.of(first.get(10, TimeUnit.SECONDS),
 					second.get(10, TimeUnit.SECONDS));
@@ -77,7 +82,7 @@ class CheckInConcurrencyTest {
 			assertThat(outcomes).filteredOn(CheckInOutcome::duplicate).hasSize(1);
 			assertThat(outcomes.get(0).checkIn()).isEqualTo(outcomes.get(1).checkIn());
 		} finally {
-			start.countDown();
+			guestLockBarrier.release();
 			executor.shutdownNow();
 		}
 
@@ -89,5 +94,43 @@ class CheckInConcurrencyTest {
 		assertThat(rsvp.getUpdateSource()).isEqualTo(RsvpUpdateSource.CHECK_IN);
 		assertThat(rsvp.getVersion()).isZero();
 		assertThat(checkIn.getRsvpVersionAfterChange()).isZero();
+	}
+
+	static final class GuestLockBarrier implements MethodInterceptor {
+		private final CountDownLatch waiting = new CountDownLatch(2);
+		private final CountDownLatch release = new CountDownLatch(1);
+
+		@Override
+		public Object invoke(MethodInvocation invocation) throws Throwable {
+			waiting.countDown();
+			if (!release.await(5, TimeUnit.SECONDS)) throw new AssertionError("Guest lock release timed out");
+			return invocation.proceed();
+		}
+
+		boolean awaitBoth() throws InterruptedException {
+			return waiting.await(5, TimeUnit.SECONDS);
+		}
+
+		void release() {
+			release.countDown();
+		}
+	}
+
+	@TestConfiguration(proxyBeanMethods = false)
+	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+	static class LockBarrierConfig {
+		@Bean
+		@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+		GuestLockBarrier guestLockBarrier() {
+			return new GuestLockBarrier();
+		}
+
+		@Bean
+		@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+		Advisor guestLockBarrierAdvisor(GuestLockBarrier barrier) {
+			NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+			pointcut.setMappedName("findByIdForUpdate");
+			return new DefaultPointcutAdvisor(pointcut, barrier);
+		}
 	}
 }
