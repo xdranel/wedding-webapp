@@ -2,5 +2,6 @@ package myweddinginvitation.webapp.rsvp;
 
 public enum RsvpUpdateSource {
     GUEST,
-    ADMIN
+    ADMIN,
+    CHECK_IN
 }

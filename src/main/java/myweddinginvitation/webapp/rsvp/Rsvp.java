@@ -100,6 +100,18 @@ public class Rsvp {
         updatedAt = now;
     }
 
+    public static Rsvp promoteForCheckIn(Rsvp current, Guest guest, int plannedAttendeeCount,
+                                         UserAccount updatedByAccount, Instant now) {
+        if (current == null) {
+            return create(guest, AttendanceResponse.HADIR, plannedAttendeeCount, null, false,
+                    GreetingModerationState.HIDDEN, null, RsvpUpdateSource.CHECK_IN, updatedByAccount, now);
+        }
+        current.update(AttendanceResponse.HADIR, plannedAttendeeCount, current.greeting,
+                current.greetingPublicConsent, current.greetingModerationState, current.privateOrganizerNote,
+                RsvpUpdateSource.CHECK_IN, updatedByAccount, now);
+        return current;
+    }
+
     public Long getId() { return id; }
     public Guest getGuest() { return guest; }
     public AttendanceResponse getResponse() { return response; }

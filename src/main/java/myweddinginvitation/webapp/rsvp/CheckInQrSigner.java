@@ -66,6 +66,3 @@ public class CheckInQrSigner {
 		}
 	}
 }
-
-record QrReference(UUID publicId, long tokenVersion) {
-}
