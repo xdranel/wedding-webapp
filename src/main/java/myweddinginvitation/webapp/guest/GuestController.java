@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.util.NoSuchElementException;
 
 import jakarta.validation.Valid;
+import myweddinginvitation.webapp.checkin.CheckInService;
 import myweddinginvitation.webapp.rsvp.AttendanceResponse;
 import myweddinginvitation.webapp.rsvp.RsvpService;
 import myweddinginvitation.webapp.wedding.WeddingSettingsRepository;
@@ -33,15 +34,17 @@ public class GuestController {
 	private final WhatsappNumberService numbers;
 	private final WeddingSettingsRepository settings;
 	private final RsvpService rsvps;
+	private final CheckInService checkIns;
 	private final Clock clock;
 
 	public GuestController(GuestService guests, GuestCategoryService categories, WhatsappNumberService numbers,
-			WeddingSettingsRepository settings, RsvpService rsvps, Clock clock) {
+			WeddingSettingsRepository settings, RsvpService rsvps, CheckInService checkIns, Clock clock) {
 		this.guests = guests;
 		this.categories = categories;
 		this.numbers = numbers;
 		this.settings = settings;
 		this.rsvps = rsvps;
+		this.checkIns = checkIns;
 		this.clock = clock;
 	}
 
@@ -105,6 +108,8 @@ public class GuestController {
 		Guest guest = guests.get(id);
 		model.addAttribute("guest", guest);
 		model.addAttribute("rsvp", rsvps.view(id).orElse(null));
+		model.addAttribute("checkIn", checkIns.current(id).orElse(null));
+		model.addAttribute("checkInHistory", checkIns.history(id));
 		model.addAttribute("pinLocked", guest.getPinLockedUntil() != null
 				&& clock.instant().isBefore(guest.getPinLockedUntil()));
 		return "admin/guests/detail";

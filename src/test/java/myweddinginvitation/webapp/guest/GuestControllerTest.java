@@ -69,6 +69,8 @@ class GuestControllerTest {
 
 	@BeforeEach
 	void clearGuests() throws Exception {
+		jdbc.update("delete from check_in_correction");
+		jdbc.update("delete from check_in");
 		jdbc.update("delete from rsvp");
 		jdbc.update("delete from guest");
 		jdbc.update("""

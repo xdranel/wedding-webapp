@@ -27,6 +27,56 @@
     </dl>
     <p th:if="${!guest.archived}"><a th:href="@{/admin/guests/{id}/rsvp(id=${guest.id})}">Edit RSVP</a></p>
   </section>
+  <section aria-labelledby="check-in-heading">
+    <h2 id="check-in-heading">Current check-in</h2>
+    <p th:if="${checkInError}" th:text="${checkInError}" role="alert">Check-in error</p>
+    <p th:if="${checkInWarning}" th:text="${checkInWarning}" role="alert">Check-in warning</p>
+    <p th:if="${checkIn == null}">Not checked in</p>
+    <div th:if="${checkIn != null}">
+      <dl>
+        <dt>Actual attendees</dt><dd th:text="${checkIn.actualAttendeeCount}">1</dd>
+        <dt>Checked in at</dt><dd th:text="${checkIn.checkedInAt}">Time</dd>
+        <dt>Checked in by</dt><dd th:text="${checkIn.checkedInByUsername}">staff</dd>
+      </dl>
+      <h3>Correct check-in</h3>
+      <form method="post" th:action="@{/admin/guests/{id}/check-in/correct(id=${guest.id})}">
+        <input type="hidden" name="checkInVersion" th:value="${checkIn.version}">
+        <fieldset th:if="${guest.plusOneAllowed}">
+          <legend>Actual attendees</legend>
+          <label><input type="radio" name="actualCount" value="1"
+                        th:checked="${checkIn.actualAttendeeCount == 1}">1</label>
+          <label><input type="radio" name="actualCount" value="2"
+                        th:checked="${checkIn.actualAttendeeCount == 2}">2</label>
+        </fieldset>
+        <input th:if="${!guest.plusOneAllowed}" type="hidden" name="actualCount" value="1">
+        <label>Reason <textarea name="reason" required maxlength="500"></textarea></label>
+        <button type="submit">Correct check-in</button>
+      </form>
+      <h3>Cancel check-in</h3>
+      <form method="post" th:action="@{/admin/guests/{id}/check-in/cancel(id=${guest.id})}">
+        <input type="hidden" name="checkInVersion" th:value="${checkIn.version}">
+        <input type="hidden" name="actualCount" th:value="${checkIn.actualAttendeeCount}">
+        <label>Reason <textarea name="reason" required maxlength="500"></textarea></label>
+        <button type="submit">Cancel check-in</button>
+      </form>
+    </div>
+  </section>
+  <section aria-labelledby="check-in-history-heading">
+    <h2 id="check-in-history-heading">Correction history</h2>
+    <p th:if="${#lists.isEmpty(checkInHistory)}">No corrections</p>
+    <ol th:if="${!#lists.isEmpty(checkInHistory)}">
+      <li th:each="entry : ${checkInHistory}">
+        <strong th:text="${entry.action}">CORRECT</strong>
+        <span th:text="${entry.beforeActualAttendeeCount}">1</span>
+        <span th:text="${entry.afterActualAttendeeCount == null ? 'cancelled' : '→ ' + entry.afterActualAttendeeCount}">→ 2</span>
+        — <span th:text="${entry.reason}">Reason</span>
+        — by <span th:text="${entry.correctedByUsername}">admin</span>
+        at <time th:text="${entry.correctedAt}">Time</time>
+        (originally checked in by <span th:text="${entry.originalCheckedInByUsername}">staff</span>
+        at <time th:text="${entry.originalCheckedInAt}">Time</time>)
+      </li>
+    </ol>
+  </section>
   <section aria-labelledby="pin-heading">
     <h2 id="pin-heading">Invitation PIN</h2>
     <p th:text="${pinLocked ? 'Locked until ' + guest.pinLockedUntil : 'Not locked'}">Not locked</p>

@@ -16,6 +16,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,6 +35,7 @@ import myweddinginvitation.webapp.wedding.PublicationState;
 import myweddinginvitation.webapp.wedding.WeddingSettings;
 import myweddinginvitation.webapp.wedding.WeddingSettingsRepository;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -45,6 +47,7 @@ public class CheckInService {
 	private static final String CURRENT_GUEST_CONSTRAINT = "uk_check_in_guest";
 
 	private final CheckInRepository checkIns;
+	private final CheckInCorrectionRepository corrections;
 	private final GuestRepository guests;
 	private final RsvpRepository rsvps;
 	private final WeddingSettingsRepository settings;
@@ -53,10 +56,12 @@ public class CheckInService {
 	private final Clock clock;
 	private final TransactionTemplate transactions;
 
-	public CheckInService(CheckInRepository checkIns, GuestRepository guests, RsvpRepository rsvps,
+	public CheckInService(CheckInRepository checkIns, CheckInCorrectionRepository corrections,
+			GuestRepository guests, RsvpRepository rsvps,
 			WeddingSettingsRepository settings, UserAccountRepository accounts, CheckInQrSigner qrSigner,
 			Clock clock, PlatformTransactionManager transactionManager) {
 		this.checkIns = checkIns;
+		this.corrections = corrections;
 		this.guests = guests;
 		this.rsvps = rsvps;
 		this.settings = settings;
@@ -115,6 +120,64 @@ public class CheckInService {
 	public CheckInSummary summary() {
 		return new CheckInSummary(checkIns.countByGuestArchivedFalse(),
 				checkIns.sumActualAttendanceForActiveGuests());
+	}
+
+	@Transactional
+	public CorrectionOutcome correct(long guestId, long checkInVersion, int actualCount,
+			String reason, String adminUsername) {
+		Guest guest = guests.findByIdForUpdate(guestId).orElseThrow(() -> failure(INVITATION_INACTIVE));
+		UserAccount admin = adminAccount(adminUsername);
+		CheckIn checkIn = currentCheckIn(guestId, checkInVersion);
+		rsvps.findByGuestId(guestId);
+		String strippedReason = reason(reason);
+		requireAllowance(guest, actualCount);
+
+		int before = checkIn.getActualAttendeeCount();
+		Instant now = clock.instant().truncatedTo(ChronoUnit.MICROS);
+		checkIn.correctActualAttendeeCount(actualCount);
+		checkIns.saveAndFlush(checkIn);
+		corrections.saveAndFlush(CheckInCorrection.create(guest, checkIn, CheckInCorrectionAction.CORRECT,
+				before, actualCount, strippedReason, admin, now, checkIn.getCheckedInAt(),
+				checkIn.getCheckedInByAccount(), checkIn.getCheckedInByAccount().getUsername()));
+		return new CorrectionOutcome(view(checkIn));
+	}
+
+	@Transactional
+	public CancellationOutcome cancel(long guestId, long checkInVersion,
+			String reason, String adminUsername) {
+		Guest guest = guests.findByIdForUpdate(guestId).orElseThrow(() -> failure(INVITATION_INACTIVE));
+		UserAccount admin = adminAccount(adminUsername);
+		CheckIn checkIn = currentCheckIn(guestId, checkInVersion);
+		Rsvp rsvp = rsvps.findByGuestId(guestId).orElse(null);
+		String strippedReason = reason(reason);
+		Instant now = clock.instant().truncatedTo(ChronoUnit.MICROS);
+		boolean restorationSkipped = false;
+
+		if (checkIn.isRsvpAutoChanged()) {
+			if (rsvp == null || rsvp.getVersion() != checkIn.getRsvpVersionAfterChange()) {
+				restorationSkipped = true;
+			} else if (checkIn.getPreviousRsvpResponse() == null) {
+				rsvps.delete(rsvp);
+				rsvps.flush();
+			} else {
+				rsvp.restoreAfterCheckInCancellation(checkIn.getPreviousRsvpResponse(),
+						checkIn.getPreviousPlannedAttendeeCount(), admin, now);
+				rsvps.saveAndFlush(rsvp);
+			}
+		}
+
+		corrections.saveAndFlush(CheckInCorrection.create(guest, checkIn, CheckInCorrectionAction.CANCEL,
+				checkIn.getActualAttendeeCount(), null, strippedReason, admin, now, checkIn.getCheckedInAt(),
+				checkIn.getCheckedInByAccount(), checkIn.getCheckedInByAccount().getUsername()));
+		checkIns.deleteCurrentById(checkIn.getId());
+		return new CancellationOutcome(restorationSkipped);
+	}
+
+	@Transactional(readOnly = true)
+	public List<CheckInCorrectionView> history(long guestId) {
+		return corrections.findByGuestIdOrderByCorrectedAtDescIdDesc(guestId).stream()
+				.map(this::view)
+				.toList();
 	}
 
 	private CheckInOutcome confirm(String payload, Long guestId, Long guestVersion, int actualCount,
@@ -189,6 +252,31 @@ public class CheckInService {
 				.orElseThrow(() -> failure(ACCOUNT_DISABLED));
 	}
 
+	private UserAccount adminAccount(String username) {
+		if (username == null) throw failure(ACCOUNT_DISABLED);
+		return accounts.findByUsernameIgnoreCase(username)
+				.filter(UserAccount::isEnabled)
+				.filter(account -> account.getRole() == AccountRole.ADMIN)
+				.orElseThrow(() -> failure(ACCOUNT_DISABLED));
+	}
+
+	private CheckIn currentCheckIn(long guestId, long version) {
+		CheckIn checkIn = checkIns.findByGuestId(guestId)
+				.orElseThrow(() -> new OptimisticLockingFailureException("Check-in has changed"));
+		if (checkIn.getVersion() != version) {
+			throw new OptimisticLockingFailureException("Check-in has changed");
+		}
+		return checkIn;
+	}
+
+	private String reason(String reason) {
+		String stripped = reason == null ? null : reason.strip();
+		if (stripped == null || stripped.isEmpty() || stripped.length() > 500) {
+			throw new IllegalArgumentException("Reason must be between 1 and 500 characters");
+		}
+		return stripped;
+	}
+
 	private WeddingSettings wedding() {
 		return settings.getSingleton().orElseThrow(() -> failure(WEDDING_UNPUBLISHED));
 	}
@@ -223,16 +311,36 @@ public class CheckInService {
 	}
 
 	private CheckInView view(CheckIn checkIn) {
-		return new CheckInView(checkIn.getGuest().getId(), checkIn.getActualAttendeeCount(),
+		return new CheckInView(checkIn.getGuest().getId(), checkIn.getVersion(), checkIn.getActualAttendeeCount(),
 				checkIn.getCheckedInAt(), checkIn.getCheckedInByAccount().getUsername());
+	}
+
+	private CheckInCorrectionView view(CheckInCorrection correction) {
+		return new CheckInCorrectionView(correction.getId(), correction.getAction(),
+				correction.getBeforeActualAttendeeCount(), correction.getAfterActualAttendeeCount(),
+				correction.getReason(), correction.getCorrectedByAccount().getUsername(),
+				correction.getCorrectedAt(), correction.getOriginalCheckedInAt(),
+				correction.getOriginalCheckedInByUsername());
 	}
 
 	private CheckInException failure(CheckInFailure failure) {
 		return new CheckInException(failure);
 	}
 
-	public record CheckInView(long guestId, int actualAttendeeCount, Instant checkedInAt,
+	public record CheckInView(long guestId, long version, int actualAttendeeCount, Instant checkedInAt,
 			String checkedInByUsername) {
+	}
+
+	public record CorrectionOutcome(CheckInView checkIn) {
+	}
+
+	public record CancellationOutcome(boolean rsvpRestorationSkipped) {
+	}
+
+	public record CheckInCorrectionView(long id, CheckInCorrectionAction action,
+			int beforeActualAttendeeCount, Integer afterActualAttendeeCount, String reason,
+			String correctedByUsername, Instant correctedAt, Instant originalCheckedInAt,
+			String originalCheckedInByUsername) {
 	}
 
 	public record CheckInSummary(long checkedInInvitations, long actualPeople) {

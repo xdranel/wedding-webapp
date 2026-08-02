@@ -112,6 +112,12 @@ public class Rsvp {
         return current;
     }
 
+	public void restoreAfterCheckInCancellation(AttendanceResponse response, int plannedAttendeeCount,
+			UserAccount updatedByAccount, Instant now) {
+		update(response, plannedAttendeeCount, greeting, greetingPublicConsent, greetingModerationState,
+				privateOrganizerNote, RsvpUpdateSource.ADMIN, updatedByAccount, now);
+	}
+
     public Long getId() { return id; }
     public Guest getGuest() { return guest; }
     public AttendanceResponse getResponse() { return response; }
