@@ -1,33 +1,40 @@
 <!doctype html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Guest Check-in</title>
-</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Guest Check-in</title></head>
 <body>
 <header>
-    <h1>Guest Check-in</h1>
-    <nav aria-label="Check-in navigation">
-        <a href="#find-guest">Find guest</a>
-        <form method="post" th:action="@{/logout}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <button type="submit">Sign out</button>
-        </form>
-    </nav>
+  <h1>Guest Check-in</h1>
+  <p id="connection-status">Connected to the check-in server.</p>
+  <form method="post" th:action="@{/logout}"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit">Sign out</button></form>
 </header>
 <main>
-    <section id="find-guest">
-        <h2>Find a guest</h2>
-        <p>
-            <label for="guest-search">Search guests</label>
-            <input id="guest-search" type="search" placeholder="Search by guest name">
-        </p>
-        <p>
-            <label for="scanner-input">Scanner input</label>
-            <input id="scanner-input" type="text" placeholder="Scan invitation code" inputmode="text">
-        </p>
-    </section>
+  <p th:if="${checkInError}" th:text="${checkInError}" role="alert">Check-in error</p>
+  <section aria-labelledby="scan-heading">
+    <h2 id="scan-heading">Scan invitation</h2>
+    <form method="post" th:action="@{/check-in/preview/qr}">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+      <label for="scanner-input">Scanner input</label>
+      <input id="scanner-input" name="payload" type="text" inputmode="text" autocomplete="off" autofocus required>
+      <button type="submit">Preview check-in</button>
+    </form>
+  </section>
+  <section aria-labelledby="find-heading">
+    <h2 id="find-heading">Find a guest</h2>
+    <form method="get" th:action="@{/check-in/search}">
+      <label for="guest-search">Name or last four phone digits</label>
+      <input id="guest-search" name="q" type="search" th:value="${search.q}" autocomplete="off">
+      <button type="submit">Search</button>
+    </form>
+    <p th:if="${searchError}" th:text="${searchError}" role="alert">Search error</p>
+    <p th:if="${search.q != null and !search.q.isBlank() and searchResults.isEmpty() and searchError == null}">No active guests found.</p>
+    <ul th:if="${!searchResults.isEmpty()}">
+      <li th:each="guest : ${searchResults}">
+        <a th:href="@{/check-in/preview/guest/{id}(id=${guest.id})}" th:text="${guest.displayName}">Guest</a>
+        <span th:text="${guest.categoryName == null ? 'Uncategorized' : guest.categoryName}">Category</span>
+        <span th:if="${guest.currentCheckIn != null}">Already checked in.</span>
+      </li>
+    </ul>
+  </section>
 </main>
 </body>
 </html>

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Pageable;
 
 public interface GuestRepository extends JpaRepository<Guest, Long>, JpaSpecificationExecutor<Guest> {
 	Optional<Guest> findByPublicId(UUID publicId);
@@ -23,6 +24,18 @@ public interface GuestRepository extends JpaRepository<Guest, Long>, JpaSpecific
 	Optional<Guest> findByPublicIdForUpdate(@Param("publicId") UUID publicId);
 
 	boolean existsByNormalizedWhatsappNumber(String normalizedWhatsappNumber);
+
+	@Query("""
+			select g from Guest g
+			where g.archived = false and (
+				(:phoneSuffix = true and function('right', g.normalizedWhatsappNumber, 4) = :query)
+				or (:phoneSuffix = false and lower(g.displayName) like lower(concat('%', :query, '%')))
+			)
+			order by g.displayName asc, g.id asc
+			""")
+	List<Guest> findActiveForCheckIn(@Param("query") String query, @Param("phoneSuffix") boolean phoneSuffix,
+			Pageable pageable);
+
 	List<Guest> findAllByOrderByDisplayNameAscIdAsc();
 	long countByCategoryIsNull();
 	long countByArchivedFalse();
