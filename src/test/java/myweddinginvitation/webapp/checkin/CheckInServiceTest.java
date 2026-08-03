@@ -8,6 +8,10 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import jakarta.persistence.EntityManagerFactory;
+import myweddinginvitation.webapp.account.AccountRole;
+import myweddinginvitation.webapp.account.UserAccount;
+import myweddinginvitation.webapp.account.UserAccountRepository;
 import myweddinginvitation.webapp.guest.DeliveryState;
 import myweddinginvitation.webapp.guest.Guest;
 import myweddinginvitation.webapp.guest.GuestForm;
@@ -25,6 +29,7 @@ import myweddinginvitation.webapp.rsvp.RsvpUpdateSource;
 import myweddinginvitation.webapp.rsvp.RsvpView;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +57,8 @@ class CheckInServiceTest {
 	@Autowired GuestRepository guests;
 	@Autowired RsvpService rsvpService;
 	@Autowired RsvpRepository rsvps;
+	@Autowired UserAccountRepository accounts;
+	@Autowired EntityManagerFactory entityManagerFactory;
 	@Autowired JdbcTemplate jdbc;
 
 	private int phoneSuffix;
@@ -93,6 +100,24 @@ class CheckInServiceTest {
 		assertThat(service.currentFor(List.of(guest.getId()))).containsEntry(guest.getId(), outcome.checkIn());
 		assertThat(service.summary().checkedInInvitations()).isEqualTo(1);
 		assertThat(service.summary().actualPeople()).isEqualTo(1);
+	}
+
+	@Test
+	void bulkCurrentViewsFetchCheckInAccountsInOneStatement() {
+		Guest first = guest("First", false);
+		Guest second = guest("Second", false);
+		accounts.saveAndFlush(new UserAccount("second-staff", "{noop}password", AccountRole.STAFF));
+		service.confirmGuest(first.getId(), first.getVersion(), 1, true, "test-admin");
+		service.confirmGuest(second.getId(), second.getVersion(), 1, true, "second-staff");
+		var statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
+		statistics.setStatisticsEnabled(true);
+		statistics.clear();
+
+		assertThat(service.currentFor(List.of(first.getId(), second.getId())).values())
+				.extracting(CheckInService.CheckInView::checkedInByUsername)
+				.containsExactlyInAnyOrder("test-admin", "second-staff");
+
+		assertThat(statistics.getPrepareStatementCount()).isEqualTo(1);
 	}
 
 	@Test

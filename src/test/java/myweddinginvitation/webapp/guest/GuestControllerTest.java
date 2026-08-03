@@ -205,6 +205,28 @@ class GuestControllerTest {
 	}
 
 	@Test
+	void disablingPlusOneAfterTwoPeopleCheckedInRendersValidationError() throws Exception {
+		Guest guest = service.create(form("Checked In Guest", "081234567880", true), false);
+		rsvps.submitGuest(guest.getId(), -1,
+				new RsvpSubmission(AttendanceResponse.HADIR, 1, null, false, null));
+		checkIns.confirmGuest(guest.getId(), guest.getVersion(), 2, false, "admin");
+
+		mockMvc.perform(post("/admin/guests/{id}", guest.getId()).session(adminSession).with(csrf())
+				.param("version", Long.toString(guest.getVersion()))
+				.param("displayName", "Submitted name").param("salutation", guest.getSalutation())
+				.param("phoneRegion", "ID").param("whatsappNumber", guest.getNormalizedWhatsappNumber())
+				.param("preferredLanguage", "ID").param("_plusOneAllowed", "on"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("admin/guests/form"))
+				.andExpect(model().attributeHasErrors("form"))
+				.andExpect(model().attribute("guest", hasProperty("id", is(guest.getId()))))
+				.andExpect(content().string(containsString("Cannot disable +1 after two people have checked in.")))
+				.andExpect(content().string(containsString("value=\"Submitted name\"")));
+
+		assertThat(guests.findById(guest.getId())).get().extracting(Guest::isPlusOneAllowed).isEqualTo(true);
+	}
+
+	@Test
 	void privateOrganizerNoteIsEscapedOnAdminDetailAndUnavailableToStaff() throws Exception {
 		jdbc.update("update wedding_settings set private_organizer_note_enabled = true where id = 1");
 		Guest guest = service.create(form("Private Note Guest", "081234567897"), false);

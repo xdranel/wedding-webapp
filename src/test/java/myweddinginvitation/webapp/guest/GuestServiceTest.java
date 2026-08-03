@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -39,6 +41,9 @@ class GuestServiceTest {
 
 	@Autowired
 	GuestRepository guests;
+
+	@Autowired
+	GuestCategoryRepository categories;
 
 	@Autowired
 	RsvpService rsvps;
@@ -58,6 +63,7 @@ class GuestServiceTest {
 		jdbc.update("delete from check_in");
 		jdbc.update("delete from rsvp");
 		jdbc.update("delete from guest");
+		jdbc.update("delete from guest_category");
 		jdbc.update("""
 				update wedding_settings set default_phone_country = 'ID',
 				publication_state = 'PUBLISHED', event_closed = false,
@@ -204,6 +210,27 @@ class GuestServiceTest {
 
 		assertThat(onePersonUpdated.isPlusOneAllowed()).isFalse();
 		assertThat(noCheckInUpdated.isPlusOneAllowed()).isFalse();
+	}
+
+	@Test
+	void checkedInFilterComposesWithCategorySortAndPaging() {
+		GuestCategory category = categories.saveAndFlush(GuestCategory.create("VIP", "vip"));
+		Guest alpha = service.create(new GuestForm("Checked Alpha", "Ibu", "ID", "081234567881",
+				category.getId(), false, MessageLanguage.ID, null), false);
+		Guest bravo = service.create(new GuestForm("Checked Bravo", "Ibu", "ID", "081234567882",
+				category.getId(), false, MessageLanguage.ID, null), false);
+		checkIns.confirmGuest(alpha.getId(), alpha.getVersion(), 1, true, "test-admin");
+		checkIns.confirmGuest(bravo.getId(), bravo.getVersion(), 1, true, "test-admin");
+		service.confirmSent(alpha.getId(), alpha.getVersion(), Instant.parse("2026-08-02T00:00:00Z"));
+		service.confirmSent(bravo.getId(), bravo.getVersion(), Instant.parse("2026-08-02T00:00:00Z"));
+
+		var page = service.search(new GuestListQuery("Checked", DeliveryState.SENT, false, category.getId(),
+				AttendanceResponse.HADIR, false, true),
+				PageRequest.of(1, 1, Sort.by("displayName").ascending()));
+
+		assertThat(page.getTotalElements()).isEqualTo(2);
+		assertThat(page.getNumber()).isEqualTo(1);
+		assertThat(page.getContent()).extracting(Guest::getDisplayName).containsExactly("Checked Bravo");
 	}
 
 	@Test

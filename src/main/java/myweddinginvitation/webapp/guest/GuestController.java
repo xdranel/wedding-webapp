@@ -147,6 +147,8 @@ public class GuestController {
 				formPage(model, form, existing, false, true);
 				model.addAttribute("duplicateAccepted", duplicateAccepted);
 				return "admin/guests/form";
+			} catch (GuestService.CheckInAllowanceReductionForbiddenException exception) {
+				result.reject("guest.checkInAllowance", exception.getMessage());
 			} catch (IllegalArgumentException exception) {
 				rejectInvalidPhoneInput(result, form, exception);
 			} catch (OptimisticLockingFailureException exception) {
