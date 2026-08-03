@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import myweddinginvitation.webapp.checkin.CheckInService;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import myweddinginvitation.webapp.rsvp.AttendanceResponse;
 import myweddinginvitation.webapp.rsvp.RsvpService;
@@ -43,6 +44,9 @@ class GuestServiceTest {
 	RsvpService rsvps;
 
 	@Autowired
+	CheckInService checkIns;
+
+	@Autowired
 	JdbcTemplate jdbc;
 
 	@Autowired
@@ -50,6 +54,8 @@ class GuestServiceTest {
 
 	@BeforeEach
 	void clearGuests() {
+		jdbc.update("delete from check_in_correction");
+		jdbc.update("delete from check_in");
 		jdbc.update("delete from rsvp");
 		jdbc.update("delete from guest");
 		jdbc.update("""
@@ -157,6 +163,47 @@ class GuestServiceTest {
 
 		assertThat(guests.findById(guest.getId())).get().extracting(Guest::isPlusOneAllowed).isEqualTo(true);
 		assertThat(rsvps.view(guest.getId())).get().extracting(RsvpView::plannedAttendeeCount).isEqualTo(2);
+	}
+
+	@Test
+	void disablingPlusOnePreservesGuestAndCheckInWhenTwoPeopleAlreadyArrived() {
+		Guest guest = service.create(new GuestForm("Sari", "Ibu", "ID", "081234567890",
+				null, true, MessageLanguage.ID, null), false);
+		RsvpView rsvp = rsvps.submitGuest(guest.getId(), -1,
+				new RsvpSubmission(AttendanceResponse.HADIR, 1, null, false, null));
+		checkIns.confirmGuest(guest.getId(), guest.getVersion(), 2, false, "test-admin");
+
+		assertThatThrownBy(() -> service.update(guest.getId(), guest.getVersion(),
+				form("Sari", "081234567890"), false))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("checked in");
+
+		assertThat(guests.findById(guest.getId())).get().extracting(Guest::isPlusOneAllowed).isEqualTo(true);
+		assertThat(rsvps.view(guest.getId())).get()
+				.extracting(RsvpView::version, RsvpView::plannedAttendeeCount)
+				.containsExactly(rsvp.version(), rsvp.plannedAttendeeCount());
+		assertThat(checkIns.current(guest.getId())).get()
+				.extracting(CheckInService.CheckInView::actualAttendeeCount).isEqualTo(2);
+	}
+
+	@Test
+	void disablingPlusOneAllowsOneOrNoCurrentCheckIn() {
+		Guest onePerson = service.create(new GuestForm("One Person", "Ibu", "ID", "081234567891",
+				null, true, MessageLanguage.ID, null), false);
+		rsvps.submitGuest(onePerson.getId(), -1,
+				new RsvpSubmission(AttendanceResponse.HADIR, 1, null, false, null));
+		checkIns.confirmGuest(onePerson.getId(), onePerson.getVersion(), 1, false, "test-admin");
+
+		Guest onePersonUpdated = service.update(onePerson.getId(), onePerson.getVersion(),
+				form("One Person", "081234567891"), false);
+		Guest noCheckIn = service.create(new GuestForm("No Check-In", "Ibu", "ID", "081234567892",
+				null, true, MessageLanguage.ID, null), false);
+
+		Guest noCheckInUpdated = service.update(noCheckIn.getId(), noCheckIn.getVersion(),
+				form("No Check-In", "081234567892"), false);
+
+		assertThat(onePersonUpdated.isPlusOneAllowed()).isFalse();
+		assertThat(noCheckInUpdated.isPlusOneAllowed()).isFalse();
 	}
 
 	@Test

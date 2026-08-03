@@ -9,6 +9,8 @@ import java.util.NoSuchElementException;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
+import myweddinginvitation.webapp.checkin.CheckIn;
+import myweddinginvitation.webapp.checkin.CheckInRepository;
 import myweddinginvitation.webapp.rsvp.AttendanceResponse;
 import myweddinginvitation.webapp.rsvp.Rsvp;
 import myweddinginvitation.webapp.rsvp.RsvpService;
@@ -28,13 +30,15 @@ public class GuestService {
 	private final GuestCategoryRepository categories;
 	private final WhatsappNumberService numbers;
 	private final RsvpService rsvps;
+	private final CheckInRepository checkIns;
 
 	public GuestService(GuestRepository guests, GuestCategoryRepository categories, WhatsappNumberService numbers,
-			RsvpService rsvps) {
+			RsvpService rsvps, CheckInRepository checkIns) {
 		this.guests = guests;
 		this.categories = categories;
 		this.numbers = numbers;
 		this.rsvps = rsvps;
+		this.checkIns = checkIns;
 	}
 
 	@Transactional
@@ -63,6 +67,10 @@ public class GuestService {
 		requireDuplicateAccepted(!normalizedNumber.equals(guest.getNormalizedWhatsappNumber())
 				&& guests.existsByNormalizedWhatsappNumber(normalizedNumber), acceptDuplicate);
 		boolean phoneChanged = !normalizedNumber.equals(guest.getNormalizedWhatsappNumber());
+		if (guest.isPlusOneAllowed() && !form.plusOneAllowed()
+				&& checkIns.findByGuestId(id).map(checkIn -> checkIn.getActualAttendeeCount() == 2).orElse(false)) {
+			throw new CheckInAllowanceReductionForbiddenException();
+		}
 		RsvpView rsvp = rsvps.view(id).orElse(null);
 		boolean reductionRequired = guest.isPlusOneAllowed() && !form.plusOneAllowed()
 				&& rsvp != null && rsvp.response() == AttendanceResponse.HADIR
@@ -162,6 +170,14 @@ public class GuestService {
 				predicates.add(filters.noRsvp() ? builder.not(builder.exists(matchingRsvp))
 						: builder.exists(matchingRsvp));
 			}
+			if (filters.checkedIn() != null) {
+				Subquery<Long> matchingCheckIn = query.subquery(Long.class);
+				Root<CheckIn> checkIn = matchingCheckIn.from(CheckIn.class);
+				matchingCheckIn.select(checkIn.get("id"))
+						.where(builder.equal(checkIn.get("guest"), root));
+				predicates.add(filters.checkedIn() ? builder.exists(matchingCheckIn)
+						: builder.not(builder.exists(matchingCheckIn)));
+			}
 			return builder.and(predicates.toArray(Predicate[]::new));
 		};
 	}
@@ -201,6 +217,12 @@ public class GuestService {
 	static class PlannedAttendanceReductionRequiredException extends IllegalStateException {
 		PlannedAttendanceReductionRequiredException() {
 			super("Confirm reducing planned attendance to one before disabling +1.");
+		}
+	}
+
+	static class CheckInAllowanceReductionForbiddenException extends IllegalStateException {
+		CheckInAllowanceReductionForbiddenException() {
+			super("Cannot disable +1 after two people have checked in.");
 		}
 	}
 }

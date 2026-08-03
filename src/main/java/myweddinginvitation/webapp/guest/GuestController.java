@@ -54,16 +54,18 @@ public class GuestController {
 			@RequestParam(required = false) Boolean archived,
 			@RequestParam(required = false) Long categoryId,
 			@RequestParam(required = false) String rsvpStatus,
+			@RequestParam(required = false) Boolean checkedIn,
 			@RequestParam(defaultValue = "updatedAt,desc") String sort,
 			@RequestParam(defaultValue = "0") int page, Model model) {
 		AttendanceResponse rsvp = attendance(rsvpStatus);
 		GuestListQuery filters = new GuestListQuery(query, delivery, archived, categoryId,
-				rsvp, "NONE".equals(rsvpStatus));
+				rsvp, "NONE".equals(rsvpStatus), checkedIn);
 		var pageOfGuests = guests.search(filters, PageRequest.of(Math.max(page, 0), 50, sort(sort)));
 		model.addAttribute("filters", filters);
 		model.addAttribute("sort", sort);
 		model.addAttribute("page", pageOfGuests);
 		model.addAttribute("rsvps", rsvps.views(pageOfGuests.getContent().stream().map(Guest::getId).toList()));
+		model.addAttribute("checkIns", checkIns.currentFor(pageOfGuests.getContent().stream().map(Guest::getId).toList()));
 		model.addAttribute("categories", categories.findAll());
 		return "admin/guests/list";
 	}

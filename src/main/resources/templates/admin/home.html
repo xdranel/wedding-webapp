@@ -36,6 +36,13 @@
         </dl>
         <p><a th:href="@{/admin/greetings}">Moderate greetings</a></p>
     </section>
+    <section id="check-in-summary">
+        <h2>Check-in summary</h2>
+        <dl>
+            <dt>Checked-in invitations</dt><dd th:text="${checkInSummary.checkedInInvitations}">0</dd>
+            <dt>Actual people</dt><dd th:text="${checkInSummary.actualPeople}">0</dd>
+        </dl>
+    </section>
     <section id="settings">
         <h2>Wedding settings</h2>
         <p><a th:href="@{/admin/wedding}">Manage wedding content</a></p>

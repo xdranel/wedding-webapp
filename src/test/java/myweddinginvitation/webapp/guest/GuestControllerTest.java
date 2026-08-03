@@ -18,6 +18,7 @@ import myweddinginvitation.webapp.account.AccountRole;
 import myweddinginvitation.webapp.account.AccountSecurityService;
 import myweddinginvitation.webapp.account.UserAccount;
 import myweddinginvitation.webapp.account.UserAccountRepository;
+import myweddinginvitation.webapp.checkin.CheckInService;
 import myweddinginvitation.webapp.rsvp.AttendanceResponse;
 import myweddinginvitation.webapp.rsvp.RsvpService;
 import myweddinginvitation.webapp.rsvp.RsvpSubmission;
@@ -54,6 +55,9 @@ class GuestControllerTest {
 
 	@Autowired
 	RsvpService rsvps;
+
+	@Autowired
+	CheckInService checkIns;
 
 	@Autowired
 	JdbcTemplate jdbc;
@@ -133,6 +137,37 @@ class GuestControllerTest {
 				.andExpect(content().string(containsString("No Reply Guest")))
 				.andExpect(content().string(not(containsString("Hadir Guest"))))
 				.andExpect(content().string(not(containsString("Declined Guest"))));
+	}
+
+	@Test
+	void checkedInFilterComposesWithExistingGuestFiltersAndDisplaysCurrentCheckIn() throws Exception {
+		Guest checked = service.create(form("Filtered Checked", "081234567898", true), false);
+		service.confirmSent(checked.getId(), checked.getVersion(), java.time.Instant.parse("2026-08-02T00:00:00Z"));
+		checked = guests.findById(checked.getId()).orElseThrow();
+		rsvps.submitGuest(checked.getId(), -1,
+				new RsvpSubmission(AttendanceResponse.HADIR, 1, null, false, null));
+		checkIns.confirmGuest(checked.getId(), checked.getVersion(), 1, false, "admin");
+
+		Guest unchecked = service.create(form("Filtered Unchecked", "081234567899"), false);
+		service.confirmSent(unchecked.getId(), unchecked.getVersion(), java.time.Instant.parse("2026-08-02T00:00:00Z"));
+		rsvps.submitGuest(unchecked.getId(), -1,
+				new RsvpSubmission(AttendanceResponse.HADIR, 1, null, false, null));
+
+		mockMvc.perform(get("/admin/guests").session(adminSession)
+				.param("query", "Filtered").param("delivery", "SENT").param("archived", "false")
+				.param("rsvpStatus", "HADIR").param("checkedIn", "true")
+				.param("sort", "name,asc").param("page", "0"))
+				.andExpect(content().string(containsString("Filtered Checked")))
+				.andExpect(content().string(not(containsString("Filtered Unchecked"))))
+				.andExpect(content().string(containsString("Actual attendees")))
+				.andExpect(content().string(containsString(">1<")));
+
+		mockMvc.perform(get("/admin/guests").session(adminSession)
+				.param("query", "Filtered").param("delivery", "SENT").param("archived", "false")
+				.param("rsvpStatus", "HADIR").param("checkedIn", "false")
+				.param("sort", "name,desc").param("page", "0"))
+				.andExpect(content().string(containsString("Filtered Unchecked")))
+				.andExpect(content().string(not(containsString("Filtered Checked"))));
 	}
 
 	@Test
