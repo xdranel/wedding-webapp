@@ -14,6 +14,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface RsvpRepository extends JpaRepository<Rsvp, Long> {
     Optional<Rsvp> findByGuestId(long guestId);
+	@Query("select r.guest.id from Rsvp r where r.id = :id")
+	Optional<Long> findGuestIdById(@Param("id") long id);
     List<Rsvp> findByGuestIdIn(Collection<Long> guestIds);
     Optional<Rsvp> findByGuestPublicId(UUID publicId);
     @EntityGraph(attributePaths = "guest")

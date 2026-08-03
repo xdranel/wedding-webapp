@@ -6,6 +6,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import myweddinginvitation.webapp.account.AccountRole;
 import myweddinginvitation.webapp.account.UserAccount;
@@ -23,14 +30,21 @@ import myweddinginvitation.webapp.rsvp.RsvpService;
 import myweddinginvitation.webapp.rsvp.RsvpSubmission;
 import myweddinginvitation.webapp.rsvp.RsvpView;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Role;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
@@ -53,6 +67,7 @@ class AdminCheckInServiceTest {
 	@Autowired RsvpRepository rsvps;
 	@Autowired UserAccountRepository accounts;
 	@Autowired JdbcTemplate jdbc;
+	@Autowired RsvpCancellationBarrier cancellationBarrier;
 
 	private int phoneSuffix;
 
@@ -189,6 +204,40 @@ class AdminCheckInServiceTest {
 	}
 
 	@Test
+	void cancellationAndGreetingModerationSerializeUnderTheGuestLock() throws Exception {
+		Guest guest = declinedGuest("Concurrent moderation", false);
+		CheckInService.CheckInView checkedIn = service.confirmGuest(
+				guest.getId(), guest.getVersion(), 1, true, "staff").checkIn();
+		RsvpView promoted = rsvpService.view(guest.getId()).orElseThrow();
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		try {
+			Future<CheckInService.CancellationOutcome> cancellation = executor.submit(() ->
+					cancellationBarrier.duringCancellation(() -> service.cancel(
+							guest.getId(), checkedIn.version(), "Concurrent correction", "admin")));
+			assertThat(cancellationBarrier.awaitRsvpRead()).isTrue();
+			Future<Void> moderation = executor.submit(() -> cancellationBarrier.duringModeration(() -> {
+				rsvpService.approveGreeting(promoted.id(), promoted.version());
+				return null;
+			}));
+			assertThat(cancellationBarrier.awaitModerationLockAttempt()).isTrue();
+
+			cancellationBarrier.releaseCancellation();
+
+			assertThat(cancellation.get(10, TimeUnit.SECONDS).rsvpRestorationSkipped()).isFalse();
+			assertThatThrownBy(() -> moderation.get(10, TimeUnit.SECONDS))
+					.isInstanceOf(ExecutionException.class)
+					.hasCauseInstanceOf(OptimisticLockingFailureException.class);
+		} finally {
+			cancellationBarrier.releaseCancellation();
+			executor.shutdownNow();
+		}
+
+		assertThat(service.current(guest.getId())).isEmpty();
+		assertThat(rsvps.findByGuestId(guest.getId()).orElseThrow().getResponse())
+				.isEqualTo(AttendanceResponse.TIDAK_HADIR);
+	}
+
+	@Test
 	void staleCancellationRollsBackWithoutRemovingCurrentCheckInOrAppendingAudit() {
 		Guest guest = attendingGuest("Stale cancellation", false, 1);
 		CheckInService.CheckInView checkedIn = service.confirmGuest(
@@ -240,11 +289,84 @@ class AdminCheckInServiceTest {
 	}
 
 	@TestConfiguration(proxyBeanMethods = false)
+	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	static class FixedClockConfig {
 		@Bean
 		@Primary
 		Clock fixedClock() {
 			return Clock.fixed(NOW, ZoneOffset.UTC);
+		}
+
+		@Bean
+		@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+		RsvpCancellationBarrier rsvpCancellationBarrier() {
+			return new RsvpCancellationBarrier();
+		}
+
+		@Bean
+		@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+		Advisor rsvpCancellationBarrierAdvisor(RsvpCancellationBarrier barrier) {
+			NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+			pointcut.setMappedNames("findByGuestId", "findByIdForUpdate");
+			return new DefaultPointcutAdvisor(pointcut, barrier);
+		}
+	}
+
+	static final class RsvpCancellationBarrier implements MethodInterceptor {
+		private enum Operation { CANCELLATION, MODERATION }
+
+		private final ThreadLocal<Operation> operation = new ThreadLocal<>();
+		private final CountDownLatch rsvpRead = new CountDownLatch(1);
+		private final CountDownLatch moderationLockAttempt = new CountDownLatch(1);
+		private final CountDownLatch releaseCancellation = new CountDownLatch(1);
+
+		@Override
+		public Object invoke(MethodInvocation invocation) throws Throwable {
+			if (operation.get() == Operation.CANCELLATION
+					&& invocation.getThis() instanceof RsvpRepository
+					&& invocation.getMethod().getName().equals("findByGuestId")) {
+				Object result = invocation.proceed();
+				rsvpRead.countDown();
+				if (!releaseCancellation.await(5, TimeUnit.SECONDS)) {
+					throw new AssertionError("Cancellation release timed out");
+				}
+				return result;
+			}
+			if (operation.get() == Operation.MODERATION
+					&& invocation.getThis() instanceof GuestRepository
+					&& invocation.getMethod().getName().equals("findByIdForUpdate")) {
+				moderationLockAttempt.countDown();
+			}
+			return invocation.proceed();
+		}
+
+		<T> T duringCancellation(Callable<T> action) throws Exception {
+			return during(Operation.CANCELLATION, action);
+		}
+
+		<T> T duringModeration(Callable<T> action) throws Exception {
+			return during(Operation.MODERATION, action);
+		}
+
+		boolean awaitRsvpRead() throws InterruptedException {
+			return rsvpRead.await(5, TimeUnit.SECONDS);
+		}
+
+		boolean awaitModerationLockAttempt() throws InterruptedException {
+			return moderationLockAttempt.await(5, TimeUnit.SECONDS);
+		}
+
+		void releaseCancellation() {
+			releaseCancellation.countDown();
+		}
+
+		private <T> T during(Operation current, Callable<T> action) throws Exception {
+			operation.set(current);
+			try {
+				return action.call();
+			} finally {
+				operation.remove();
+			}
 		}
 	}
 }

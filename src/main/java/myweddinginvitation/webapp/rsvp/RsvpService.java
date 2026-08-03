@@ -191,6 +191,8 @@ public class RsvpService {
 	}
 
 	private Rsvp current(long id, long version) {
+		long guestId = rsvps.findGuestIdById(id).orElseThrow(NoSuchElementException::new);
+		guests.findByIdForUpdate(guestId).orElseThrow(NoSuchElementException::new);
 		Rsvp rsvp = rsvps.findById(id).orElseThrow(NoSuchElementException::new);
 		if (rsvp.getVersion() != version) throw new OptimisticLockingFailureException("RSVP has changed");
 		return rsvp;
