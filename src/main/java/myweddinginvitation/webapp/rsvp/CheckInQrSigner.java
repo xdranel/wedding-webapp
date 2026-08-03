@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CheckInQrSigner {
+	// Current W1 payloads are at most 103 characters; retain small format headroom.
+	public static final int MAX_PAYLOAD_LENGTH = 128;
 	private static final String ALGORITHM = "HmacSHA256";
 	private static final String FORMAT = "W1";
 	private static final String PURPOSE = "check-in-qr:W1:";
@@ -38,7 +40,7 @@ public class CheckInQrSigner {
 	}
 
 	public Optional<QrReference> verify(String payload) {
-		if (payload == null) return Optional.empty();
+		if (payload == null || payload.length() > MAX_PAYLOAD_LENGTH) return Optional.empty();
 		String[] parts = payload.split("\\.", -1);
 		if (parts.length != 4 || !FORMAT.equals(parts[0])) return Optional.empty();
 		try {

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -57,6 +58,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class AdminCheckInServiceTest {
 	private static final Instant NOW = Instant.parse("2026-08-02T00:00:00Z");
+	private static final Instant CORRECTED_AT = Instant.parse("2026-08-02T00:05:00Z");
 
 	@Autowired CheckInService service;
 	@Autowired CheckInRepository checkIns;
@@ -68,11 +70,13 @@ class AdminCheckInServiceTest {
 	@Autowired UserAccountRepository accounts;
 	@Autowired JdbcTemplate jdbc;
 	@Autowired RsvpCancellationBarrier cancellationBarrier;
+	@Autowired MutableClock clock;
 
 	private int phoneSuffix;
 
 	@BeforeEach
 	void resetData() {
+		clock.set(NOW);
 		jdbc.update("delete from check_in_correction");
 		jdbc.update("delete from check_in");
 		jdbc.update("delete from rsvp");
@@ -96,6 +100,7 @@ class AdminCheckInServiceTest {
 		Guest guest = attendingGuest("Correction", true, 2);
 		CheckInService.CheckInView checkedIn = service.confirmGuest(
 				guest.getId(), guest.getVersion(), 1, false, "staff").checkIn();
+		clock.set(CORRECTED_AT);
 
 		CheckInService.CorrectionOutcome outcome = service.correct(
 				guest.getId(), checkedIn.version(), 2, "  Counted companion  ", "ADMIN");
@@ -109,8 +114,9 @@ class AdminCheckInServiceTest {
 			assertThat(correction.afterActualAttendeeCount()).isEqualTo(2);
 			assertThat(correction.reason()).isEqualTo("Counted companion");
 			assertThat(correction.correctedByUsername()).isEqualTo("admin");
-			assertThat(correction.correctedAt()).isEqualTo(NOW);
+			assertThat(correction.correctedAt()).isEqualTo(CORRECTED_AT);
 			assertThat(correction.originalCheckedInAt()).isEqualTo(NOW);
+			assertThat(correction.correctedAt()).isNotEqualTo(correction.originalCheckedInAt());
 			assertThat(correction.originalCheckedInByUsername()).isEqualTo("staff");
 		});
 	}
@@ -293,8 +299,8 @@ class AdminCheckInServiceTest {
 	static class FixedClockConfig {
 		@Bean
 		@Primary
-		Clock fixedClock() {
-			return Clock.fixed(NOW, ZoneOffset.UTC);
+		MutableClock fixedClock() {
+			return new MutableClock();
 		}
 
 		@Bean
@@ -309,6 +315,29 @@ class AdminCheckInServiceTest {
 			NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
 			pointcut.setMappedNames("findByGuestId", "findByIdForUpdate");
 			return new DefaultPointcutAdvisor(pointcut, barrier);
+		}
+	}
+
+	static final class MutableClock extends Clock {
+		private Instant instant = NOW;
+
+		void set(Instant instant) {
+			this.instant = instant;
+		}
+
+		@Override
+		public ZoneId getZone() {
+			return ZoneOffset.UTC;
+		}
+
+		@Override
+		public Clock withZone(ZoneId zone) {
+			return this;
+		}
+
+		@Override
+		public Instant instant() {
+			return instant;
 		}
 	}
 

@@ -74,6 +74,7 @@ public class CheckInService {
 
 	@Transactional(readOnly = true)
 	public CheckInPreview previewQr(String payload) {
+		requireQrPayloadLength(payload);
 		QrReference reference = qrSigner.verify(payload).orElseThrow(() -> failure(INVALID_QR));
 		WeddingSettings wedding = wedding();
 		requireOpen(wedding);
@@ -95,7 +96,7 @@ public class CheckInService {
 	}
 
 	public CheckInOutcome confirmQr(String payload, int actualCount, boolean acceptRsvpChange, String username) {
-		if (payload == null) throw failure(INVALID_QR);
+		requireQrPayloadLength(payload);
 		return confirm(payload, null, null, actualCount, acceptRsvpChange, username);
 	}
 
@@ -128,7 +129,6 @@ public class CheckInService {
 		Guest guest = guests.findByIdForUpdate(guestId).orElseThrow(() -> failure(INVITATION_INACTIVE));
 		UserAccount admin = adminAccount(adminUsername);
 		CheckIn checkIn = currentCheckIn(guestId, checkInVersion);
-		rsvps.findByGuestId(guestId);
 		String strippedReason = reason(reason);
 		requireAllowance(guest, actualCount);
 
@@ -298,16 +298,20 @@ public class CheckInService {
 
 	private CheckInPreview preview(Guest guest, Rsvp rsvp) {
 		return new CheckInPreview(guest.getId(), guest.getVersion(), guest.getDisplayName(),
-				guest.getCategory() == null ? null : guest.getCategory().getDisplayName(), mask(guest),
+				guest.getCategory() == null ? null : guest.getCategory().getDisplayName(),
+				mask(guest.getNormalizedWhatsappNumber()),
 				guest.isPlusOneAllowed(), rsvp == null ? null : rsvp.getResponse(),
 				rsvp == null ? null : rsvp.getPlannedAttendeeCount(),
 				rsvp == null || rsvp.getResponse() == AttendanceResponse.TIDAK_HADIR,
 				checkIns.findByGuestId(guest.getId()).map(this::view).orElse(null));
 	}
 
-	private String mask(Guest guest) {
-		String number = guest.getNormalizedWhatsappNumber();
+	static String mask(String number) {
 		return "•••• " + number.substring(Math.max(0, number.length() - 4));
+	}
+
+	private void requireQrPayloadLength(String payload) {
+		if (payload == null || payload.length() > CheckInQrSigner.MAX_PAYLOAD_LENGTH) throw failure(INVALID_QR);
 	}
 
 	private CheckInView view(CheckIn checkIn) {

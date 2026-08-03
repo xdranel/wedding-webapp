@@ -165,7 +165,7 @@ class AdminCheckInControllerTest {
 		mockMvc.perform(post("/admin/guests/{id}/check-in/cancel", guest.getId())
 				.session(adminSession).with(csrf())
 				.param("checkInVersion", Long.toString(current.version()))
-				.param("actualCount", "1").param("reason", "Duplicate invitation"))
+				.param("reason", "Duplicate invitation"))
 				.andExpect(redirectedUrl("/admin/guests/" + guest.getId()))
 				.andExpect(flash().attribute("checkInWarning", containsString("RSVP")));
 

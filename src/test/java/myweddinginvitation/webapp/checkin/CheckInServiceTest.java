@@ -121,6 +121,18 @@ class CheckInServiceTest {
 	}
 
 	@Test
+	void oversizedQrIsRejectedBeforeDatabaseWork() {
+		var statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
+		statistics.setStatisticsEnabled(true);
+		statistics.clear();
+
+		assertFailure(CheckInFailure.INVALID_QR,
+				() -> service.confirmQr("x".repeat(129), 1, false, "test-admin"));
+
+		assertThat(statistics.getPrepareStatementCount()).isZero();
+	}
+
+	@Test
 	void confirmationRejectsUnpublishedClosedArchivedDisabledStaleAndOverAllowance() {
 		Guest guest = guest("Guarded guest", false);
 

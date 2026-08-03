@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import java.time.Instant;
+
 import myweddinginvitation.webapp.account.AccountRole;
 import myweddinginvitation.webapp.account.AccountSecurityService;
 import myweddinginvitation.webapp.account.UserAccount;
@@ -138,10 +140,27 @@ class CheckInControllerTest {
 				.andExpect(content().string(containsString("id=\"scanner-stop\"")))
 				.andExpect(content().string(containsString("id=\"scanner-video\"")))
 				.andExpect(content().string(containsString("id=\"scanner-status\"")))
-				.andExpect(content().string(containsString("/webjars/qr-scanner/1.4.2/qr-scanner.min.js")))
 				.andExpect(content().string(containsString("/js/check-in-scanner.js")))
+				.andExpect(content().string(containsString("name=\"payload\" type=\"text\" inputmode=\"text\" autocomplete=\"off\" maxlength=\"128\"")))
+				.andExpect(content().string(containsString("name=\"q\" type=\"search\"")))
+				.andExpect(content().string(containsString("maxlength=\"160\"")))
+				.andExpect(content().string(not(containsString("<script type=\"module\" src=\"/webjars/"))))
 				.andExpect(content().string(not(containsString("https://cdn"))))
 				.andExpect(content().string(not(containsString("http://cdn"))));
+	}
+
+	@Test
+	void expiredQrDirectsStaffToManualSearchWithoutGuestDetails() throws Exception {
+		Guest guest = attendingGuest("Expired QR guest", false, "+62811118888");
+		String payload = qrSigner.payload(guest.getPublicId(), guest.getInvitationTokenVersion());
+		guestService.regenerateInvitation(guest.getId(), guest.getVersion(), Instant.parse("2026-08-03T00:00:00Z"));
+
+		mockMvc.perform(post("/check-in/preview/qr").session(staffSession).with(csrf()).param("payload", payload))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("expired")))
+				.andExpect(content().string(containsString("manual search")))
+				.andExpect(content().string(not(containsString("Expired QR guest"))))
+				.andExpect(content().string(not(containsString("8888"))));
 	}
 
 	@Test

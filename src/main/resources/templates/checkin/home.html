@@ -18,7 +18,7 @@
     <form id="qr-preview-form" method="post" th:action="@{/check-in/preview/qr}">
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
       <label for="scanner-input">Scanner input</label>
-      <input id="scanner-input" name="payload" type="text" inputmode="text" autocomplete="off" autofocus required>
+      <input id="scanner-input" name="payload" type="text" inputmode="text" autocomplete="off" maxlength="128" autofocus required>
       <button type="submit">Preview check-in</button>
     </form>
   </section>
@@ -26,7 +26,7 @@
     <h2 id="find-heading">Find a guest</h2>
     <form method="get" th:action="@{/check-in/search}">
       <label for="guest-search">Name or last four phone digits</label>
-      <input id="guest-search" name="q" type="search" th:value="${search.q}" autocomplete="off">
+      <input id="guest-search" name="q" type="search" th:value="${search.q}" autocomplete="off" maxlength="160">
       <button type="submit">Search</button>
     </form>
     <p th:if="${searchError}" th:text="${searchError}" role="alert">Search error</p>
@@ -35,12 +35,15 @@
       <li th:each="guest : ${searchResults}">
         <a th:href="@{/check-in/preview/guest/{id}(id=${guest.id})}" th:text="${guest.displayName}">Guest</a>
         <span th:text="${guest.categoryName == null ? 'Uncategorized' : guest.categoryName}">Category</span>
-        <span th:if="${guest.currentCheckIn != null}">Already checked in.</span>
+        <span th:text="${guest.maskedWhatsappNumber}">•••• 0000</span>
+        <span th:text="${'Plus one: ' + (guest.plusOneAllowed ? 'Allowed' : 'Not allowed')}">Plus one</span>
+        <span th:text="${'RSVP: ' + (guest.rsvpResponse == null ? 'No RSVP' : guest.rsvpResponse)}">RSVP</span>
+        <span th:text="${'Planned attendees: ' + (guest.plannedAttendeeCount == null ? '—' : guest.plannedAttendeeCount)}">Planned attendees</span>
+        <span th:text="${'Check-in: ' + (guest.currentCheckIn == null ? 'Not checked in' : 'Checked in')}">Check-in state</span>
       </li>
     </ul>
   </section>
 </main>
-<script type="module" src="/webjars/qr-scanner/1.4.2/qr-scanner.min.js"></script>
 <script type="module" src="/js/check-in-scanner.js"></script>
 </body>
 </html>

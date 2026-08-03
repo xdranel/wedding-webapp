@@ -42,7 +42,7 @@ public class AdminCheckInController {
 
 	@PostMapping("/admin/guests/{id}/check-in/cancel")
 	String cancel(@PathVariable long id,
-			@Valid @ModelAttribute("checkInForm") CheckInCorrectionForm form, BindingResult result,
+			@Valid @ModelAttribute("checkInForm") CheckInCancellationForm form, BindingResult result,
 			Authentication authentication, RedirectAttributes attributes) {
 		if (result.hasErrors()) {
 			attributes.addFlashAttribute("checkInError", INVALID);

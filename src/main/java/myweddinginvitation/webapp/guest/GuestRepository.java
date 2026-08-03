@@ -7,6 +7,7 @@ import java.util.UUID;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,6 +34,7 @@ public interface GuestRepository extends JpaRepository<Guest, Long>, JpaSpecific
 			)
 			order by g.displayName asc, g.id asc
 			""")
+	@EntityGraph(attributePaths = "category")
 	List<Guest> findActiveForCheckIn(@Param("query") String query, @Param("phoneSuffix") boolean phoneSuffix,
 			Pageable pageable);
 

@@ -5,6 +5,9 @@ import java.util.Map;
 
 import myweddinginvitation.webapp.guest.Guest;
 import myweddinginvitation.webapp.guest.GuestRepository;
+import myweddinginvitation.webapp.rsvp.AttendanceResponse;
+import myweddinginvitation.webapp.rsvp.RsvpService;
+import myweddinginvitation.webapp.rsvp.RsvpView;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -22,10 +25,12 @@ public class CheckInController {
 
 	private final CheckInService checkIns;
 	private final GuestRepository guests;
+	private final RsvpService rsvps;
 
-	public CheckInController(CheckInService checkIns, GuestRepository guests) {
+	public CheckInController(CheckInService checkIns, GuestRepository guests, RsvpService rsvps) {
 		this.checkIns = checkIns;
 		this.guests = guests;
+		this.rsvps = rsvps;
 	}
 
 	@GetMapping("/check-in")
@@ -44,10 +49,17 @@ public class CheckInController {
 			return "checkin/home";
 		}
 		List<Guest> found = guests.findActiveForCheckIn(form.query(), form.isPhoneSuffix(), PageRequest.of(0, 20));
-		Map<Long, CheckInService.CheckInView> current = checkIns.currentFor(found.stream().map(Guest::getId).toList());
-		model.addAttribute("searchResults", found.stream().map(guest -> new CheckInSearchResult(guest.getId(),
-				guest.getDisplayName(), guest.getCategory() == null ? null : guest.getCategory().getDisplayName(),
-				current.get(guest.getId()))).toList());
+		List<Long> ids = found.stream().map(Guest::getId).toList();
+		Map<Long, CheckInService.CheckInView> current = checkIns.currentFor(ids);
+		Map<Long, RsvpView> rsvp = found.isEmpty() ? Map.of() : rsvps.views(ids);
+		model.addAttribute("searchResults", found.stream().map(guest -> {
+			RsvpView guestRsvp = rsvp.get(guest.getId());
+			return new CheckInSearchResult(guest.getId(), guest.getDisplayName(),
+					guest.getCategory() == null ? null : guest.getCategory().getDisplayName(),
+					CheckInService.mask(guest.getNormalizedWhatsappNumber()), guest.isPlusOneAllowed(),
+					guestRsvp == null ? null : guestRsvp.response(),
+					guestRsvp == null ? null : guestRsvp.plannedAttendeeCount(), current.get(guest.getId()));
+		}).toList());
 		return "checkin/home";
 	}
 
@@ -126,7 +138,8 @@ public class CheckInController {
 
 	private String message(CheckInException exception) {
 		return switch (exception.failure()) {
-			case INVALID_QR, EXPIRED_QR -> "The invitation code is not valid. Scan it again.";
+			case INVALID_QR -> "The invitation code is not valid. Scan it again.";
+			case EXPIRED_QR -> "This invitation code has expired. Find the guest with manual search.";
 			case INVITATION_INACTIVE -> "This invitation is not active.";
 			case WEDDING_UNPUBLISHED, CHECK_IN_CLOSED -> "Check-in is not currently open.";
 			case ACCOUNT_DISABLED -> "Your staff account is not active.";
@@ -137,6 +150,8 @@ public class CheckInController {
 	}
 
 	public record CheckInSearchResult(long id, String displayName, String categoryName,
+			String maskedWhatsappNumber, boolean plusOneAllowed, AttendanceResponse rsvpResponse,
+			Integer plannedAttendeeCount,
 			CheckInService.CheckInView currentCheckIn) {
 	}
 }
