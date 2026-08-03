@@ -46,6 +46,8 @@ class GuestDeliveryServiceTest {
 
 	@BeforeEach
 	void setUp() {
+		jdbc.update("delete from check_in_correction");
+		jdbc.update("delete from check_in");
 		jdbc.update("delete from guest");
 		jdbc.update("""
 				update wedding_settings set couple_title = 'Rama & Shinta',

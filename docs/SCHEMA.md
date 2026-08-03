@@ -1,12 +1,11 @@
 # Data Schema
 
-Status: approved logical schema
+Status: implemented through Flyway V10
 
 Database target: MySQL 8.4 LTS.
 
-Flyway migrations will translate this logical schema into MySQL DDL during
-implementation. Names may change mechanically, but relationships and business
-constraints require a documented design change.
+Flyway migrations V1-V10 translate this schema into MySQL DDL. Applied
+migrations are immutable; later schema changes require a new migration.
 
 ## Confirmed guest attributes
 
@@ -152,13 +151,23 @@ most 500 characters; private organizer notes are at most 1,000 characters.
 ### `check_in`
 
 Zero or one current row per guest containing actual attendee count, staff
-account, and check-in timestamp. The unique guest relationship is the final
-concurrency guard against duplicate check-in.
+account, check-in timestamp, and optimistic-lock version. The unique guest
+relationship is the final concurrency guard against duplicate check-in.
+
+V10 also stores whether confirmation automatically changed RSVP, the previous
+response/count snapshot, and the RSVP version immediately after promotion.
+Database checks restrict actual count to one or two and require a consistent
+snapshot. Application validation additionally enforces the guest's current
+`+1` allowance.
 
 ### `check_in_correction`
 
 Append-only record of administrator check-in cancellation or correction:
-affected guest, before/after state, reason, administrator, and timestamp.
+affected guest, nullable current-check-in reference, before/after count,
+`CORRECT`/`CANCEL`, nonblank reason of at most 500 characters, administrator,
+timestamp, and snapshots of original check-in time/account/username. Deleting
+the current row sets only its audit foreign key to null, preserving history.
+Indexes support guest timeline and chronological audit reads.
 
 ### `user_account`
 

@@ -1,6 +1,6 @@
 # Architecture
 
-Status: approved for implementation planning
+Status: implemented through Phase 5; Phase 5 manual venue acceptance pending
 
 ## Selected approach
 
@@ -75,6 +75,17 @@ MariaDB is not a supported runtime target.
 - `/admin/**` serves the administrator dashboard.
 - `/check-in/**` serves restricted staff operations.
 
+`/check-in` accepts USB-scanner text and manual search; camera JavaScript
+submits decoded text through the same QR preview POST. QR and manual selection
+produce the same limited preview model, then separate confirmation POSTs call
+the same transactional service. `/check-in/result` uses post/redirect/get and
+shows either the winning check-in or the unchanged original duplicate.
+
+Administrator-only `/admin/accounts` routes manage staff lifecycle.
+Administrator guest-detail routes correct or cancel a current check-in and
+render immutable history. `/admin` and `/admin/guests` read current aggregate
+and per-guest check-in state; they do not create check-ins.
+
 The application is server-rendered. Browser JavaScript is limited to camera,
 scanner, audio, countdown, gallery, and small interaction enhancements. There
 is no public REST API or separate SPA.
@@ -105,8 +116,14 @@ directly to web forms.
 
 - MySQL 8.4 LTS is the only supported database.
 - Flyway exclusively manages schema changes.
+- Flyway V10 adds `check_in` and `check_in_correction`; V1-V9 remain immutable.
 - MySQL constraints and transactions enforce single check-in and allowance
   invariants.
+- Confirmation locks the guest before reading RSVP/current check-in state, and
+  a unique `check_in.guest_id` constraint is the final duplicate guard.
+- Correction and cancellation append audit rows. Cancellation removes only the
+  current row; RSVP restoration occurs only when its post-promotion version is
+  still current, otherwise the later RSVP edit wins and a warning is shown.
 - Uploaded media is stored in one mounted local volume.
 - Upload replacement is atomic: validate/process a new file before replacing
   the previous reference.
@@ -125,6 +142,9 @@ directly to web forms.
   accessing any authenticated area other than password change and logout.
 - CSRF protection remains enabled for state-changing web requests.
 - Administrator and staff permissions are role-separated.
+- `/admin/**` requires `ADMIN`; `/check-in/**` allows `ADMIN` or `STAFF`;
+  `/account/password` requires authentication. CSRF remains required for every
+  mutation.
 - Account passwords use a strong password encoder.
 - Invitation links and check-in QR payloads use purpose-separated HMAC
   signatures. QR payloads contain only the random public invitation ID, token
@@ -149,6 +169,12 @@ MySQL 8.4 LTS ------- database volume
 
 Venue staff -- local Wi-Fi --> Spring Boot app
 ```
+
+USB scanner input and manual search use ordinary HTTP requests and continue
+over the venue LAN when WAN access is unavailable. Browser camera access uses
+`getUserMedia`, so it requires a secure HTTPS context; on HTTP the camera fails
+closed while USB/manual operation remains available. There is no client-side
+offline queue or database synchronization.
 
 Docker Compose runs `app`, `mysql`, and `cloudflared`. Nginx and Tailscale are
 optional operational alternatives, not runtime dependencies.

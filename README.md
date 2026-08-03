@@ -72,3 +72,21 @@ appearing inside another personalized invitation. Private organizer notes are
 administrator-only. CSV import remains the exact seven-column schema above;
 export adds RSVP, moderation, greeting, private-note, update-source, and update-
 time columns.
+
+## Event check-in
+
+Administrators create individual staff accounts at `/admin/accounts`. A new or
+reset staff account must replace its temporary password before it can open
+`/check-in`; disabling or resetting the account revokes existing sessions.
+
+At `/check-in`, staff can submit a USB-scanner payload, scan with a browser
+camera, or search by guest name/final four phone digits. Every entry path shows
+a server-validated preview and requires explicit confirmation. Camera access
+requires HTTPS; on an HTTP venue LAN, USB input and manual search remain the
+supported fallback and do not require internet access.
+
+Administrators see current counts on `/admin`, current state on guest list and
+detail pages, and may correct or cancel a check-in with a reason. Flyway V10
+stores one current check-in per guest plus append-only correction/cancellation
+history. Automated MySQL coverage is implemented; physical LAN, scanner,
+camera, and multi-device acceptance remains pending user sign-off.

@@ -1,6 +1,20 @@
 # Product Requirements
 
-Status: approved for implementation planning
+Status: implemented through Phase 5; Phase 5 manual acceptance pending
+
+## Implementation status — 2026-08-03
+
+Phase 5 server implementation and automated MySQL verification are complete:
+restricted staff lifecycle, USB/camera/manual preview and confirmation routes,
+atomic duplicate handling, RSVP promotion, administrator summaries,
+correction/cancellation, and immutable audit history are present. Camera still
+requires HTTPS; HTTP venue LAN access supports USB/manual operation, including
+during WAN loss.
+
+Phase 5 is not accepted yet. Physical scanners/cameras, multiple devices and
+accounts, HTTP/HTTPS LAN behavior, and WAN-disconnected operation remain
+pending user acceptance with no acceptance date recorded. Phase 6 reporting
+and export work and Phase 7 deployment/operations work remain pending.
 
 ## Change management
 

@@ -115,6 +115,48 @@ Use dummy guests and record these checks separately from automated tests:
 - [x] Administrator correction works after deadline and confirmed `+1` reduction changes two planned attendees to one.
 - [x] Import remains seven columns; extended export opens safely in a spreadsheet.
 
+## Event check-in operations
+
+Administrators create, reset, enable, and disable restricted staff at
+`/admin/accounts`. Give each person a separate account and temporary password.
+Creation/reset requires a password change at the next login; reset, disable,
+and password change revoke older sessions. Staff sessions have a 12-hour
+absolute lifetime. Prepare and test all accounts before the event.
+
+Staff use `/check-in`. A USB scanner acts as keyboard input in the focused QR
+field; camera decoding submits that same form; manual search accepts a name or
+exactly four final normalized-phone digits. All paths show a preview and need
+explicit confirmation. Staff cannot see full phone numbers, internal notes,
+private RSVP notes, greetings, or correction history.
+
+Use HTTPS for browser cameras. On plain HTTP LAN access, camera APIs are not a
+supported path; the page reports the problem while USB scanner input and manual
+search remain usable. WAN loss is acceptable while staff devices can still
+reach the Spring Boot server and its MySQL database over LAN. If the LAN/server
+fails, stop electronic writes and use a pre-event CSV/printed list; there is no
+offline queue to merge later.
+
+Administrator correction and cancellation are on each `/admin/guests/{id}`
+detail page and require a reason. If check-in promoted an absent/declined RSVP,
+cancellation restores it only when nobody edited RSVP afterward; otherwise the
+later edit is preserved and the page warns the administrator.
+
+### Phase 5 manual venue acceptance
+
+Status: pending user acceptance; acceptance date not yet recorded. Automated
+tests do not substitute for these physical device/network checks.
+
+- [ ] USB scanner, camera, and search share preview and explicit confirmation.
+- [ ] Camera works over HTTPS and fails cleanly over HTTP while USB/manual remain usable.
+- [ ] WAN disconnected but LAN/server available still permits USB/manual check-in.
+- [ ] Two simultaneous confirmations produce one winner and one duplicate result.
+- [ ] No-RSVP/declined warning and automatic promotion behave as documented.
+- [ ] Companion-only attendance records one; an allowed pair records two.
+- [ ] Archived, expired-token, stale-declined QR, unpublished, and closed-event cases reject.
+- [ ] Disabled/reset staff sessions are revoked.
+- [ ] Administrator correction/cancellation and RSVP restoration/skip warning are correct.
+- [ ] Staff pages reveal no protected guest fields.
+
 ## Wedding content and media
 
 After signing in as an administrator, open `/admin/wedding` to edit wedding
@@ -147,7 +189,9 @@ docker compose up -d mysql
 ```
 
 The next application startup applies Flyway migrations and bootstraps an
-administrator when the database has no administrator account.
+administrator when the database has no administrator account. V10 creates the
+current check-in and append-only correction tables; never edit V1-V10 after
+they have been applied.
 
 ## Tests and health
 
@@ -156,6 +200,9 @@ Tests use a temporary MySQL 8.4 Testcontainer and require Docker access:
 ```bash
 ./mvnw test
 ```
+
+`CheckInJourneyTest` exercises the complete server journey. Camera decoding,
+physical scanners, and network topology remain in the manual checklist above.
 
 For rootless Podman, use the socket setup above and run the same command:
 

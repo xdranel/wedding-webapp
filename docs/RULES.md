@@ -1,6 +1,6 @@
 # Business Rules
 
-Status: approved for implementation planning
+Status: implemented through Phase 5; Phase 5 manual acceptance pending
 
 1. An invitation belongs to one named primary guest.
 2. An invitation may optionally allow one unnamed companion.
@@ -190,3 +190,18 @@ Status: approved for implementation planning
 114. The seven-column CSV import schema remains unchanged; administrator export
      includes RSVP, moderation, greeting, and private-note fields with formula
      injection protection.
+115. USB, camera, and manual search must converge on a server-side preview and
+     explicit confirmation; preview alone must not write attendance.
+116. Browser-camera failure must not disable USB scanner input or manual
+     search.
+117. WAN loss must not block USB/manual check-in while the application and
+     database remain reachable on the venue LAN.
+118. New and reset staff accounts must change their temporary password before
+     using check-in routes.
+119. Staff disablement, password reset, and password change must revoke older
+     sessions through the account session version.
+120. Cancelling an RSVP-promoting check-in restores the saved prior RSVP only
+     when the RSVP version still matches the promotion; a later RSVP edit must
+     be preserved and reported to the administrator.
+121. Check-in correction and cancellation history is append-only and retains
+     the original check-in time and staff username even after cancellation.

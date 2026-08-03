@@ -1,6 +1,6 @@
 # Product Design
 
-Status: approved for implementation planning
+Status: implemented through Phase 5; physical venue acceptance pending
 
 ## Selected product approach
 
@@ -107,13 +107,22 @@ approve/hide actions with pending, approved, and hidden filters.
 ## Check-in flow
 
 The restricted staff interface keeps scanner input focused and also supports
-name/last-four-digit search. A scan or search shows limited guest details,
-then requires explicit confirmation of actual attendance.
+name/last-four-digit search. USB and camera decoding submit the same QR-preview
+form; manual search selects the same preview model. A scan or search shows only
+name, category, masked phone suffix, allowance, RSVP, planned count, and current
+check-in, then requires explicit server-side confirmation of actual attendance.
 
 Successful check-in shows a clear result and resets the scanner for the next
 guest. Duplicate check-in shows the original time and staff member. A guest
 without RSVP or marked `Tidak hadir` requires warning confirmation before
-check-in changes the RSVP to `Hadir`.
+check-in changes the RSVP to `Hadir`. The administrator sees current counts on
+the dashboard/list/detail, may correct actual count or cancel with a required
+reason, and retains append-only history. Cancellation restores an automatic
+RSVP promotion only if no later RSVP edit occurred.
+
+Camera start is user-initiated and requires HTTPS. An insecure-context,
+permission, or decoder failure leaves USB scanner input and manual search
+usable and displays that fallback; WAN loss does not affect these LAN paths.
 
 ## Error behavior
 
@@ -137,5 +146,11 @@ alternative image text, visible audio controls, and reduced-motion behavior.
 - MVC/security tests cover guest, administrator, staff, CSRF, and validation.
 - MySQL integration tests cover Flyway, atomic CSV import, and concurrent
   check-in.
-- One smoke flow covers invitation, RSVP, QR, and check-in.
+- RSVP/QR and check-in journeys cover their complete server flows. The check-in
+  journey creates staff, enforces first-password change, confirms/duplicates a
+  QR, verifies administrator views, corrects/cancels, manually promotes a
+  declined RSVP, and proves a later RSVP edit prevents rollback.
 - Media tests verify invalid uploads do not replace valid files.
+
+Physical USB/camera, HTTP/HTTPS LAN, WAN-disconnected, and two-device checks
+remain manual acceptance; they are not represented as passed by MockMvc.
