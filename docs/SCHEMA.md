@@ -10,9 +10,12 @@ Flyway migrations V1-V10 implement only the schema required through Phase 5:
 `check_in_correction`. Applied migrations are immutable; later schema changes
 require a new migration.
 
-Later sections for gallery, gifts, help contacts, background audio, reminders,
-reports, and operational erasure describe planned Phase 6/7 schema and are not
-present in V1-V10.
+V8 already creates `message_template` and seeds its `RSVP_REMINDER` and
+`EVENT_REMINDER` rows. Later sections for gallery, gifts, help contacts,
+background audio, reports, operational erasure, and reminder scheduling or
+workflow fields (including guest reminder timestamps) describe planned Phase
+6/7 schema and are not present in V1-V10; reminder delivery automation is also
+planned for Phase 6.
 
 ## Confirmed guest attributes
 
