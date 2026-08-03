@@ -1,11 +1,18 @@
 # Data Schema
 
-Status: implemented through Flyway V10
+Status: implemented through Phase 5 by Flyway V1-V10; later-phase schema is planned
 
 Database target: MySQL 8.4 LTS.
 
-Flyway migrations V1-V10 translate this schema into MySQL DDL. Applied
-migrations are immutable; later schema changes require a new migration.
+Flyway migrations V1-V10 implement only the schema required through Phase 5:
+`user_account`, `wedding_settings`, `partner`, `event_part`, `story_entry`,
+`guest_category`, `guest`, `message_template`, `rsvp`, `check_in`, and
+`check_in_correction`. Applied migrations are immutable; later schema changes
+require a new migration.
+
+Later sections for gallery, gifts, help contacts, background audio, reminders,
+reports, and operational erasure describe planned Phase 6/7 schema and are not
+present in V1-V10.
 
 ## Confirmed guest attributes
 

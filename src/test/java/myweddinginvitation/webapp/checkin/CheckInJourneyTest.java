@@ -127,6 +127,7 @@ class CheckInJourneyTest {
 				.param("actualCount", "1").param("reason", "Companion did not arrive"))
 				.andExpect(redirectedUrl("/admin/guests/" + guest.getId()));
 		current = checkInService.current(guest.getId()).orElseThrow();
+		assertThat(current.actualAttendeeCount()).isEqualTo(1);
 		mockMvc.perform(post("/admin/guests/{id}/check-in/cancel", guest.getId())
 				.session(adminSession).with(csrf())
 				.param("checkInVersion", Long.toString(current.version()))
