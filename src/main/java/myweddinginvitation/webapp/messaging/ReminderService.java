@@ -14,6 +14,7 @@ import myweddinginvitation.webapp.guest.Guest;
 import myweddinginvitation.webapp.guest.GuestRepository;
 import myweddinginvitation.webapp.guest.InvitationLinkSigner;
 import myweddinginvitation.webapp.guest.MessageLanguage;
+import myweddinginvitation.webapp.guest.WhatsappNumberService;
 import myweddinginvitation.webapp.rsvp.AttendanceResponse;
 import myweddinginvitation.webapp.rsvp.Rsvp;
 import myweddinginvitation.webapp.rsvp.RsvpRepository;
@@ -24,27 +25,32 @@ import myweddinginvitation.webapp.wedding.WeddingPreview;
 import myweddinginvitation.webapp.wedding.WeddingSettings;
 import myweddinginvitation.webapp.wedding.WeddingSettingsRepository;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class ReminderService {
+	private static final int MAX_QUEUE_GUESTS = 2_000;
 	private final GuestRepository guests;
 	private final RsvpRepository rsvps;
 	private final WeddingSettingsRepository settings;
 	private final InvitationLinkSigner signer;
 	private final MessageTemplateService templates;
 	private final WeddingContentService weddingContent;
+	private final WhatsappNumberService numbers;
 
 	public ReminderService(GuestRepository guests, RsvpRepository rsvps, WeddingSettingsRepository settings,
-			InvitationLinkSigner signer, MessageTemplateService templates, WeddingContentService weddingContent) {
+			InvitationLinkSigner signer, MessageTemplateService templates, WeddingContentService weddingContent,
+			WhatsappNumberService numbers) {
 		this.guests = guests;
 		this.rsvps = rsvps;
 		this.settings = settings;
 		this.signer = signer;
 		this.templates = templates;
 		this.weddingContent = weddingContent;
+		this.numbers = numbers;
 	}
 
 	@Transactional(readOnly = true)
@@ -52,7 +58,10 @@ public class ReminderService {
 		WeddingSettings wedding = wedding();
 		requireContent(kind, wedding, null, MessageLanguage.ID);
 		// ponytail: bounded single-wedding scan; add a database projection only if guest volume exceeds the documented 2,000 limit.
-		List<Guest> allGuests = guests.findAllForReminderQueue();
+		List<Guest> allGuests = guests.findAllForReminderQueue(PageRequest.of(0, MAX_QUEUE_GUESTS + 1));
+		if (allGuests.size() > MAX_QUEUE_GUESTS) {
+			throw new IllegalStateException("Reminder queues support at most 2,000 guests.");
+		}
 		Map<Long, Rsvp> rsvpsByGuest = byGuest(allGuests.stream().map(Guest::getId).toList());
 		return allGuests.stream()
 				.filter(guest -> categoryId == null || (guest.getCategory() != null
@@ -126,7 +135,7 @@ public class ReminderService {
 	}
 
 	private boolean eligible(Guest guest, Rsvp rsvp, ReminderKind kind) {
-		if (guest.isArchived() || !usableNumber(guest.getNormalizedWhatsappNumber())) return false;
+		if (guest.isArchived() || !numbers.isValidE164(guest.getNormalizedWhatsappNumber())) return false;
 		return kind == ReminderKind.RSVP ? rsvp == null
 				: rsvp != null && rsvp.getResponse() == AttendanceResponse.HADIR;
 	}
@@ -162,10 +171,6 @@ public class ReminderService {
 
 	private String location(WeddingPreview.EventView event) {
 		return event == null ? null : event.venueName();
-	}
-
-	private static boolean usableNumber(String value) {
-		return value != null && value.length() > 1 && value.charAt(0) == '+' && value.substring(1).chars().allMatch(Character::isDigit);
 	}
 
 	private static boolean hasText(String value) {

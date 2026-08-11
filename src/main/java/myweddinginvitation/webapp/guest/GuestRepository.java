@@ -42,7 +42,7 @@ public interface GuestRepository extends JpaRepository<Guest, Long>, JpaSpecific
 
 	@EntityGraph(attributePaths = "category")
 	@Query("select g from Guest g order by g.displayName asc, g.id asc")
-	List<Guest> findAllForReminderQueue();
+	List<Guest> findAllForReminderQueue(Pageable pageable);
 
 	long countByCategoryIsNull();
 	long countByArchivedFalse();

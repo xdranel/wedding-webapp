@@ -48,6 +48,17 @@ public class WhatsappNumberService {
 		}
 	}
 
+	public boolean isValidE164(String number) {
+		if (number == null) return false;
+		try {
+			PhoneNumber parsed = phoneUtil.parse(number, "ZZ");
+			return phoneUtil.isValidNumber(parsed)
+					&& number.equals(phoneUtil.format(parsed, PhoneNumberUtil.PhoneNumberFormat.E164));
+		} catch (NumberParseException exception) {
+			return false;
+		}
+	}
+
 	private String countryLabel(String code) {
 		String country = new Locale("", code).getDisplayCountry(Locale.ENGLISH);
 		return country + " (+" + phoneUtil.getCountryCodeForRegion(code) + ")";

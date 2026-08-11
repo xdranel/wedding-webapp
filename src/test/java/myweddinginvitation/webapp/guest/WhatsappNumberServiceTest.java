@@ -59,4 +59,10 @@ class WhatsappNumberServiceTest {
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Select a valid phone country.");
 	}
+
+	@ParameterizedTest
+	@CsvSource({ "+6281234567890,true", "+0,false", "+000,false", "+６２８１２３４５６７８９０,false" })
+	void validatesCanonicalE164Numbers(String number, boolean valid) {
+		assertThat(numbers.isValidE164(number)).isEqualTo(valid);
+	}
 }

@@ -126,6 +126,8 @@ class ReminderServiceTest {
 		jdbc.update("update event_part set map_url = 'https://maps.example/event'");
 		rsvp(guest, AttendanceResponse.HADIR);
 		assertThat(reminders.queue(ReminderKind.EVENT, null)).extracting(ReminderGuestView::id).containsExactly(guest.getId());
+		jdbc.update("update event_part set visible = false");
+		assertThatThrownBy(() -> reminders.queue(ReminderKind.EVENT, null)).isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
@@ -133,11 +135,13 @@ class ReminderServiceTest {
 		Guest archived = guest("Archived", null, MessageLanguage.ID);
 		Guest valid = guest("Valid", null, MessageLanguage.ID);
 		guestService.archive(archived.getId(), archived.getVersion());
-		jdbc.update("update guest set normalized_whatsapp_number = '' where id = ?", valid.getId());
+		for (String malformed : List.of("", "+0", "+000", "+６２８１２３４５６７８９０")) {
+			jdbc.update("update guest set normalized_whatsapp_number = ? where id = ?", malformed, valid.getId());
 
-		assertThat(reminders.queue(ReminderKind.RSVP, null)).isEmpty();
-		assertThatThrownBy(() -> reminders.whatsappUri(valid.getId(), ReminderKind.RSVP, MessageLanguage.ID))
-				.isInstanceOf(IllegalStateException.class);
+			assertThat(reminders.queue(ReminderKind.RSVP, null)).isEmpty();
+			assertThatThrownBy(() -> reminders.whatsappUri(valid.getId(), ReminderKind.RSVP, MessageLanguage.ID))
+					.isInstanceOf(IllegalStateException.class);
+		}
 	}
 
 	@Test
@@ -164,6 +168,9 @@ class ReminderServiceTest {
 		String message = URLDecoder.decode(uri.getRawQuery().substring("text=".length()), UTF_8);
 		assertThat(message).contains("EN Sari", "2030-08-12T12:00", "https://invite.example/i/")
 				.doesNotContain("QR");
+		String indonesian = URLDecoder.decode(reminders.whatsappUri(guest.getId(), ReminderKind.RSVP, MessageLanguage.ID)
+				.getRawQuery().substring("text=".length()), UTF_8);
+		assertThat(indonesian).contains("ID Sari");
 		assertThat(reload(guest.getId()))
 				.extracting(Guest::getPreferredLanguage, Guest::getLastRsvpReminderSentAt, Guest::getLastEventReminderSentAt)
 				.containsExactly(MessageLanguage.ID, null, null);
@@ -215,15 +222,64 @@ class ReminderServiceTest {
 	}
 
 	@Test
+	void confirmationRevalidatesPublishedDeadlineAndVisibleEventContent() {
+		Guest rsvpGuest = guest("RSVP", null, MessageLanguage.ID);
+		reminders.whatsappUri(rsvpGuest.getId(), ReminderKind.RSVP, MessageLanguage.ID);
+		jdbc.update("update wedding_settings set publication_state = 'DRAFT' where id = 1");
+		assertThatThrownBy(() -> reminders.confirmSent(rsvpGuest.getId(), rsvpGuest.getVersion(), ReminderKind.RSVP, null, FIRST))
+				.isInstanceOf(IllegalStateException.class);
+		jdbc.update("update wedding_settings set publication_state = 'PUBLISHED', rsvp_deadline = null where id = 1");
+		assertThatThrownBy(() -> reminders.confirmSent(rsvpGuest.getId(), rsvpGuest.getVersion(), ReminderKind.RSVP, null, FIRST))
+				.isInstanceOf(IllegalStateException.class);
+		assertThat(reload(rsvpGuest.getId()).getLastRsvpReminderSentAt()).isNull();
+
+		jdbc.update("update wedding_settings set rsvp_deadline = '2030-08-12 12:00:00' where id = 1");
+		completeVisibleEvent();
+		Guest eventGuest = guest("Event", null, MessageLanguage.ID);
+		rsvp(eventGuest, AttendanceResponse.HADIR);
+		reminders.whatsappUri(eventGuest.getId(), ReminderKind.EVENT, MessageLanguage.ID);
+		jdbc.update("update event_part set visible = false");
+		assertThatThrownBy(() -> reminders.confirmSent(eventGuest.getId(), eventGuest.getVersion(), ReminderKind.EVENT, null, FIRST))
+				.isInstanceOf(IllegalStateException.class);
+		assertThat(reload(eventGuest.getId()).getLastEventReminderSentAt()).isNull();
+	}
+
+	@Test
+	void confirmationKeepsCategoryFilterWhenSelectingTheNextGuest() {
+		long familyId = category("Family", "family");
+		long friendsId = category("Friends", "friends");
+		Guest selected = guest("Selected", familyId, MessageLanguage.ID);
+		Guest nextFamily = guest("Zed", familyId, MessageLanguage.ID);
+		guest("Alpha friend", friendsId, MessageLanguage.ID);
+
+		Long next = reminders.confirmSent(selected.getId(), selected.getVersion(), ReminderKind.RSVP, familyId, FIRST);
+
+		assertThat(next).isEqualTo(nextFamily.getId());
+	}
+
+	@Test
+	void queueAllowsTwoThousandGuestsAndRejectsMoreBeforeBulkRsvpLoading() {
+		insertGuests(2_000);
+
+		assertThat(reminders.queue(ReminderKind.RSVP, null)).isEmpty();
+
+		insertGuests(1);
+		assertThatThrownBy(() -> reminders.queue(ReminderKind.RSVP, null))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("2,000");
+	}
+
+	@Test
 	void queueFetchesRsvpsAndCategoriesWithoutPerGuestQueries() {
-		for (int index = 0; index < 3; index++) guest("Guest " + index, null, MessageLanguage.ID);
+		long categoryId = category("Family", "family");
+		for (int index = 0; index < 3; index++) guest("Guest " + index, categoryId, MessageLanguage.ID);
 		var statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
 		statistics.setStatisticsEnabled(true);
 		statistics.clear();
 
 		assertThat(reminders.queue(ReminderKind.RSVP, null)).hasSize(3);
 
-		assertThat(statistics.getPrepareStatementCount()).isLessThanOrEqualTo(3);
+		assertThat(statistics.getPrepareStatementCount()).isEqualTo(3);
 	}
 
 	private Guest guest(String name, Long categoryId, MessageLanguage language) {
@@ -240,6 +296,20 @@ class ReminderServiceTest {
 
 	private Guest reload(long id) {
 		return guests.findById(id).orElseThrow();
+	}
+
+	private long category(String name, String normalized) {
+		jdbc.update("insert into guest_category (display_name, normalized_name) values (?, ?)", name, normalized);
+		return jdbc.queryForObject("select id from guest_category where normalized_name = ?", Long.class, normalized);
+	}
+
+	private void insertGuests(int count) {
+		int start = jdbc.queryForObject("select count(*) from guest", Integer.class);
+		jdbc.batchUpdate("""
+				insert into guest (public_id, display_name, salutation, normalized_whatsapp_number)
+				values (uuid_to_bin(uuid()), ?, 'Ibu', ?)
+				""", java.util.stream.IntStream.range(start, start + count)
+				.mapToObj(index -> new Object[] { "Bulk %04d".formatted(index), "+000%012d".formatted(index) }).toList());
 	}
 
 	private void completeVisibleEvent() {
