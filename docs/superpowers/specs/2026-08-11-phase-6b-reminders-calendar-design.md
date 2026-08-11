@@ -1,6 +1,6 @@
 # Phase 6B Manual Reminders and Calendar Design
 
-**Status:** approved in conversation; written specification pending user review
+**Status:** approved and reviewed by the user on 2026-08-12
 
 ## Scope
 
