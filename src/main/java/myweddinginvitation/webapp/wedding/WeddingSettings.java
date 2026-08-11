@@ -64,6 +64,15 @@ public class WeddingSettings {
     @Column(name = "private_organizer_note_enabled", nullable = false)
     private boolean privateOrganizerNoteEnabled;
 
+    @Column(name = "gallery_enabled", nullable = false)
+    private boolean galleryEnabled;
+
+    @Column(name = "background_audio_enabled", nullable = false)
+    private boolean backgroundAudioEnabled;
+
+    @Column(name = "background_audio_path", length = 500)
+    private String backgroundAudioPath;
+
     protected WeddingSettings() {
     }
 
@@ -135,12 +144,45 @@ public class WeddingSettings {
         return privateOrganizerNoteEnabled;
     }
 
+    public boolean isGalleryEnabled() {
+        return galleryEnabled;
+    }
+
+    public boolean isBackgroundAudioEnabled() {
+        return backgroundAudioEnabled;
+    }
+
+    public String getBackgroundAudioPath() {
+        return backgroundAudioPath;
+    }
+
     void publish() {
         publicationState = PublicationState.PUBLISHED;
     }
 
     void returnToDraft() {
         publicationState = PublicationState.DRAFT;
+    }
+
+    void setGalleryEnabled(boolean enabled, boolean hasPhotos) {
+        if (enabled && !hasPhotos) throw new IllegalStateException("Gallery requires at least one photo");
+        galleryEnabled = enabled;
+    }
+
+    void setBackgroundAudioEnabled(boolean enabled) {
+        if (enabled && backgroundAudioPath == null) throw new IllegalStateException("Background audio is missing");
+        backgroundAudioEnabled = enabled;
+    }
+
+    void replaceBackgroundAudio(String relativePath) {
+        backgroundAudioPath = relativePath;
+    }
+
+    String removeBackgroundAudio() {
+        String removed = backgroundAudioPath;
+        backgroundAudioPath = null;
+        backgroundAudioEnabled = false;
+        return removed;
     }
 
     void update(WeddingSettingsForm form) {
