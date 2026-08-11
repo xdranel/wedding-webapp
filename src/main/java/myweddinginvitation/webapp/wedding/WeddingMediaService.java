@@ -155,7 +155,9 @@ public class WeddingMediaService {
 
 	private WeddingMediaView view(String language) {
 		WeddingSettings wedding = settings.getSingleton().orElseThrow();
-		return new WeddingMediaView(wedding.isGalleryEnabled(), wedding.isBackgroundAudioEnabled(), wedding.getVersion(),
+		boolean audioEnabled = wedding.isBackgroundAudioEnabled()
+				&& wedding.getBackgroundAudioPath() != null && !wedding.getBackgroundAudioPath().isBlank();
+		return new WeddingMediaView(wedding.isGalleryEnabled(), audioEnabled, wedding.getVersion(),
 				photos.findAllByOrderByPositionAsc().stream().map(photo -> new WeddingMediaView.Photo(
 						photo.getId(), photo.getVersion(), photo.getAltText(), caption(photo, language),
 						photo.getCaptionId(), photo.getCaptionEn(),

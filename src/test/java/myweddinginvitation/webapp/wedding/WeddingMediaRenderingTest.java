@@ -60,6 +60,18 @@ class WeddingMediaRenderingTest {
 		String empty = mockMvc.perform(get(path).param("language", "EN"))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		assertThat(empty).doesNotContain("id=\"gallery-dialog\"");
+
+		jdbc.update("""
+				update wedding_settings set background_audio_enabled = true, background_audio_path = null where id = 1
+				""");
+		String missingAudio = mockMvc.perform(get(path).param("language", "EN"))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		assertThat(missingAudio).doesNotContain("id=\"background-audio\"", "id=\"audio-toggle\"");
+
+		jdbc.update("update wedding_settings set background_audio_path = '  ' where id = 1");
+		String blankAudio = mockMvc.perform(get(path).param("language", "EN"))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		assertThat(blankAudio).doesNotContain("id=\"background-audio\"", "id=\"audio-toggle\"");
 	}
 
 	@Test

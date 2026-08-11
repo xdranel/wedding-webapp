@@ -305,6 +305,19 @@ class WeddingMediaServiceTest {
 	}
 
 	@Test
+	void viewsSuppressEnabledAudioWhenPersistedPathIsMissingOrBlank() {
+		jdbc.update("""
+				update wedding_settings set background_audio_enabled = true, background_audio_path = null where id = 1
+				""");
+		assertThat(service.publicView("EN").audioEnabled()).isFalse();
+		assertThat(service.adminView().audioEnabled()).isFalse();
+
+		jdbc.update("update wedding_settings set background_audio_path = '  ' where id = 1");
+		assertThat(service.publicView("EN").audioEnabled()).isFalse();
+		assertThat(service.adminView().audioEnabled()).isFalse();
+	}
+
+	@Test
 	void concurrentTenthAddsSerializeAtTheLimitWithoutDuplicatePosition() throws Exception {
 		for (int index = 0; index < 9; index++) {
 			service.addPhoto(image(index), form("Photo " + index, null, null, 0));

@@ -197,6 +197,23 @@ class WeddingPreviewTest {
 				.doesNotContain("autoplay", "localStorage");
 	}
 
+	@Test
+	void previewOmitsEnabledAudioWhenPathIsMissingOrBlank() throws Exception {
+		jdbc.update("""
+				update wedding_settings set background_audio_enabled = true, background_audio_path = null where id = 1
+				""");
+		String missing = mockMvc.perform(get("/admin/wedding/preview/render").session(adminSession)
+				.param("salutation", "Bapak/Ibu").param("guestName", "Nama Tamu").param("language", "EN"))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		assertThat(missing).doesNotContain("id=\"background-audio\"", "id=\"audio-toggle\"");
+
+		jdbc.update("update wedding_settings set background_audio_path = '  ' where id = 1");
+		String blank = mockMvc.perform(get("/admin/wedding/preview/render").session(adminSession)
+				.param("salutation", "Bapak/Ibu").param("guestName", "Nama Tamu").param("language", "EN"))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		assertThat(blank).doesNotContain("id=\"background-audio\"", "id=\"audio-toggle\"");
+	}
+
 	private void seedCompleteIndonesianContentWithEnglishMissing() {
 		jdbc.update("""
 				update wedding_settings set couple_title = 'Rama & Shinta', opening_text_id = 'Dengan hormat',
