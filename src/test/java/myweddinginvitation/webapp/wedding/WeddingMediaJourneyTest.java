@@ -284,6 +284,10 @@ class WeddingMediaJourneyTest {
 				.doesNotContain("src=\"/media/gallery/" + portraitId + "/image\"")
 				.doesNotContain("src=\"/media/gallery/" + landscapeId + "/image\"")
 				.doesNotContain("autoplay");
+		assertThat(page).contains(
+				"EN".equals(language) ? "<html lang=\"en\"" : "<html lang=\"id\"",
+				"EN".equals(language) ? "Welcome" : "Dengan hormat",
+				"EN".equals(language) ? "Play music" : "Putar musik");
 		assertThat(page.indexOf("alt=\"Portrait dance\"")).isLessThan(page.indexOf("alt=\"Landscape moment\""));
 	}
 
