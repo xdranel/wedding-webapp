@@ -82,6 +82,12 @@ class WeddingMediaServiceTest {
 				paths.forEach(this::delete);
 			}
 		}
+		Path audio = mediaDirectory.resolve("audio");
+		if (Files.exists(audio)) {
+			try (Stream<Path> paths = Files.list(audio)) {
+				paths.forEach(this::delete);
+			}
+		}
 	}
 
 	@Test
@@ -244,6 +250,61 @@ class WeddingMediaServiceTest {
 	}
 
 	@Test
+	void replacesAudioAndRemovesOnlyCommittedObsoleteFile() throws IOException {
+		service.replaceAudio(audio(1));
+		String oldPath = wedding().getBackgroundAudioPath();
+		assertThat(audioPath(oldPath)).isRegularFile();
+
+		service.replaceAudio(audio(2));
+
+		String replacement = wedding().getBackgroundAudioPath();
+		assertThat(replacement).isNotEqualTo(oldPath);
+		assertThat(audioPath(replacement)).isRegularFile();
+		assertThat(audioPath(oldPath)).doesNotExist();
+
+		AtomicReference<String> rolledBack = new AtomicReference<>();
+		new TransactionTemplate(transactions).executeWithoutResult(status -> {
+			service.replaceAudio(audio(3));
+			rolledBack.set(wedding().getBackgroundAudioPath());
+			assertThat(audioPath(rolledBack.get())).isRegularFile();
+			status.setRollbackOnly();
+		});
+		assertThat(wedding().getBackgroundAudioPath()).isEqualTo(replacement);
+		assertThat(audioPath(replacement)).isRegularFile();
+		assertThat(audioPath(rolledBack.get())).doesNotExist();
+	}
+
+	@Test
+	void failedAudioReplacementPreservesOldFile() {
+		service.replaceAudio(audio(1));
+		String oldPath = wedding().getBackgroundAudioPath();
+
+		assertThatThrownBy(() -> service.replaceAudio(new MockMultipartFile("audio", "bad.mp3", "audio/mpeg", new byte[] {1, 2})))
+				.isInstanceOf(IllegalArgumentException.class);
+
+		assertThat(wedding().getBackgroundAudioPath()).isEqualTo(oldPath);
+		assertThat(audioPath(oldPath)).isRegularFile();
+	}
+
+	@Test
+	void audioEnablementRequiresFileDisablePreservesAndDeleteDisables() {
+		long emptyVersion = wedding().getVersion();
+		assertThatThrownBy(() -> service.setAudioEnabled(emptyVersion, true)).isInstanceOf(IllegalStateException.class);
+
+		service.replaceAudio(audio(1));
+		String path = wedding().getBackgroundAudioPath();
+		service.setAudioEnabled(wedding().getVersion(), true);
+		service.setAudioEnabled(wedding().getVersion(), false);
+		assertThat(wedding().isBackgroundAudioEnabled()).isFalse();
+		assertThat(audioPath(path)).isRegularFile();
+
+		service.deleteAudio(wedding().getVersion());
+		assertThat(wedding().getBackgroundAudioPath()).isNull();
+		assertThat(wedding().isBackgroundAudioEnabled()).isFalse();
+		assertThat(audioPath(path)).doesNotExist();
+	}
+
+	@Test
 	void concurrentTenthAddsSerializeAtTheLimitWithoutDuplicatePosition() throws Exception {
 		for (int index = 0; index < 9; index++) {
 			service.addPhoto(image(index), form("Photo " + index, null, null, 0));
@@ -345,6 +406,15 @@ class WeddingMediaServiceTest {
 
 	private static MockMultipartFile image(int color) {
 		return new MockMultipartFile("image", "photo.png", "image/png", png(color));
+	}
+
+	private static MockMultipartFile audio(int value) {
+		return new MockMultipartFile("audio", "track.mp3", "audio/mpeg",
+				new byte[] {(byte) 0xff, (byte) 0xfb, (byte) 0x90, 0x64, (byte) value});
+	}
+
+	private Path audioPath(String relativePath) {
+		return mediaDirectory.resolve(relativePath);
 	}
 
 	private static byte[] png(int color) {

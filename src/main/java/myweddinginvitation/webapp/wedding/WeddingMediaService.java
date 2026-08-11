@@ -15,12 +15,14 @@ public class WeddingMediaService {
 	private final WeddingSettingsRepository settings;
 	private final GalleryPhotoRepository photos;
 	private final GalleryImageStorage storage;
+	private final WeddingAudioStorage audio;
 
 	public WeddingMediaService(WeddingSettingsRepository settings, GalleryPhotoRepository photos,
-			GalleryImageStorage storage) {
+			GalleryImageStorage storage, WeddingAudioStorage audio) {
 		this.settings = settings;
 		this.photos = photos;
 		this.storage = storage;
+		this.audio = audio;
 	}
 
 	@Transactional(readOnly = true)
@@ -42,7 +44,7 @@ public class WeddingMediaService {
 		List<GalleryPhoto> ordered = photos.findAllByOrderByPositionAsc();
 		if (ordered.size() >= MAX_PHOTOS) throw new IllegalStateException("Gallery allows at most ten photos");
 		StoredGalleryImage image = storage.store(file);
-		cleanUpAfterTransaction(image, null);
+		cleanUpAfterTransaction(() -> storage.delete(image), null);
 		return photos.saveAndFlush(GalleryPhoto.create(ordered.size(), image.mainPath(), image.thumbnailPath(),
 				altText, captionId, captionEn)).getId();
 	}
@@ -62,7 +64,7 @@ public class WeddingMediaService {
 		GalleryPhoto photo = lockedPhoto(id, version);
 		StoredGalleryImage oldImage = stored(photo);
 		StoredGalleryImage newImage = storage.store(file);
-		cleanUpAfterTransaction(newImage, oldImage);
+		cleanUpAfterTransaction(() -> storage.delete(newImage), () -> storage.deleteAfterCommit(oldImage));
 		photo.replacePaths(newImage.mainPath(), newImage.thumbnailPath());
 		photos.saveAndFlush(photo);
 	}
@@ -95,7 +97,7 @@ public class WeddingMediaService {
 		List<GalleryPhoto> ordered = photos.findAllByOrderByPositionAsc();
 		GalleryPhoto deleted = ordered.stream().filter(photo -> photo.getId() == id).findFirst().orElseThrow();
 		requireVersion(deleted, version);
-		cleanUpAfterTransaction(null, stored(deleted));
+		cleanUpAfterTransaction(null, () -> storage.deleteAfterCommit(stored(deleted)));
 		photos.delete(deleted);
 		photos.flush();
 		int position = 0;
@@ -123,6 +125,34 @@ public class WeddingMediaService {
 		settings.saveAndFlush(wedding);
 	}
 
+	@Transactional
+	public void replaceAudio(MultipartFile file) {
+		WeddingSettings wedding = lockWedding();
+		String oldPath = wedding.getBackgroundAudioPath();
+		String newPath = audio.store(file);
+		cleanUpAfterTransaction(() -> audio.delete(newPath),
+				oldPath == null ? null : () -> audio.deleteAfterCommit(oldPath));
+		wedding.replaceBackgroundAudio(newPath);
+		settings.saveAndFlush(wedding);
+	}
+
+	@Transactional
+	public void deleteAudio(long weddingVersion) {
+		WeddingSettings wedding = lockWedding();
+		requireWeddingVersion(wedding, weddingVersion);
+		String oldPath = wedding.removeBackgroundAudio();
+		cleanUpAfterTransaction(null, oldPath == null ? null : () -> audio.deleteAfterCommit(oldPath));
+		settings.saveAndFlush(wedding);
+	}
+
+	@Transactional
+	public void setAudioEnabled(long weddingVersion, boolean enabled) {
+		WeddingSettings wedding = lockWedding();
+		requireWeddingVersion(wedding, weddingVersion);
+		wedding.setBackgroundAudioEnabled(enabled);
+		settings.saveAndFlush(wedding);
+	}
+
 	private WeddingMediaView view(String language) {
 		WeddingSettings wedding = settings.getSingleton().orElseThrow();
 		return new WeddingMediaView(wedding.isGalleryEnabled(), wedding.isBackgroundAudioEnabled(), wedding.getVersion(),
@@ -144,6 +174,10 @@ public class WeddingMediaService {
 
 	private static void requireVersion(GalleryPhoto photo, long version) {
 		if (photo.getVersion() != version) throw new OptimisticLockingFailureException("Gallery photo has changed");
+	}
+
+	private static void requireWeddingVersion(WeddingSettings wedding, long version) {
+		if (wedding.getVersion() != version) throw new OptimisticLockingFailureException("Wedding settings have changed");
 	}
 
 	private static String requiredAlt(String value) {
@@ -169,16 +203,16 @@ public class WeddingMediaService {
 		return new StoredGalleryImage(photo.getMainPath(), photo.getThumbnailPath());
 	}
 
-	private void cleanUpAfterTransaction(StoredGalleryImage added, StoredGalleryImage obsolete) {
+	private void cleanUpAfterTransaction(Runnable added, Runnable obsolete) {
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 			@Override
 			public void afterCommit() {
-				if (obsolete != null) storage.deleteAfterCommit(obsolete);
+				if (obsolete != null) obsolete.run();
 			}
 
 			@Override
 			public void afterCompletion(int status) {
-				if (status != STATUS_COMMITTED && added != null) storage.delete(added);
+				if (status != STATUS_COMMITTED && added != null) added.run();
 			}
 		});
 	}
