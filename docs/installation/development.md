@@ -143,19 +143,20 @@ later edit is preserved and the page warns the administrator.
 
 ### Phase 5 manual venue acceptance
 
-Status: pending user acceptance; acceptance date not yet recorded. Automated
-tests do not substitute for these physical device/network checks.
+Status: partially accepted on 2026-08-11. Testing used two staff accounts on
+an iPhone and a laptop browser. The remaining camera retest and physical USB
+scanner check are recorded below; automated tests do not replace them.
 
-- [ ] USB scanner, camera, and search share preview and explicit confirmation.
-- [ ] Camera works over HTTPS and fails cleanly over HTTP while USB/manual remain usable.
-- [ ] WAN disconnected but LAN/server available still permits USB/manual check-in.
-- [ ] Two simultaneous confirmations produce one winner and one duplicate result.
-- [ ] No-RSVP/declined warning and automatic promotion behave as documented.
-- [ ] Companion-only attendance records one; an allowed pair records two.
-- [ ] Archived, expired-token, stale-declined QR, unpublished, and closed-event cases reject.
-- [ ] Disabled/reset staff sessions are revoked.
-- [ ] Administrator correction/cancellation and RSVP restoration/skip warning are correct.
-- [ ] Staff pages reveal no protected guest fields.
+- [ ] USB scanner, camera, and search share preview and explicit confirmation. Pasting a decoded QR payload successfully verified the scanner-input path; physical USB hardware remains untested.
+- [ ] Camera works over HTTPS and fails cleanly over HTTP while USB/manual remain usable. iPhone Safari exposed detailed scan results rendering as `[object Object]`; fixed in code and awaiting device retest.
+- [x] WAN disconnected but LAN/server available still permits USB/manual check-in.
+- [x] Two simultaneous confirmations produce one winner and one duplicate result.
+- [x] No-RSVP/declined warning and automatic promotion behave as documented.
+- [x] Companion-only attendance records one; an allowed pair records two.
+- [x] Archived, expired-token, stale-declined QR, unpublished, and closed-event cases reject.
+- [x] Disabled/reset staff sessions are revoked.
+- [x] Administrator correction/cancellation and RSVP restoration/skip warning are correct.
+- [x] Staff pages reveal no protected guest fields.
 
 ## Wedding content and media
 

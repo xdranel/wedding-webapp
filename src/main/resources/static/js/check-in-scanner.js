@@ -41,10 +41,10 @@ async function start() {
     startButton.disabled = true;
     stopButton.disabled = false;
     video.hidden = false;
-    scanner ??= new QrScanner(video, (payload) => {
+    scanner ??= new QrScanner(video, (result) => {
       if (!scanning) return;
       stop();
-      input.value = payload;
+      input.value = result.data;
       status.textContent = 'Invitation scanned. Opening preview.';
       form.requestSubmit();
     }, { preferredCamera: 'environment' });

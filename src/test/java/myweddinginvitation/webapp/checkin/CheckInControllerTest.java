@@ -168,7 +168,8 @@ class CheckInControllerTest {
 		mockMvc.perform(get("/webjars/qr-scanner/1.4.2/qr-scanner.min.js"))
 				.andExpect(status().isOk());
 		mockMvc.perform(get("/js/check-in-scanner.js"))
-				.andExpect(status().isOk());
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("input.value = result.data")));
 	}
 
 	@Test
