@@ -3,6 +3,7 @@ package myweddinginvitation.webapp.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -93,6 +94,15 @@ class SecurityRoutesTest {
 		mockMvc.perform(post("/admin/wedding/media/gallery-enabled").session(admin)
 				.param("version", "0").param("enabled", "false"))
 				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	void anonymousMediaReadsArePublicButWritesAreDenied() throws Exception {
+		mockMvc.perform(get("/media/wedding/audio"))
+				.andExpect(status().isNotFound());
+		mockMvc.perform(post("/media/wedding/audio").with(csrf()))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrl("/login"));
 	}
 
 	@Test
