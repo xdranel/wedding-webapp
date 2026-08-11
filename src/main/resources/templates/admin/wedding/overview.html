@@ -51,6 +51,7 @@
         <a th:href="@{/admin/wedding/partners}">Partners</a>
         <a th:href="@{/admin/wedding/events}">Events</a>
         <a th:href="@{/admin/wedding/story}">Story</a>
+		<a th:href="@{/admin/wedding/media}">Media</a>
         <a th:href="@{/admin/wedding/preview}">Preview</a>
     </nav>
     <form th:if="${overview.publicationState.name() == 'DRAFT'}" method="post" th:action="@{/admin/wedding/publish}">

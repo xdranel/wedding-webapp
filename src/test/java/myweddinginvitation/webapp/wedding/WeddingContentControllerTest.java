@@ -122,6 +122,7 @@ class WeddingContentControllerTest {
 				.andExpect(content().string(containsString("/admin/wedding/partners")))
 				.andExpect(content().string(containsString("/admin/wedding/events")))
 				.andExpect(content().string(containsString("/admin/wedding/story")))
+				.andExpect(content().string(containsString("/admin/wedding/media")))
 				.andExpect(content().string(containsString("/admin/wedding/preview")))
 				.andExpect(content().string(containsString("Partner 1 needs attention")))
 				.andExpect(content().string(containsString("Ceremony needs attention")))

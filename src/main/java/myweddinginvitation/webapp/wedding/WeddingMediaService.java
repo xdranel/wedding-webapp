@@ -158,6 +158,7 @@ public class WeddingMediaService {
 		return new WeddingMediaView(wedding.isGalleryEnabled(), wedding.isBackgroundAudioEnabled(), wedding.getVersion(),
 				photos.findAllByOrderByPositionAsc().stream().map(photo -> new WeddingMediaView.Photo(
 						photo.getId(), photo.getVersion(), photo.getAltText(), caption(photo, language),
+						photo.getCaptionId(), photo.getCaptionEn(),
 						"/media/gallery/" + photo.getId() + "/thumbnail",
 						"/media/gallery/" + photo.getId() + "/image")).toList());
 	}

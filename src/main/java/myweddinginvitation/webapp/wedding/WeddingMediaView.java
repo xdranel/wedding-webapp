@@ -12,6 +12,8 @@ public record WeddingMediaView(
 			long version,
 			String altText,
 			String caption,
+			String captionId,
+			String captionEn,
 			String thumbnailUrl,
 			String imageUrl) {
 	}
