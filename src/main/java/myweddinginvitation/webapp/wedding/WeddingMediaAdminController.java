@@ -39,7 +39,7 @@ public class WeddingMediaAdminController {
 		try {
 			media.addPhoto(image, photoForm);
 			return "redirect:/admin/wedding/media?photoAdded";
-		} catch (IllegalArgumentException | IllegalStateException exception) {
+		} catch (IllegalArgumentException exception) {
 			result.reject("photo.invalid", exception.getMessage());
 			return badRequest(response, model, photoForm, null);
 		}
@@ -103,7 +103,7 @@ public class WeddingMediaAdminController {
 			return "redirect:/admin/wedding/media?galleryVisibilityChanged";
 		} catch (OptimisticLockingFailureException exception) {
 			return conflict(model, emptyForm(), null);
-		} catch (IllegalArgumentException exception) {
+		} catch (IllegalArgumentException | IllegalStateException exception) {
 			return badRequest(response, model, exception.getMessage());
 		}
 	}
@@ -138,7 +138,7 @@ public class WeddingMediaAdminController {
 			return "redirect:/admin/wedding/media?audioVisibilityChanged";
 		} catch (OptimisticLockingFailureException exception) {
 			return conflict(model, emptyForm(), null);
-		} catch (IllegalArgumentException exception) {
+		} catch (IllegalArgumentException | IllegalStateException exception) {
 			return badRequest(response, model, exception.getMessage());
 		}
 	}

@@ -31,7 +31,9 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.servlet.autoconfigure.MultipartProperties;
 import org.springframework.context.annotation.Import;
+import org.springframework.util.unit.DataSize;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
@@ -41,7 +43,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(properties = {
 		"app.bootstrap-admin.username=test-admin",
-		"app.bootstrap-admin.password=Test-Only-Password-2026"
+		"app.bootstrap-admin.password=Test-Only-Password-2026",
+		"spring.servlet.multipart.max-file-size=21MB",
+		"spring.servlet.multipart.max-request-size=21MB"
 })
 @AutoConfigureMockMvc
 @Import(MySqlTestConfiguration.class)
@@ -58,6 +62,7 @@ class WeddingMediaAdminControllerTest {
 	@Autowired WeddingSettingsRepository settings;
 	@Autowired GalleryPhotoRepository photos;
 	@Autowired JdbcTemplate jdbc;
+	@Autowired MultipartProperties multipartProperties;
 
 	private MockHttpSession adminSession;
 
@@ -148,6 +153,12 @@ class WeddingMediaAdminControllerTest {
 	}
 
 	@Test
+	void multipartTransportAllowsTheTwentyMiBDomainGuardToRejectOversizedAudio() {
+		assertThat(multipartProperties.getMaxFileSize()).isEqualTo(DataSize.ofMegabytes(21));
+		assertThat(multipartProperties.getMaxRequestSize()).isEqualTo(DataSize.ofMegabytes(21));
+	}
+
+	@Test
 	void replacementMoveBoundaryAndConfirmedDeleteUseSeparatePosts() throws Exception {
 		long firstId = media.addPhoto(image("first.png", Color.BLUE), form("First", 0));
 		long secondId = media.addPhoto(image("second.png", Color.RED), form("Second", 0));
@@ -197,6 +208,21 @@ class WeddingMediaAdminControllerTest {
 				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())).param("confirm", "true"))
 				.andExpect(redirectedUrl("/admin/wedding/media?audioDeleted"));
 		assertThat(settings.getSingleton().orElseThrow().getBackgroundAudioPath()).isNull();
+	}
+
+	@Test
+	void emptyGalleryAndMissingAudioEnablementReturnSafeBadRequestPages() throws Exception {
+		mockMvc.perform(post("/admin/wedding/media/gallery-enabled").session(adminSession).with(csrf())
+				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())).param("enabled", "true"))
+				.andExpect(status().isBadRequest())
+				.andExpect(view().name("admin/wedding/media"))
+				.andExpect(content().string(containsString("Gallery requires at least one photo")));
+
+		mockMvc.perform(post("/admin/wedding/media/audio-enabled").session(adminSession).with(csrf())
+				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())).param("enabled", "true"))
+				.andExpect(status().isBadRequest())
+				.andExpect(view().name("admin/wedding/media"))
+				.andExpect(content().string(containsString("Background audio is missing")));
 	}
 
 	@Test
