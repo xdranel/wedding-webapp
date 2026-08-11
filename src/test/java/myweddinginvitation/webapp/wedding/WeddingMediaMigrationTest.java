@@ -10,12 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(properties = {
 		"app.bootstrap-admin.username=test-admin",
 		"app.bootstrap-admin.password=Test-Only-Password-2026"
 })
 @Import(MySqlTestConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class WeddingMediaMigrationTest {
 	@Autowired
 	JdbcTemplate jdbc;

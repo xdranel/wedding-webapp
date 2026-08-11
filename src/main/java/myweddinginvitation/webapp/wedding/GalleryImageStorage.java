@@ -20,6 +20,7 @@ import javax.imageio.stream.ImageInputStream;
 import myweddinginvitation.webapp.config.AppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,6 +35,7 @@ public class GalleryImageStorage {
     private final Path galleryDirectory;
     private final BiConsumer<BufferedImage, Path> webpWriter;
 
+    @Autowired
     public GalleryImageStorage(AppProperties properties) {
         this(properties.mediaDirectory());
     }
