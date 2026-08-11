@@ -251,11 +251,11 @@ class WeddingMediaServiceTest {
 
 	@Test
 	void replacesAudioAndRemovesOnlyCommittedObsoleteFile() throws IOException {
-		service.replaceAudio(audio(1));
+		service.replaceAudio(wedding().getVersion(), audio(1));
 		String oldPath = wedding().getBackgroundAudioPath();
 		assertThat(audioPath(oldPath)).isRegularFile();
 
-		service.replaceAudio(audio(2));
+		service.replaceAudio(wedding().getVersion(), audio(2));
 
 		String replacement = wedding().getBackgroundAudioPath();
 		assertThat(replacement).isNotEqualTo(oldPath);
@@ -264,7 +264,7 @@ class WeddingMediaServiceTest {
 
 		AtomicReference<String> rolledBack = new AtomicReference<>();
 		new TransactionTemplate(transactions).executeWithoutResult(status -> {
-			service.replaceAudio(audio(3));
+			service.replaceAudio(wedding().getVersion(), audio(3));
 			rolledBack.set(wedding().getBackgroundAudioPath());
 			assertThat(audioPath(rolledBack.get())).isRegularFile();
 			status.setRollbackOnly();
@@ -276,10 +276,11 @@ class WeddingMediaServiceTest {
 
 	@Test
 	void failedAudioReplacementPreservesOldFile() {
-		service.replaceAudio(audio(1));
+		service.replaceAudio(wedding().getVersion(), audio(1));
 		String oldPath = wedding().getBackgroundAudioPath();
 
-		assertThatThrownBy(() -> service.replaceAudio(new MockMultipartFile("audio", "bad.mp3", "audio/mpeg", new byte[] {1, 2})))
+		assertThatThrownBy(() -> service.replaceAudio(wedding().getVersion(),
+				new MockMultipartFile("audio", "bad.mp3", "audio/mpeg", new byte[] {1, 2})))
 				.isInstanceOf(IllegalArgumentException.class);
 
 		assertThat(wedding().getBackgroundAudioPath()).isEqualTo(oldPath);
@@ -287,11 +288,29 @@ class WeddingMediaServiceTest {
 	}
 
 	@Test
+	void staleAudioReplacementRejectsBeforeStorageAndPreservesCurrentFile() throws IOException {
+		service.replaceAudio(wedding().getVersion(), audio(1));
+		long staleVersion = wedding().getVersion();
+		service.replaceAudio(staleVersion, audio(2));
+		String currentPath = wedding().getBackgroundAudioPath();
+
+		assertThatThrownBy(() -> service.replaceAudio(staleVersion,
+				new MockMultipartFile("audio", "bad.mp3", "audio/mpeg", new byte[] {1, 2})))
+				.isInstanceOf(OptimisticLockingFailureException.class);
+		assertThat(wedding().getBackgroundAudioPath()).isEqualTo(currentPath);
+		assertThat(audioPath(currentPath)).isRegularFile();
+		assertThat(Files.readAllBytes(audioPath(currentPath))).isEqualTo(audio(2).getBytes());
+		try (Stream<Path> paths = Files.list(mediaDirectory.resolve("audio"))) {
+			assertThat(paths.filter(Files::isRegularFile)).containsExactly(audioPath(currentPath));
+		}
+	}
+
+	@Test
 	void audioEnablementRequiresFileDisablePreservesAndDeleteDisables() {
 		long emptyVersion = wedding().getVersion();
 		assertThatThrownBy(() -> service.setAudioEnabled(emptyVersion, true)).isInstanceOf(IllegalStateException.class);
 
-		service.replaceAudio(audio(1));
+		service.replaceAudio(wedding().getVersion(), audio(1));
 		String path = wedding().getBackgroundAudioPath();
 		service.setAudioEnabled(wedding().getVersion(), true);
 		service.setAudioEnabled(wedding().getVersion(), false);

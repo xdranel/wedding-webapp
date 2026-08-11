@@ -126,8 +126,9 @@ public class WeddingMediaService {
 	}
 
 	@Transactional
-	public void replaceAudio(MultipartFile file) {
+	public void replaceAudio(long weddingVersion, MultipartFile file) {
 		WeddingSettings wedding = lockWedding();
+		requireWeddingVersion(wedding, weddingVersion);
 		String oldPath = wedding.getBackgroundAudioPath();
 		String newPath = audio.store(file);
 		cleanUpAfterTransaction(() -> audio.delete(newPath),

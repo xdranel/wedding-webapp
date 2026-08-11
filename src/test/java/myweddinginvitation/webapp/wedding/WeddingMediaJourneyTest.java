@@ -231,7 +231,8 @@ class WeddingMediaJourneyTest {
 
 	private void uploadAudio() throws Exception {
 		mockMvc.perform(multipart("/admin/wedding/media/audio").session(adminSession).with(csrf())
-				.file(new MockMultipartFile("audio", "journey.mp3", "audio/mpeg", MP3)))
+				.file(new MockMultipartFile("audio", "journey.mp3", "audio/mpeg", MP3))
+				.param("version", Long.toString(settingsVersion())))
 				.andExpect(redirectedUrl("/admin/wedding/media?audioReplaced"));
 	}
 

@@ -109,10 +109,13 @@ public class WeddingMediaAdminController {
 	}
 
 	@PostMapping("/admin/wedding/media/audio")
-	String replaceAudio(@RequestParam("audio") MultipartFile audio, Model model, HttpServletResponse response) {
+	String replaceAudio(@RequestParam long version, @RequestParam("audio") MultipartFile audio, Model model,
+			HttpServletResponse response) {
 		try {
-			media.replaceAudio(audio);
+			media.replaceAudio(version, audio);
 			return "redirect:/admin/wedding/media?audioReplaced";
+		} catch (OptimisticLockingFailureException exception) {
+			return conflict(model, emptyForm(), null);
 		} catch (IllegalArgumentException exception) {
 			return badRequest(response, model, exception.getMessage());
 		}

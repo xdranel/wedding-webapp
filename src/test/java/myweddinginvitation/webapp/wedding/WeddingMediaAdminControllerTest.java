@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import javax.imageio.ImageIO;
@@ -88,13 +89,18 @@ class WeddingMediaAdminControllerTest {
 	void mediaPageListsFormActionsWithoutClientFileNamesOrPaths() throws Exception {
 		long id = media.addPhoto(image("C:/private/engagement.png", Color.BLUE), form("Engagement photo", 0));
 
-		mockMvc.perform(get("/admin/wedding/media").session(adminSession))
+		String page = mockMvc.perform(get("/admin/wedding/media").session(adminSession))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/wedding/media"))
 				.andExpect(model().attributeExists("media", "photoForm"))
 				.andExpect(content().string(containsString("/admin/wedding/media/photos/" + id + "/replace")))
 				.andExpect(content().string(containsString("/admin/wedding/media/audio")))
-				.andExpect(content().string(not(containsString("C:/private/engagement.png"))));
+				.andExpect(content().string(not(containsString("C:/private/engagement.png"))))
+				.andReturn().getResponse().getContentAsString();
+		int audioForm = page.indexOf("action=\"/admin/wedding/media/audio\"");
+		assertThat(audioForm).isNotNegative();
+		assertThat(page.substring(audioForm, page.indexOf("</form>", audioForm)))
+				.contains("name=\"version\" value=\"0\"");
 	}
 
 	@Test
@@ -150,7 +156,8 @@ class WeddingMediaAdminControllerTest {
 		byte[] oversized = new byte[20 * 1024 * 1024 + 1];
 		MockMultipartFile audio = new MockMultipartFile("audio", "large.mp3", "audio/mpeg", oversized);
 
-		mockMvc.perform(multipart("/admin/wedding/media/audio").session(adminSession).with(csrf()).file(audio))
+		mockMvc.perform(multipart("/admin/wedding/media/audio").session(adminSession).with(csrf()).file(audio)
+				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())))
 				.andExpect(status().isBadRequest())
 				.andExpect(content().string(containsString("at most 20 MiB")));
 	}
@@ -217,7 +224,8 @@ class WeddingMediaAdminControllerTest {
 		assertThat(settings.getSingleton().orElseThrow().isGalleryEnabled()).isTrue();
 
 		mockMvc.perform(multipart("/admin/wedding/media/audio").session(adminSession).with(csrf())
-				.file(new MockMultipartFile("audio", "song.mp3", "audio/mpeg", new byte[] {(byte) 0xff, (byte) 0xfb})))
+				.file(new MockMultipartFile("audio", "song.mp3", "audio/mpeg", new byte[] {(byte) 0xff, (byte) 0xfb}))
+				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())))
 				.andExpect(redirectedUrl("/admin/wedding/media?audioReplaced"));
 
 		mockMvc.perform(post("/admin/wedding/media/audio-enabled").session(adminSession).with(csrf())
@@ -229,6 +237,23 @@ class WeddingMediaAdminControllerTest {
 				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())).param("confirm", "true"))
 				.andExpect(redirectedUrl("/admin/wedding/media?audioDeleted"));
 		assertThat(settings.getSingleton().orElseThrow().getBackgroundAudioPath()).isNull();
+	}
+
+	@Test
+	void staleAudioReplacementReturnsConflictAndPreservesCurrentTrack() throws Exception {
+		media.replaceAudio(settings.getSingleton().orElseThrow().getVersion(), audio(1));
+		long staleVersion = settings.getSingleton().orElseThrow().getVersion();
+		media.replaceAudio(staleVersion, audio(2));
+		String currentPath = settings.getSingleton().orElseThrow().getBackgroundAudioPath();
+
+		mockMvc.perform(multipart("/admin/wedding/media/audio").session(adminSession).with(csrf())
+				.file(audio(3)).param("version", Long.toString(staleVersion)))
+				.andExpect(status().isOk())
+				.andExpect(view().name("admin/wedding/media"))
+				.andExpect(content().string(containsString("changed by another administrator")));
+		assertThat(settings.getSingleton().orElseThrow().getBackgroundAudioPath()).isEqualTo(currentPath);
+		assertThat(mediaDirectory.resolve(currentPath)).isRegularFile();
+		assertThat(Files.readAllBytes(mediaDirectory.resolve(currentPath))).isEqualTo(audio(2).getBytes());
 	}
 
 	@Test
@@ -276,5 +301,10 @@ class WeddingMediaAdminControllerTest {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		ImageIO.write(image, "png", output);
 		return new MockMultipartFile("image", name, "image/png", output.toByteArray());
+	}
+
+	private static MockMultipartFile audio(int value) {
+		return new MockMultipartFile("audio", "track.mp3", "audio/mpeg",
+				new byte[] {(byte) 0xff, (byte) 0xfb, (byte) 0x90, 0x64, (byte) value});
 	}
 }
