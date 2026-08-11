@@ -81,6 +81,8 @@ class PublicInvitationControllerTest {
 				.andExpect(content().string(containsString("Dengan hormat")))
 				.andExpect(content().string(containsString("/css/invitation.css")))
 				.andExpect(content().string(containsString("noindex, nofollow")))
+				.andExpect(content().string(containsString("/media/partner/")))
+				.andExpect(content().string(not(containsString("rama.jpg"))))
 				.andExpect(content().string(not(containsString(WHATSAPP))))
 				.andExpect(content().string(not(containsString(INTERNAL_NOTE))))
 				.andExpect(content().string(containsString("RSVP")))
@@ -176,10 +178,10 @@ class PublicInvitationControllerTest {
 				accent_color = '#2E5E4E', font_preset = 'MODERN' where id = 1
 				""");
 		jdbc.update("""
-				update partner set full_name = ?, nickname = ?, child_of_label_id = ?,
+				update partner set full_name = ?, nickname = ?, photo_path = ?, child_of_label_id = ?,
 				child_of_label_en = null, parents_names_id = ?, parents_names_en = null
 				where display_order = ?
-				""", "Rama Pratama", "Rama", "Putra", "Keluarga Pratama", 1);
+				""", "Rama Pratama", "Rama", "rama.jpg", "Putra", "Keluarga Pratama", 1);
 		jdbc.update("""
 				update partner set full_name = ?, nickname = ?, child_of_label_id = ?,
 				child_of_label_en = null, parents_names_id = ?, parents_names_en = null

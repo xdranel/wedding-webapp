@@ -107,9 +107,9 @@ class WeddingPreviewTest {
 		assertThat(page).contains("for=\"salutation\"", "for=\"guest-name\"", "for=\"language\"")
 				.contains("<button type=\"button\" id=\"open-invitation\"")
 				.contains("alt=\"Portrait of Rama Pratama\"")
-				.contains("/admin/wedding/media/rama.jpg")
+				.contains("/media/partner/")
 				.contains("style=\"--accent: #2E5E4E;\"", "data-font=\"MODERN\"")
-				.doesNotContain("RSVP", "QRCode", "Live stream", "/i/");
+				.doesNotContain("RSVP", "QRCode", "Live stream", "/i/", "/admin/wedding/media/rama.jpg");
 		assertThat(jdbc.queryForMap("""
 				select couple_title, opening_text_id, closing_text_id, accent_color, font_preset from wedding_settings where id = 1
 				""")).isEqualTo(settingsBefore);

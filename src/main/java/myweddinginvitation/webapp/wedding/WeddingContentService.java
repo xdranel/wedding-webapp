@@ -292,7 +292,7 @@ public class WeddingContentService {
                 guestName, coverDate(orderedEvents), weddingSettings.getAccentColor(), weddingSettings.getFontPreset(),
                 localized(weddingSettings.getOpeningTextId(), weddingSettings.getOpeningTextEn(), language),
                 localized(weddingSettings.getClosingTextId(), weddingSettings.getClosingTextEn(), language),
-                orderedPartners.stream().map(partner -> new WeddingPreview.PartnerView(partner.getFullName(), partner.getNickname(),
+                orderedPartners.stream().map(partner -> new WeddingPreview.PartnerView(partner.getId(), partner.getFullName(), partner.getNickname(),
                         partner.getPhotoPath(), localized(partner.getChildOfLabelId(), partner.getChildOfLabelEn(), language),
                         localized(partner.getParentsNamesId(), partner.getParentsNamesEn(), language), partner.getInstagramUrl())).toList(),
                 orderedEvents.stream().filter(EventPart::isVisible).map(event -> new WeddingPreview.EventView(event.getType(), event.getDate(),

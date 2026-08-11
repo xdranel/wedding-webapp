@@ -35,6 +35,9 @@
     <section aria-labelledby="partners-title">
         <h2 id="partners-title" th:text="${language == 'EN'} ? 'The couple' : 'Mempelai'">Mempelai</h2>
         <article th:each="partner : ${preview.partners}">
+            <img th:if="${!#strings.isEmpty(partner.photoPath)}"
+                 th:src="@{/media/partner/{id}(id=${partner.id})}"
+                 th:alt="${'Portrait of ' + (partner.fullName ?: partner.nickname ?: 'partner')}">
             <h3 th:text="${partner.fullName ?: partner.nickname ?: 'Partner'}">Partner</h3>
             <p th:if="${!#strings.isEmpty(partner.childOfLabel)}" th:text="${partner.childOfLabel}">Putra/Putri</p>
             <p th:if="${!#strings.isEmpty(partner.parentsNames)}" th:text="${partner.parentsNames}">Keluarga</p>

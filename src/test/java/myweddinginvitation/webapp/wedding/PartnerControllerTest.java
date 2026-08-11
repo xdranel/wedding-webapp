@@ -59,17 +59,13 @@ class PartnerControllerTest {
 
 	long partnerId;
 	MockHttpSession adminSession;
-	MockHttpSession staffSession;
 
 	@BeforeEach
 	void resetPartners() throws Exception {
 		accounts.deleteAll();
 		accounts.save(new UserAccount("admin", "{noop}" + PASSWORD, AccountRole.ADMIN));
-		accounts.save(new UserAccount("staff", "{noop}" + PASSWORD, AccountRole.STAFF));
 		accountSecurity.changePassword("admin", PASSWORD, PASSWORD);
-		accountSecurity.changePassword("staff", PASSWORD, PASSWORD);
 		adminSession = login("admin");
-		staffSession = login("staff");
 		for (Partner partner : partners.findAll()) {
 			if (partner.getPhotoPath() != null) storage.delete(partner.getPhotoPath());
 		}
@@ -154,18 +150,17 @@ class PartnerControllerTest {
 	}
 
 	@Test
-	void storedPhotoIsAvailableOnlyToAdministratorsWithSafeResponseHeaders() throws Exception {
-		String path = saveValidPartnerPhoto();
+	void storedPhotoIsAvailableByPartnerIdentifierWithSafeResponseHeaders() throws Exception {
+		saveValidPartnerPhoto();
 
-		mockMvc.perform(get("/admin/wedding/media/{filename}", path).session(adminSession))
+		mockMvc.perform(get("/media/partner/{id}", partnerId))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.IMAGE_JPEG))
-				.andExpect(header().string("X-Content-Type-Options", "nosniff"));
-		mockMvc.perform(get("/admin/wedding/media/{filename}", path).session(staffSession))
-				.andExpect(status().isForbidden());
-		mockMvc.perform(get("/admin/wedding/media/missing.jpg").session(adminSession))
+				.andExpect(header().string("X-Content-Type-Options", "nosniff"))
+				.andExpect(header().string("Cache-Control", "no-cache"));
+		mockMvc.perform(get("/media/partner/missing"))
 				.andExpect(status().isNotFound());
-		mockMvc.perform(get("/admin/wedding/media/{filename}", "../outside.jpg").session(adminSession))
+		mockMvc.perform(get("/media/partner/{id}", 999999))
 				.andExpect(status().isNotFound());
 	}
 

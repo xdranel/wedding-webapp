@@ -24,6 +24,7 @@ public record WeddingPreview(
     }
 
     public record PartnerView(
+            Long id,
             String fullName,
             String nickname,
             String photoPath,
