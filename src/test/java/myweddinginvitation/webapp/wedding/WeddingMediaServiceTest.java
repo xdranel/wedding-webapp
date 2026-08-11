@@ -22,15 +22,25 @@ import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Role;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -40,7 +50,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 		"app.bootstrap-admin.username=test-admin",
 		"app.bootstrap-admin.password=Test-Only-Password-2026"
 })
-@Import(MySqlTestConfiguration.class)
+@Import({MySqlTestConfiguration.class, WeddingMediaServiceTest.LockBarrierConfig.class})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class WeddingMediaServiceTest {
 	@TempDir
 	static Path mediaDirectory;
@@ -50,6 +61,7 @@ class WeddingMediaServiceTest {
 	@Autowired WeddingSettingsRepository settings;
 	@Autowired JdbcTemplate jdbc;
 	@Autowired PlatformTransactionManager transactions;
+	@Autowired WeddingLockBarrier weddingLockBarrier;
 
 	@DynamicPropertySource
 	static void mediaDirectory(DynamicPropertyRegistry registry) {
@@ -237,18 +249,19 @@ class WeddingMediaServiceTest {
 			service.addPhoto(image(index), form("Photo " + index, null, null, 0));
 		}
 		byte[] upload = png(20);
-		CountDownLatch ready = new CountDownLatch(2);
-		CountDownLatch start = new CountDownLatch(1);
-		try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
-			Future<Boolean> first = executor.submit(() -> concurrentAdd(upload, ready, start, "Concurrent one"));
-			Future<Boolean> second = executor.submit(() -> concurrentAdd(upload, ready, start, "Concurrent two"));
-			assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue();
-			start.countDown();
+		weddingLockBarrier.arm();
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		try {
+			Future<Boolean> first = executor.submit(() -> concurrentAdd(upload, "Concurrent one"));
+			Future<Boolean> second = executor.submit(() -> concurrentAdd(upload, "Concurrent two"));
+			assertThat(weddingLockBarrier.awaitBoth()).isTrue();
+			weddingLockBarrier.release();
 
 			assertThat(List.of(first.get(30, TimeUnit.SECONDS), second.get(30, TimeUnit.SECONDS)))
 					.containsExactlyInAnyOrder(true, false);
 		} finally {
-			start.countDown();
+			weddingLockBarrier.release();
+			executor.shutdownNow();
 		}
 
 		assertThat(jdbc.queryForObject("select count(*) from gallery_photo", Integer.class)).isEqualTo(10);
@@ -256,14 +269,61 @@ class WeddingMediaServiceTest {
 		assertThat(fileCount()).isEqualTo(20);
 	}
 
-	private boolean concurrentAdd(byte[] upload, CountDownLatch ready, CountDownLatch start, String alt) throws Exception {
-		ready.countDown();
-		start.await();
+	private boolean concurrentAdd(byte[] upload, String alt) {
 		try {
 			service.addPhoto(new MockMultipartFile("image", "photo.png", "image/png", upload), form(alt, null, null, 0));
 			return true;
 		} catch (IllegalStateException exception) {
 			return false;
+		}
+	}
+
+	static final class WeddingLockBarrier implements MethodInterceptor {
+		private CountDownLatch waiting;
+		private CountDownLatch release;
+
+		void arm() {
+			waiting = new CountDownLatch(2);
+			release = new CountDownLatch(1);
+		}
+
+		@Override
+		public Object invoke(MethodInvocation invocation) throws Throwable {
+			CountDownLatch currentWaiting = waiting;
+			CountDownLatch currentRelease = release;
+			if (currentWaiting != null) {
+				currentWaiting.countDown();
+				if (!currentRelease.await(5, TimeUnit.SECONDS)) {
+					throw new AssertionError("Wedding lock release timed out");
+				}
+			}
+			return invocation.proceed();
+		}
+
+		boolean awaitBoth() throws InterruptedException {
+			return waiting.await(5, TimeUnit.SECONDS);
+		}
+
+		void release() {
+			if (release != null) release.countDown();
+		}
+	}
+
+	@TestConfiguration(proxyBeanMethods = false)
+	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+	static class LockBarrierConfig {
+		@Bean
+		@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+		WeddingLockBarrier weddingLockBarrier() {
+			return new WeddingLockBarrier();
+		}
+
+		@Bean
+		@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+		Advisor weddingLockBarrierAdvisor(WeddingLockBarrier barrier) {
+			NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+			pointcut.setMappedName("findSingletonForUpdate");
+			return new DefaultPointcutAdvisor(pointcut, barrier);
 		}
 	}
 
