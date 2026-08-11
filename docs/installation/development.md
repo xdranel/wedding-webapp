@@ -144,11 +144,11 @@ later edit is preserved and the page warns the administrator.
 ### Phase 5 manual venue acceptance
 
 Status: partially accepted on 2026-08-11. Testing used two staff accounts on
-an iPhone and a laptop browser. The remaining camera retest and physical USB
-scanner check are recorded below; automated tests do not replace them.
+a phone and a laptop browser. Camera scanning has passed on both devices; only
+the physical USB scanner check remains deferred. Automated tests do not replace it.
 
 - [ ] USB scanner, camera, and search share preview and explicit confirmation. Pasting a decoded QR payload successfully verified the scanner-input path; physical USB hardware remains untested.
-- [ ] Camera works over HTTPS and fails cleanly over HTTP while USB/manual remain usable. iPhone Safari exposed detailed scan results rendering as `[object Object]`; fixed in code and awaiting device retest.
+- [x] Camera works over HTTPS and fails cleanly over HTTP while USB/manual remain usable. The detailed-result fix passed camera scanning on both phone and laptop.
 - [x] WAN disconnected but LAN/server available still permits USB/manual check-in.
 - [x] Two simultaneous confirmations produce one winner and one duplicate result.
 - [x] No-RSVP/declined warning and automatic promotion behave as documented.
