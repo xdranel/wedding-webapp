@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
@@ -28,6 +29,11 @@ public class WebErrorHandler {
     @ExceptionHandler(AccessDeniedException.class)
     ModelAndView forbidden() {
         return error("error/403", HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ModelAndView uploadTooLarge(MaxUploadSizeExceededException exception) {
+        return error("error/413", HttpStatus.PAYLOAD_TOO_LARGE);
     }
 
     @ExceptionHandler(Exception.class)

@@ -39,7 +39,7 @@ public class WeddingMediaAdminController {
 		try {
 			media.addPhoto(image, photoForm);
 			return "redirect:/admin/wedding/media?photoAdded";
-		} catch (IllegalArgumentException exception) {
+		} catch (IllegalArgumentException | IllegalStateException exception) {
 			result.reject("photo.invalid", exception.getMessage());
 			return badRequest(response, model, photoForm, null);
 		}

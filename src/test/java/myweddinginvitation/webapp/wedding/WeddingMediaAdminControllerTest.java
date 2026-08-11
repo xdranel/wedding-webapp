@@ -36,7 +36,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.util.unit.DataSize;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -150,6 +153,24 @@ class WeddingMediaAdminControllerTest {
 		mockMvc.perform(multipart("/admin/wedding/media/audio").session(adminSession).with(csrf()).file(audio))
 				.andExpect(status().isBadRequest())
 				.andExpect(content().string(containsString("at most 20 MiB")));
+	}
+
+	@Test
+	void addPhotoStorageFailureReturnsSafeBadRequest() throws Exception {
+		WeddingMediaService failingMedia = org.mockito.Mockito.mock(WeddingMediaService.class);
+		org.mockito.Mockito.when(failingMedia.adminView())
+				.thenReturn(new WeddingMediaView(false, false, 0, java.util.List.of()));
+		org.mockito.Mockito.doThrow(new IllegalStateException("Could not process gallery image"))
+				.when(failingMedia).addPhoto(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+		WeddingMediaAdminController controller = new WeddingMediaAdminController(failingMedia);
+		GalleryPhotoForm form = form("Photo", 0);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		String page = controller.addPhoto(image("photo.png", Color.BLUE), form,
+				new BeanPropertyBindingResult(form, "photoForm"), new ExtendedModelMap(), response);
+
+		assertThat(page).isEqualTo("admin/wedding/media");
+		assertThat(response.getStatus()).isEqualTo(400);
 	}
 
 	@Test
