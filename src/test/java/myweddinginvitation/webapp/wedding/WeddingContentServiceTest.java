@@ -41,7 +41,7 @@ class WeddingContentServiceTest {
 		jdbc.update("""
 				update wedding_settings set publication_state = 'DRAFT', couple_title = null,
 				opening_text_id = null, opening_text_en = null, closing_text_id = null,
-				closing_text_en = null, time_zone = 'Asia/Jakarta'
+				closing_text_en = null, time_zone = 'Asia/Jakarta', calendar_downloads_enabled = false
 				where id = 1
 				""");
 	}
@@ -148,6 +148,17 @@ class WeddingContentServiceTest {
 				.extracting(WeddingSettingsForm::isEventClosed, WeddingSettingsForm::isGreetingsEnabled,
 						WeddingSettingsForm::isPrivateOrganizerNoteEnabled)
 				.containsExactly(true, false, true);
+	}
+
+	@Test
+	void settingsRoundTripCalendarDownloadsSwitch() {
+		WeddingSettingsForm form = service.settingsForm();
+		assertThat(form.isCalendarDownloadsEnabled()).isFalse();
+		form.setCalendarDownloadsEnabled(true);
+
+		service.saveSettings(form);
+
+		assertThat(service.settingsForm().isCalendarDownloadsEnabled()).isTrue();
 	}
 
 	@Test

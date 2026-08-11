@@ -65,6 +65,12 @@ public class Guest {
 	@Column(name = "last_sent_at")
 	private Instant lastSentAt;
 
+	@Column(name = "last_rsvp_reminder_sent_at")
+	private Instant lastRsvpReminderSentAt;
+
+	@Column(name = "last_event_reminder_sent_at")
+	private Instant lastEventReminderSentAt;
+
 	@Column(nullable = false)
 	private boolean archived;
 
@@ -139,6 +145,16 @@ public class Guest {
 		updatedAt = regeneratedAt;
 	}
 
+	public void confirmRsvpReminder(Instant sentAt) {
+		lastRsvpReminderSentAt = sentAt;
+		updatedAt = sentAt;
+	}
+
+	public void confirmEventReminder(Instant sentAt) {
+		lastEventReminderSentAt = sentAt;
+		updatedAt = sentAt;
+	}
+
 	public void pinFailed(Instant now) {
 		if (pinLockedUntil != null && !now.isBefore(pinLockedUntil)) clearPinLock();
 		if (pinLockedUntil != null) return;
@@ -173,6 +189,8 @@ public class Guest {
 	public DeliveryState getDeliveryState() { return deliveryState; }
 	public Instant getFirstSentAt() { return firstSentAt; }
 	public Instant getLastSentAt() { return lastSentAt; }
+	public Instant getLastRsvpReminderSentAt() { return lastRsvpReminderSentAt; }
+	public Instant getLastEventReminderSentAt() { return lastEventReminderSentAt; }
 	public boolean isArchived() { return archived; }
 	public Instant getArchivedAt() { return archivedAt; }
 	public int getFailedPinCount() { return failedPinCount; }

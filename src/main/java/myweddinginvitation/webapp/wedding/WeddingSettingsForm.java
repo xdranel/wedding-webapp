@@ -50,6 +50,8 @@ public class WeddingSettingsForm {
 
     private boolean privateOrganizerNoteEnabled;
 
+    private boolean calendarDownloadsEnabled;
+
     public Long getVersion() {
         return version;
     }
@@ -160,5 +162,13 @@ public class WeddingSettingsForm {
 
     public void setPrivateOrganizerNoteEnabled(boolean privateOrganizerNoteEnabled) {
         this.privateOrganizerNoteEnabled = privateOrganizerNoteEnabled;
+    }
+
+    public boolean isCalendarDownloadsEnabled() {
+        return calendarDownloadsEnabled;
+    }
+
+    public void setCalendarDownloadsEnabled(boolean calendarDownloadsEnabled) {
+        this.calendarDownloadsEnabled = calendarDownloadsEnabled;
     }
 }

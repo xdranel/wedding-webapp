@@ -65,6 +65,7 @@ public class WeddingContentService {
         form.setEventClosed(source.isEventClosed());
         form.setGreetingsEnabled(source.isGreetingsEnabled());
         form.setPrivateOrganizerNoteEnabled(source.isPrivateOrganizerNoteEnabled());
+        form.setCalendarDownloadsEnabled(source.isCalendarDownloadsEnabled());
         return form;
     }
 

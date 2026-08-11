@@ -64,6 +64,9 @@ public class WeddingSettings {
     @Column(name = "private_organizer_note_enabled", nullable = false)
     private boolean privateOrganizerNoteEnabled;
 
+    @Column(name = "calendar_downloads_enabled", nullable = false)
+    private boolean calendarDownloadsEnabled;
+
     @Column(name = "gallery_enabled", nullable = false)
     private boolean galleryEnabled;
 
@@ -144,6 +147,10 @@ public class WeddingSettings {
         return privateOrganizerNoteEnabled;
     }
 
+    public boolean isCalendarDownloadsEnabled() {
+        return calendarDownloadsEnabled;
+    }
+
     public boolean isGalleryEnabled() {
         return galleryEnabled;
     }
@@ -199,5 +206,6 @@ public class WeddingSettings {
         eventClosed = form.isEventClosed();
         greetingsEnabled = form.isGreetingsEnabled();
         privateOrganizerNoteEnabled = form.isPrivateOrganizerNoteEnabled();
+        calendarDownloadsEnabled = form.isCalendarDownloadsEnabled();
     }
 }
