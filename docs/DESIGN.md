@@ -1,6 +1,7 @@
 # Product Design
 
-Status: implemented through Phase 5; physical venue acceptance pending
+Status: implemented through Phase 6A; media phone/laptop acceptance pending and
+the Phase 5 physical USB scanner check remains deferred
 
 ## Selected product approach
 
@@ -20,9 +21,14 @@ sections, with one shared RSVP and check-in flow.
 An optional gift section presents copyable account details without handling
 payments.
 
-The guest invitation includes an optional gallery of up to ten photos.
+The guest invitation includes an optional gallery of up to ten photos. Each
+photo has required language-neutral alternative text, optional ID/EN captions
+with fallback, lazy thumbnail loading, and a full image loaded only when the
+keyboard/touch/mouse-accessible dialog opens.
 
-One optional background track has visible play/pause controls.
+One optional MP3 background track uses `preload="none"` and visible play/pause
+controls. Opening the invitation attempts playback from that user gesture, but
+rejection or media failure never blocks the invitation.
 
 An optional countdown derives its target from existing event details.
 
@@ -100,6 +106,9 @@ The administrator interface has:
 - Settings and local system status
 
 Saved content changes become live immediately while the wedding is published.
+Media management supports upload, metadata edit, move up/down, replacement,
+disable/re-enable, and confirmed deletion. Disabling preserves stored media;
+failed replacement preserves the active file.
 The guest list also provides RSVP filters, response/count columns, individual
 RSVP correction, and PIN-lock clearing. Greeting moderation uses individual
 approve/hide actions with pending, approved, and hidden filters.
@@ -150,7 +159,13 @@ alternative image text, visible audio controls, and reduced-motion behavior.
   journey creates staff, enforces first-password change, confirms/duplicates a
   QR, verifies administrator views, corrects/cancels, manually promotes a
   declined RSVP, and proves a later RSVP edit prevents rollback.
-- Media tests verify invalid uploads do not replace valid files.
+- Media tests verify processing limits, lifecycle, access control, rendering,
+  and invalid uploads preserving valid files. The MySQL/filesystem media
+  journey covers administrator publication through signed ID/EN invitations,
+  endpoint bytes, replacement/toggles/deletion, and unchanged guest token,
+  RSVP, and check-in state.
 
-Physical USB/camera, HTTP/HTTPS LAN, WAN-disconnected, and two-device checks
-remain manual acceptance; they are not represented as passed by MockMvc.
+Phase 6A phone/laptop touch, mouse, keyboard, Chrome/Safari, initial MP3-request,
+playback-fallback, throttling, and administrator-operation checks remain manual
+acceptance; they are not represented as passed by MockMvc. The Phase 5 physical
+USB scanner check remains separately deferred. Phase 6B-6D remain pending.

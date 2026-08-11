@@ -1,21 +1,21 @@
 # Data Schema
 
-Status: implemented through Phase 5 by Flyway V1-V10; later-phase schema is planned
+Status: implemented through Phase 6A by Flyway V1-V11; Phase 6B-6D schema is planned
 
 Database target: MySQL 8.4 LTS.
 
-Flyway migrations V1-V10 implement only the schema required through Phase 5:
+Flyway migrations V1-V11 implement the schema required through Phase 6A:
 `user_account`, `wedding_settings`, `partner`, `event_part`, `story_entry`,
-`guest_category`, `guest`, `message_template`, `rsvp`, `check_in`, and
-`check_in_correction`. Applied migrations are immutable; later schema changes
-require a new migration.
+`gallery_photo`, `guest_category`, `guest`, `message_template`, `rsvp`,
+`check_in`, and `check_in_correction`. V11 adds gallery/audio state to
+`wedding_settings` and the ordered gallery table. Applied migrations are
+immutable; later schema changes require a new migration.
 
-V8 already creates `message_template` and seeds its `RSVP_REMINDER` and
-`EVENT_REMINDER` rows. Later sections for gallery, gifts, help contacts,
-background audio, reports, operational erasure, and reminder scheduling or
-workflow fields (including guest reminder timestamps) describe planned Phase
-6/7 schema and are not present in V1-V10; reminder delivery automation is also
-planned for Phase 6.
+V8 creates `message_template` and seeds its `RSVP_REMINDER` and
+`EVENT_REMINDER` rows. Later sections for gifts, help contacts, reports,
+operational erasure, and reminder scheduling/workflow fields (including guest
+reminder timestamps) remain planned for Phase 6B-7 and are not present in
+V1-V11.
 
 ## Confirmed guest attributes
 
@@ -75,8 +75,8 @@ role, and WhatsApp number.
 
 Singleton wedding configuration: publication state, event-closed state, time
 zone, default phone country, RSVP deadline, bilingual narrative content,
-visual settings, optional-section visibility, help-page contact, and media
-references.
+visual settings, optional-section visibility, help-page contact, gallery
+enablement, background-audio enablement, and nullable relative MP3 path.
 
 ### `partner`
 
@@ -96,8 +96,12 @@ and bilingual body.
 
 ### `gallery_photo`
 
-At most ten ordered rows with media path, bilingual optional caption, and
-alternative text.
+At most ten ordered rows with contiguous zero-based `position`, unique relative
+`main_path` and `thumbnail_path`, required `alt_text`, nullable `caption_id`
+and `caption_en`, optimistic-lock `version`, and timestamps. Application-owned
+paths point below `MEDIA_DIRECTORY/gallery/`; client filenames and absolute
+paths are never persisted. The singleton wedding scope makes a wedding foreign
+key unnecessary.
 
 ### `gift_account`
 
@@ -191,5 +195,6 @@ The database/application enforce exactly one administrator account.
 
 - Activity-bearing guests are archived rather than hard-deleted.
 - Technical logs are external to this schema and retained for 14 days.
-- Daily backup covers this database and the media volume.
+- Daily backup covers this database and the complete media volume, including
+  gallery WebP and audio MP3 files referenced by V11 state.
 - Post-event bulk guest-data erasure is an explicit server-side operation.

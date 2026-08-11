@@ -170,9 +170,46 @@ Content starts in draft. Publishing requires two complete partner profiles
 published is live immediately; returning to draft keeps the saved content.
 
 Set `MEDIA_DIRECTORY` in `.env` to the directory for partner photos. The
-default is `./data/media`. Only JPEG, PNG, and WebP uploads up to 10 MiB are
-accepted. `/data/` is Git-ignored, including the default media location; keep
-real uploaded files untracked.
+default is `./data/media`. `/data/` is Git-ignored, including the default media
+location; keep real uploaded files untracked.
+
+Manage gallery and audio at `/admin/wedding/media`. Gallery uploads accept
+JPEG, PNG, or WebP up to 10 MiB and 40,000,000 decoded pixels. The application
+stores only generated WebP files below `gallery/`: a main image with longest
+side at most 1920 px and a thumbnail at most 480 px, without enlarging smaller
+inputs. Audio accepts one validated non-empty MP3 up to 20 MiB and stores it
+below `audio/`. Generated random names and relative database paths replace
+client filenames.
+
+New files are validated and stored before the database reference changes. A
+failed replacement preserves the active row and files and cleans new artifacts;
+after a successful commit, obsolete files are removed. Disabling gallery/audio
+keeps its media, while deleting the final photo or MP3 disables the feature.
+
+Public delivery is limited to `/media/partner/{id}`,
+`/media/gallery/{id}/thumbnail`, `/media/gallery/{id}/image`, and
+`/media/wedding/audio`. These routes resolve database references and do not
+accept filesystem paths. Backups must include the database and all of
+`MEDIA_DIRECTORY`, including its `gallery/` and `audio/` directories.
+
+### Phase 6A manual phone/laptop acceptance
+
+Status: pending user acceptance. Automated verification does not mark these
+checks complete, and Phase 6A is not accepted until the available phone and
+laptop checks pass.
+
+- [ ] Initial invitation rendering makes no MP3 request before user interaction.
+- [ ] Responsive thumbnails and full images work on phone touch and laptop mouse.
+- [ ] Lightbox previous/next/close work by touch, mouse, and keyboard, with focus restored.
+- [ ] Open Invitation attempts playback; browser rejection leaves a usable Play control.
+- [ ] Play/Pause stays labelled and media failure never blocks invitation content.
+- [ ] Upload, reorder, edit, replace, disable/re-enable, and deletion work in the administrator page.
+- [ ] Current Chrome and Safari pass on the available phone and laptop.
+- [ ] Gallery/audio remain usable on a throttled or slow connection.
+
+The Phase 5 physical USB scanner check remains deferred until hardware is
+available. It is separate from this Phase 6A media gate and does not block
+Phase 6B.
 
 ## Database lifecycle
 
@@ -191,8 +228,8 @@ docker compose up -d mysql
 
 The next application startup applies Flyway migrations and bootstraps an
 administrator when the database has no administrator account. V10 creates the
-current check-in and append-only correction tables; never edit V1-V10 after
-they have been applied.
+current check-in and append-only correction tables; V11 adds gallery rows and
+gallery/audio wedding settings. Never edit V1-V11 after they have been applied.
 
 ## Tests and health
 
@@ -202,8 +239,12 @@ Tests use a temporary MySQL 8.4 Testcontainer and require Docker access:
 ./mvnw test
 ```
 
-`CheckInJourneyTest` exercises the complete server journey. Camera decoding,
-physical scanners, and network topology remain in the manual checklist above.
+`CheckInJourneyTest` exercises the check-in server journey.
+`WeddingMediaJourneyTest` exercises administrator publication, real image/MP3
+storage, signed ID/EN invitation rendering, exact media delivery, replacement,
+visibility, deletion, and unchanged guest/RSVP/check-in state. Browser media
+behavior, physical scanners, and network topology remain in the manual
+checklists above.
 
 For rootless Podman, use the socket setup above and run the same command:
 

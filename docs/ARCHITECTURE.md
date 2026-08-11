@@ -1,6 +1,7 @@
 # Architecture
 
-Status: implemented through Phase 5; Phase 5 manual venue acceptance pending
+Status: implemented through Phase 6A; Phase 6A phone/laptop acceptance pending
+and the Phase 5 physical USB scanner check remains deferred
 
 ## Selected approach
 
@@ -74,6 +75,10 @@ MariaDB is not a supported runtime target.
 - `/i/{token}` serves personalized invitation, RSVP, and QR access.
 - `/admin/**` serves the administrator dashboard.
 - `/check-in/**` serves restricted staff operations.
+- `/admin/wedding/media` serves administrator gallery/audio management.
+- `/media/partner/{id}`, `/media/gallery/{id}/thumbnail`,
+  `/media/gallery/{id}/image`, and `/media/wedding/audio` serve only
+  database-referenced files; there is no path-based media API.
 
 `/check-in` accepts USB-scanner text and manual search; camera JavaScript
 submits decoded text through the same QR preview POST. QR and manual selection
@@ -116,7 +121,9 @@ directly to web forms.
 
 - MySQL 8.4 LTS is the only supported database.
 - Flyway exclusively manages schema changes.
-- Flyway V10 adds `check_in` and `check_in_correction`; V1-V9 remain immutable.
+- Flyway V10 adds `check_in` and `check_in_correction`; V11 adds
+  `gallery_photo` plus gallery/audio state on `wedding_settings`; V1-V11 are
+  immutable after application.
 - MySQL constraints and transactions enforce single check-in and allowance
   invariants.
 - Confirmation locks the guest before reading RSVP/current check-in state, and
@@ -124,9 +131,18 @@ directly to web forms.
 - Correction and cancellation append audit rows. Cancellation removes only the
   current row; RSVP restoration occurs only when its post-promotion version is
   still current, otherwise the later RSVP edit wins and a warning is shown.
-- Uploaded media is stored in one mounted local volume.
-- Upload replacement is atomic: validate/process a new file before replacing
-  the previous reference.
+- Uploaded media is stored in one mounted local volume. Partner files remain
+  at its root, optimized gallery WebP files live below `gallery/`, and the
+  optional MP3 lives below `audio/`.
+- Gallery input is decoded as JPEG, PNG, or WebP, limited to 10 MiB and
+  40,000,000 pixels before raster allocation, then written as a maximum
+  1920 px main image and 480 px thumbnail without upscaling. Audio is one
+  validated non-empty MP3 of at most 20 MiB.
+- Replacement validates and stores the new file before changing the database
+  reference. Failure removes new artifacts and preserves the active reference
+  and files; successful commit removes obsolete files.
+- Gallery/audio visibility requires its media, while disabling preserves it.
+  Deleting the final gallery row or the MP3 disables the corresponding feature.
 
 ## Security
 
@@ -183,9 +199,15 @@ optional operational alternatives, not runtime dependencies.
 
 - Container health checks and restart policies recover ordinary process
   failures.
-- Daily backups contain a MySQL dump and uploaded media.
+- Daily backups contain a MySQL dump and the complete mounted media directory,
+  including partner, `gallery/`, and `audio/` files.
 - Backup retention defaults to 14 daily copies and is deployment-configurable.
 - Restore and permanent bulk guest erasure are server-side operations.
 - CSV export and a printed list are the venue fallback if the local network
   fails.
 - No write is accepted when the authoritative MySQL database is unavailable.
+
+Phase 6B reminders/calendar files, Phase 6C reporting/exports/moderation/status,
+and Phase 6D integration/acceptance documentation remain pending. Phase 6A
+automated verification is complete, but phone/laptop Chrome/Safari acceptance
+has not been signed off.

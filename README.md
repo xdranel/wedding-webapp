@@ -29,6 +29,17 @@ Partner photos are JPEG, PNG, or WebP files up to 10 MiB. Set
 The default is `./data/media`; `/data/` is intentionally ignored by Git, so do
 not put uploaded media under version control.
 
+Administrators manage the optional wedding gallery and background audio at
+`/admin/wedding/media`. The gallery accepts up to ten JPEG, PNG, or WebP files
+of at most 10 MiB and stores only generated WebP main images (longest side at
+most 1920 px) and thumbnails (at most 480 px) below `gallery/`. Audio accepts
+one non-empty MP3 of at most 20 MiB below `audio/`. Failed replacements keep
+the active database reference and files. Public delivery uses referenced IDs
+at `/media/gallery/{id}/thumbnail`, `/media/gallery/{id}/image`, and
+`/media/wedding/audio`; filesystem paths are not public inputs. Back up the
+entire `MEDIA_DIRECTORY`, including partner, `gallery/`, and `audio/` files,
+with the database.
+
 ## Guest invitations and delivery
 
 Set `INVITATION_BASE_URL` and `INVITATION_SIGNING_SECRET` in untracked

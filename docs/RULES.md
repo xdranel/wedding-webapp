@@ -1,6 +1,7 @@
 # Business Rules
 
-Status: implemented through Phase 5; Phase 5 manual acceptance pending
+Status: implemented through Phase 6A; Phase 6A manual acceptance pending and
+the Phase 5 physical USB scanner check remains deferred
 
 1. An invitation belongs to one named primary guest.
 2. An invitation may optionally allow one unnamed companion.
@@ -205,3 +206,21 @@ Status: implemented through Phase 5; Phase 5 manual acceptance pending
      be preserved and reported to the administrator.
 121. Check-in correction and cancellation history is append-only and retains
      the original check-in time and staff username even after cancellation.
+122. A gallery contains at most ten photos in contiguous zero-based order.
+123. Every gallery photo requires language-neutral alternative text; optional
+     ID/EN captions use the existing fallback when the selected language is
+     absent.
+124. Gallery uploads must decode as JPEG, PNG, or WebP, be at most 10 MiB and
+     40,000,000 pixels, and store only generated WebP main and thumbnail files
+     with longest sides at most 1920 px and 480 px without upscaling.
+125. Background audio is one validated non-empty MP3 of at most 20 MiB.
+126. Gallery/audio cannot be enabled without required media. Disabling keeps
+     files; deleting the final gallery photo or MP3 disables that feature.
+127. A failed replacement must preserve the active database reference and
+     files and remove new artifacts; a successful commit removes obsolete files.
+128. Public media requests resolve only database-referenced identifiers and
+     must never accept a filesystem path or expose directory listings.
+129. Media operations must not change invitation tokens, guest data, RSVP, or
+     check-in state.
+130. Background audio uses no initial preload; playback rejection or failure
+     must not prevent the invitation from opening or hide the labelled control.

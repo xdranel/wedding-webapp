@@ -1,8 +1,9 @@
 # Product Requirements
 
-Status: implemented through Phase 5; Phase 5 manual acceptance pending
+Status: implemented through Phase 6A; Phase 6A manual acceptance pending and
+the Phase 5 physical USB scanner check remains deferred
 
-## Implementation status — 2026-08-03
+## Implementation status — 2026-08-11
 
 Phase 5 server implementation and automated MySQL verification are complete:
 restricted staff lifecycle, USB/camera/manual preview and confirmation routes,
@@ -11,10 +12,16 @@ correction/cancellation, and immutable audit history are present. Camera still
 requires HTTPS; HTTP venue LAN access supports USB/manual operation, including
 during WAN loss.
 
-Phase 5 is not accepted yet. Physical scanners/cameras, multiple devices and
-accounts, HTTP/HTTPS LAN behavior, and WAN-disconnected operation remain
-pending user acceptance with no acceptance date recorded. Phase 6 reporting
-and export work and Phase 7 deployment/operations work remain pending.
+Phase 5 camera, multiple-device/account, HTTP/HTTPS LAN, and WAN-disconnected
+checks have passed; only the physical USB scanner remains deferred.
+
+Phase 6A gallery, synchronous WebP processing, MP3 background audio,
+administrator media operations, referenced media routes, accessible public and
+preview rendering, and automated MySQL/filesystem verification are implemented.
+Phone/laptop media acceptance remains pending with no acceptance date recorded;
+Phase 6A is not user-accepted. Phase 6B reminders/calendar files, Phase 6C
+reports/exports/moderation/status, Phase 6D integration/acceptance, and Phase 7
+deployment/operations remain pending.
 
 ## Change management
 
@@ -122,6 +129,20 @@ and export work and Phase 7 deployment/operations work remain pending.
   photos.
 - Administrators can optionally upload one background-audio track.
 - Guests control playback; playlists and guaranteed autoplay are out of scope.
+- Gallery photos require language-neutral alternative text, support optional
+  ID/EN captions with fallback, and can be edited, reordered, replaced,
+  disabled/re-enabled, and deleted without changing guest state.
+- Gallery input is decoded as JPG/PNG/WebP, limited to 10 MiB and 40,000,000
+  pixels, and stored only as generated WebP main (at most 1920 px longest side)
+  and thumbnail (at most 480 px) files without upscaling.
+- Background audio is one validated non-empty MP3 of at most 20 MiB. It uses
+  no initial preload or autoplay requirement, and playback failure must not
+  block invitation opening.
+- Failed media replacement preserves the active database reference and file;
+  successful replacement removes obsolete files after commit.
+- Public media routes accept database identifiers only and never a filesystem
+  path. Media changes must not alter invitation tokens, RSVP, check-in, or guest
+  data.
 - The invitation can optionally show a countdown to the reception start time,
   falling back to the ceremony start time when reception is hidden.
 - Guests can optionally submit a greeting with their RSVP.
