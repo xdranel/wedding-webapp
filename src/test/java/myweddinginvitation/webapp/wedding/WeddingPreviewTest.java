@@ -16,8 +16,6 @@ import myweddinginvitation.webapp.account.AccountSecurityService;
 import myweddinginvitation.webapp.account.UserAccount;
 import myweddinginvitation.webapp.account.UserAccountRepository;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,11 +48,15 @@ class WeddingPreviewTest {
 	@Autowired
 	private AccountSecurityService accountSecurity;
 
+	@Autowired
+	private GalleryPhotoRepository galleryPhotos;
+
 	private MockHttpSession adminSession;
 	private MockHttpSession staffSession;
 
 	@BeforeEach
 	void setUp() throws Exception {
+		jdbc.update("delete from gallery_photo");
 		jdbc.update("delete from story_entry");
 		jdbc.update("delete from event_part");
 		jdbc.update("""
@@ -64,7 +66,8 @@ class WeddingPreviewTest {
 				""");
 		jdbc.update("""
 				update wedding_settings set couple_title = null, opening_text_id = null, opening_text_en = null,
-				closing_text_id = null, closing_text_en = null, accent_color = '#7A5C48', font_preset = 'CLASSIC'
+				closing_text_id = null, closing_text_en = null, accent_color = '#7A5C48', font_preset = 'CLASSIC',
+				gallery_enabled = false, background_audio_enabled = false, background_audio_path = null
 				where id = 1
 				""");
 		accounts.deleteAll();
@@ -173,11 +176,25 @@ class WeddingPreviewTest {
 	}
 
 	@Test
-	void languageAssetRegistersSubmissionBeforeReadingOptionalStorage() throws Exception {
-		String script = Files.readString(Path.of("src/main/resources/static/js/invitation-preview.js")).replaceAll("\\s+", " ");
+	void previewUsesPublicMediaSemanticsAndLanguageFallback() throws Exception {
+		GalleryPhoto photo = galleryPhotos.saveAndFlush(GalleryPhoto.create(0, "gallery/main.webp", "gallery/thumb.webp",
+				"Accessible preview alt", "Caption fallback", null));
+		jdbc.update("""
+				update wedding_settings set gallery_enabled = true, background_audio_enabled = true,
+				background_audio_path = 'audio/song.mp3' where id = 1
+				""");
 
-		assertThat(script.indexOf("language.addEventListener")).isLessThan(script.indexOf("localStorage.getItem"));
-		assertThat(script).contains("try { localStorage.setItem", "form.requestSubmit(); });", "catch (_) {");
+		String page = mockMvc.perform(get("/admin/wedding/preview/render").session(adminSession)
+				.param("salutation", "Bapak/Ibu").param("guestName", "Nama Tamu").param("language", "EN"))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+		assertThat(page)
+				.contains("loading=\"lazy\"", "alt=\"Accessible preview alt\"", "data-caption=\"Caption fallback\"")
+				.contains("data-image-url=\"/media/gallery/" + photo.getId() + "/image\"")
+				.contains("id=\"gallery-dialog\"", "id=\"background-audio\"", "preload=\"none\"")
+				.contains("id=\"audio-toggle\"", "/js/invitation-media.js")
+				.doesNotContain("src=\"/media/gallery/" + photo.getId() + "/image\"")
+				.doesNotContain("autoplay", "localStorage");
 	}
 
 	private void seedCompleteIndonesianContentWithEnglishMissing() {

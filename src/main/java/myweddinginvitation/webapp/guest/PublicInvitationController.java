@@ -13,6 +13,7 @@ import myweddinginvitation.webapp.rsvp.GuestVerificationSession;
 import myweddinginvitation.webapp.rsvp.PublicGreetingView;
 import myweddinginvitation.webapp.rsvp.RsvpService;
 import myweddinginvitation.webapp.rsvp.RsvpView;
+import myweddinginvitation.webapp.wedding.WeddingMediaService;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,13 +26,15 @@ public class PublicInvitationController {
 	private final InvitationAccessService access;
 	private final RsvpService rsvps;
 	private final GuestVerificationSession verification;
+	private final WeddingMediaService weddingMedia;
 	private final Clock clock;
 
 	public PublicInvitationController(InvitationAccessService access, RsvpService rsvps,
-			GuestVerificationSession verification, Clock clock) {
+			GuestVerificationSession verification, WeddingMediaService weddingMedia, Clock clock) {
 		this.access = access;
 		this.rsvps = rsvps;
 		this.verification = verification;
+		this.weddingMedia = weddingMedia;
 		this.clock = clock;
 	}
 
@@ -54,6 +57,7 @@ public class PublicInvitationController {
 				? rsvps.approvedGreetings(page) : Page.empty();
 		model.addAttribute("preview", access.preview());
 		model.addAttribute("language", access.language());
+		model.addAttribute("media", weddingMedia.publicView(access.language()));
 		model.addAttribute("accentColor", safeAccent(access.preview().accentColor()));
 		model.addAttribute("invitationPath", invitationPath);
 		model.addAttribute("plusOneAllowed", access.guest().isPlusOneAllowed());

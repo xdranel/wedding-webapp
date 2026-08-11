@@ -18,9 +18,11 @@ import org.springframework.dao.OptimisticLockingFailureException;
 @Controller
 public class WeddingContentController {
     private final WeddingContentService weddingContent;
+    private final WeddingMediaService weddingMedia;
 
-    public WeddingContentController(WeddingContentService weddingContent) {
+    public WeddingContentController(WeddingContentService weddingContent, WeddingMediaService weddingMedia) {
         this.weddingContent = weddingContent;
+        this.weddingMedia = weddingMedia;
     }
 
     @GetMapping("/admin/wedding")
@@ -92,6 +94,7 @@ public class WeddingContentController {
         WeddingPreview preview = weddingContent.preview(form.getSalutation(), form.getGuestName(), form.getLanguage());
         model.addAttribute("form", form);
         model.addAttribute("preview", preview);
+        model.addAttribute("media", weddingMedia.publicView(form.getLanguage()));
         model.addAttribute("accentColor", safeAccent(preview.accentColor()));
         return "admin/wedding/preview";
     }

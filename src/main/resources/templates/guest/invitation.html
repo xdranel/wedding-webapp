@@ -25,8 +25,11 @@
             <time th:datetime="${preview.coverDate}" th:text="${preview.coverDate}">2027-05-01</time>
         </p>
         <p th:text="${preview.salutation + ' ' + preview.guestName}">Bapak/Ibu Nama Tamu</p>
+        <button type="button" id="open-invitation" aria-controls="invitation" aria-expanded="false"
+                th:text="${language == 'EN'} ? 'Open invitation' : 'Buka Undangan'">Buka Undangan</button>
     </section>
 
+    <div id="invitation" tabindex="-1">
     <section th:if="${!#strings.isEmpty(preview.openingText)}" aria-labelledby="opening-title">
         <h2 id="opening-title" th:text="${language == 'EN'} ? 'Welcome' : 'Sapaan'">Sapaan</h2>
         <p th:text="${preview.openingText}">Selamat datang</p>
@@ -73,6 +76,33 @@
             <h3 th:text="${entry.title}">Story title</h3>
             <p th:text="${entry.body}">Story body</p>
         </article>
+    </section>
+
+    <section th:if="${media.galleryEnabled and !media.photos.empty}" class="gallery" aria-labelledby="gallery-title">
+        <h2 id="gallery-title" th:text="${language == 'EN'} ? 'Gallery' : 'Galeri'">Galeri</h2>
+        <div class="gallery-grid">
+            <button th:each="photo, photoStat : ${media.photos}" type="button" class="gallery-thumbnail"
+                    th:attr="data-gallery-index=${photoStat.index},data-image-url=${photo.imageUrl},data-alt=${photo.altText},data-caption=${photo.caption ?: ''}"
+                    th:aria-label="${(language == 'EN' ? 'Open photo: ' : 'Buka foto: ') + photo.altText}">
+                <img th:src="${photo.thumbnailUrl}" th:alt="${photo.altText}" loading="lazy">
+            </button>
+        </div>
+        <dialog id="gallery-dialog" aria-labelledby="gallery-dialog-title">
+            <h2 id="gallery-dialog-title" class="visually-hidden"
+                th:text="${language == 'EN'} ? 'Gallery photo' : 'Foto galeri'">Foto galeri</h2>
+            <figure>
+                <img id="gallery-image" alt="">
+                <figcaption id="gallery-caption" hidden></figcaption>
+            </figure>
+            <div class="gallery-controls">
+                <button type="button" id="gallery-previous"
+                        th:aria-label="${language == 'EN'} ? 'Previous photo' : 'Foto sebelumnya'">&#8592;</button>
+                <button type="button" id="gallery-next"
+                        th:aria-label="${language == 'EN'} ? 'Next photo' : 'Foto berikutnya'">&#8594;</button>
+                <button type="button" id="gallery-close"
+                        th:aria-label="${language == 'EN'} ? 'Close gallery' : 'Tutup galeri'">&#215;</button>
+            </div>
+        </dialog>
     </section>
 
     <section th:if="${!#strings.isEmpty(preview.closingText)}" aria-labelledby="closing-title">
@@ -201,6 +231,15 @@
            th:href="${invitationPath + '?language=' + language + '&page=' + (greetingPage + 1)}"
            th:text="${language == 'EN'} ? 'Load more' : 'Lihat lainnya'">Lihat lainnya</a>
     </section>
+    </div>
+
+    <audio th:if="${media.audioEnabled}" id="background-audio" preload="none" src="/media/wedding/audio"
+           th:aria-label="${language == 'EN'} ? 'Background music' : 'Musik latar'"></audio>
+    <button th:if="${media.audioEnabled}" type="button" id="audio-toggle" aria-controls="background-audio"
+            aria-pressed="false"
+            th:attr="data-play-label=${language == 'EN' ? 'Play music' : 'Putar musik'},data-pause-label=${language == 'EN' ? 'Pause music' : 'Jeda musik'}"
+            th:text="${language == 'EN'} ? 'Play music' : 'Putar musik'">Putar musik</button>
 </main>
+<script th:src="@{/js/invitation-media.js}" defer></script>
 </body>
 </html>

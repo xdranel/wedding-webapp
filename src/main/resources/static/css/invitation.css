@@ -125,6 +125,61 @@ img {
     max-width: 100%;
 }
 
+.gallery-grid {
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.gallery-thumbnail {
+    padding: 0;
+}
+
+.gallery-thumbnail img {
+    aspect-ratio: 1;
+    object-fit: cover;
+    width: 100%;
+}
+
+#gallery-dialog {
+    border: 0;
+    max-height: 95vh;
+    max-width: min(95vw, 64rem);
+    padding: 1rem;
+}
+
+#gallery-dialog::backdrop {
+    background: rgb(0 0 0 / 75%);
+}
+
+#gallery-image {
+    max-height: 75vh;
+    margin: auto;
+}
+
+.gallery-controls {
+    display: flex;
+    gap: .5rem;
+    justify-content: center;
+}
+
+#audio-toggle {
+    bottom: 1rem;
+    position: fixed;
+    right: 1rem;
+    z-index: 1;
+}
+
+.visually-hidden {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
 .js #invitation {
     display: none;
 }
@@ -137,6 +192,10 @@ img {
     .preview-controls form {
         grid-template-columns: repeat(3, 1fr) auto;
         align-items: end;
+    }
+
+    .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
