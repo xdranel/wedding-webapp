@@ -33,10 +33,10 @@ public class PartnerPhotoStorage {
         if (file == null || file.isEmpty() || file.getSize() > MAX_SIZE)
             throw new IllegalArgumentException("Photo must be at most 10 MiB");
         String extension = photoType(file).extension();
-        Path destination = mediaDirectory.resolve(UUID.randomUUID() + extension).normalize();
+        Path destination = mediaDirectory.resolve("partner").resolve(UUID.randomUUID() + extension).normalize();
         if (!destination.startsWith(mediaDirectory)) throw new IllegalArgumentException("Invalid photo path");
         try {
-            Files.createDirectories(mediaDirectory);
+            Files.createDirectories(destination.getParent());
             Files.copy(file.getInputStream(), destination);
             return mediaDirectory.relativize(destination).toString();
         } catch (IOException exception) {

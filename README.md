@@ -24,7 +24,8 @@ Publishing requires both complete partner profiles with photos and one visible
 complete event. Edits made after publishing are live immediately; returning to
 draft preserves content and hides future public invitation output.
 
-Partner photos are JPEG, PNG, or WebP files up to 10 MiB. Set
+Partner photos are JPEG, PNG, or WebP files up to 10 MiB and new uploads are
+stored below `partner/`. Set
 `MEDIA_DIRECTORY` in the untracked `.env` file to choose where they are stored.
 The default is `./data/media`; `/data/` is intentionally ignored by Git, so do
 not put uploaded media under version control.

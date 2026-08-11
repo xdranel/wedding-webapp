@@ -82,7 +82,8 @@ enablement, background-audio enablement, and nullable relative MP3 path.
 
 Exactly two ordered rows containing full name, nickname, bilingual
 son/daughter wording, parents' names, photo reference, and optional Instagram
-URL.
+URL. New photo references point below `MEDIA_DIRECTORY/partner/`; legacy
+references stored directly below `MEDIA_DIRECTORY` remain readable.
 
 ### `event_part`
 

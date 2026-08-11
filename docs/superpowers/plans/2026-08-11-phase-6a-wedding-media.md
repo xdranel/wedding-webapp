@@ -1,6 +1,6 @@
 # Phase 6A Wedding Media Implementation Plan
 
-**Status (2026-08-11):** Tasks 1-8 implementation and automated verification are complete. Manual phone/laptop acceptance remains pending, so Phase 6A is not yet user-accepted.
+**Status (2026-08-11):** Tasks 1-8, automated verification, and manual phone/laptop acceptance are complete. Phase 6A is user-accepted; only the separate Phase 5 physical USB-scanner check remains deferred.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 

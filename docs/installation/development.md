@@ -169,9 +169,11 @@ Content starts in draft. Publishing requires two complete partner profiles
 (including photos) and one complete visible event. A later edit while
 published is live immediately; returning to draft keeps the saved content.
 
-Set `MEDIA_DIRECTORY` in `.env` to the directory for partner photos. The
-default is `./data/media`. `/data/` is Git-ignored, including the default media
-location; keep real uploaded files untracked.
+Set `MEDIA_DIRECTORY` in `.env` to the media root. The default is
+`./data/media`; new partner photos are stored below its `partner/` directory.
+Legacy partner photos stored directly below the media root remain readable.
+`/data/` is Git-ignored, including the default media location; keep real
+uploaded files untracked.
 
 Manage gallery and audio at `/admin/wedding/media`. Gallery uploads accept
 JPEG, PNG, or WebP up to 10 MiB and 40,000,000 decoded pixels. The application
@@ -190,22 +192,22 @@ Public delivery is limited to `/media/partner/{id}`,
 `/media/gallery/{id}/thumbnail`, `/media/gallery/{id}/image`, and
 `/media/wedding/audio`. These routes resolve database references and do not
 accept filesystem paths. Backups must include the database and all of
-`MEDIA_DIRECTORY`, including its `gallery/` and `audio/` directories.
+`MEDIA_DIRECTORY`, including its `partner/`, `gallery/`, and `audio/`
+directories.
 
 ### Phase 6A manual phone/laptop acceptance
 
-Status: pending user acceptance. Automated verification does not mark these
-checks complete, and Phase 6A is not accepted until the available phone and
-laptop checks pass.
+Status: accepted by the user on 2026-08-11 using the available phone and
+laptop.
 
-- [ ] Initial invitation rendering makes no MP3 request before user interaction.
-- [ ] Responsive thumbnails and full images work on phone touch and laptop mouse.
-- [ ] Lightbox previous/next/close work by touch, mouse, and keyboard, with focus restored.
-- [ ] Open Invitation attempts playback; browser rejection leaves a usable Play control.
-- [ ] Play/Pause stays labelled and media failure never blocks invitation content.
-- [ ] Upload, reorder, edit, replace, disable/re-enable, and deletion work in the administrator page.
-- [ ] Current Chrome and Safari pass on the available phone and laptop.
-- [ ] Gallery/audio remain usable on a throttled or slow connection.
+- [x] Initial invitation rendering makes no MP3 request before user interaction.
+- [x] Responsive thumbnails and full images work on phone touch and laptop mouse.
+- [x] Lightbox previous/next/close work by touch, mouse, and keyboard, with focus restored.
+- [x] Open Invitation attempts playback; browser rejection leaves a usable Play control.
+- [x] Play/Pause stays labelled and media failure never blocks invitation content.
+- [x] Upload, reorder, edit, replace, disable/re-enable, and deletion work in the administrator page.
+- [x] Current Chrome and Safari pass on the available phone and laptop.
+- [x] Gallery/audio remain usable on a throttled or slow connection.
 
 The Phase 5 physical USB scanner check remains deferred until hardware is
 available. It is separate from this Phase 6A media gate and does not block

@@ -1,7 +1,7 @@
 # Product Requirements
 
-Status: implemented through Phase 6A; Phase 6A manual acceptance pending and
-the Phase 5 physical USB scanner check remains deferred
+Status: implemented and manually accepted through Phase 6A; the Phase 5
+physical USB scanner check remains deferred
 
 ## Implementation status — 2026-08-11
 
@@ -18,8 +18,8 @@ checks have passed; only the physical USB scanner remains deferred.
 Phase 6A gallery, synchronous WebP processing, MP3 background audio,
 administrator media operations, referenced media routes, accessible public and
 preview rendering, and automated MySQL/filesystem verification are implemented.
-Phone/laptop media acceptance remains pending with no acceptance date recorded;
-Phase 6A is not user-accepted. Phase 6B reminders/calendar files, Phase 6C
+Phone/laptop media acceptance passed on 2026-08-11. Phase 6B
+reminders/calendar files, Phase 6C
 reports/exports/moderation/status, Phase 6D integration/acceptance, and Phase 7
 deployment/operations remain pending.
 

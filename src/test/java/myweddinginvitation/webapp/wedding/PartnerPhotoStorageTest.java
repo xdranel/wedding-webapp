@@ -28,7 +28,7 @@ class PartnerPhotoStorageTest {
 
 		String path = storage.store(file);
 
-		assertThat(path).endsWith(".jpg").doesNotContain("face");
+		assertThat(path).startsWith("partner/").endsWith(".jpg").doesNotContain("face");
 		assertThat(mediaDirectory.resolve(path)).exists();
 	}
 
