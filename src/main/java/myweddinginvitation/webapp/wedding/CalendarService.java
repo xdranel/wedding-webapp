@@ -24,12 +24,14 @@ public class CalendarService {
         LocalDateTime start = LocalDateTime.of(event.date(), event.startTime());
         LocalDateTime end = event.endTime() == null ? start.plusHours(type == EventType.CEREMONY ? 1 : 3) : LocalDateTime.of(event.date(), event.endTime());
         String name = "EN".equals(language) ? type == EventType.CEREMONY ? "Ceremony" : "Reception" : type == EventType.CEREMONY ? "Akad" : "Resepsi";
-        List<String> properties = new ArrayList<>(List.of(
+        List<String> properties = List.of(
                 "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//myweddinginvitation.webapp//Wedding Invitation//EN", "CALSCALE:GREGORIAN",
+                "BEGIN:VTIMEZONE", "TZID:" + zoneId.getId(), "BEGIN:STANDARD", "DTSTART:19700101T000000", "TZOFFSETFROM:+0700", "TZOFFSETTO:+0700",
+                "TZNAME:WIB", "END:STANDARD", "END:VTIMEZONE",
                 "BEGIN:VEVENT", "UID:" + uid(type), "DTSTAMP:" + UTC_DATE_TIME.format(Instant.now()) + "Z", "SUMMARY:" + text(name + " - " + preview.coupleTitle()),
                 dateTime("DTSTART", start, zoneId), dateTime("DTEND", end, zoneId),
                 "LOCATION:" + text(event.venueName() + ", " + event.address()),
-                "DESCRIPTION:" + text(description(event, invitationUrl)), "URL:" + invitationUrl, "END:VEVENT", "END:VCALENDAR"));
+                "DESCRIPTION:" + text(description(event, invitationUrl)), "URL:" + invitationUrl, "END:VEVENT", "END:VCALENDAR");
         return Optional.of(new CalendarFile("wedding-" + type.name().toLowerCase() + ".ics", content(properties)));
     }
 

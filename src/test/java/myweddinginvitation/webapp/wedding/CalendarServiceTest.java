@@ -25,11 +25,19 @@ class CalendarServiceTest {
                 "DTEND;TZID=Asia/Jakarta:20270502T103000", "https://maps.example/ceremony", "https://invite.example/a")
                 .doesNotContain("BEGIN:VALARM");
         assertThat(ceremony).containsPattern("DTSTAMP:\\d{8}T\\d{6}Z");
+        assertThat(ceremony).contains("BEGIN:VTIMEZONE\r\nTZID:Asia/Jakarta\r\nBEGIN:STANDARD\r\nDTSTART:19700101T000000\r\n"
+                + "TZOFFSETFROM:+0700\r\nTZOFFSETTO:+0700\r\nTZNAME:WIB\r\nEND:STANDARD\r\nEND:VTIMEZONE");
+        assertThat(ceremony.indexOf("BEGIN:VCALENDAR")).isLessThan(ceremony.indexOf("BEGIN:VTIMEZONE"));
+        assertThat(ceremony.indexOf("END:VTIMEZONE")).isLessThan(ceremony.indexOf("BEGIN:VEVENT"));
+        assertThat(ceremony.indexOf("END:VEVENT")).isLessThan(ceremony.indexOf("END:VCALENDAR"));
         assertThat(reception).contains("SUMMARY:Reception - A & B", "LOCATION:Ballroom\\, Rose Street",
                 "DTEND;TZID=Asia/Jakarta:20270502T210000", "https://maps.example/reception");
         assertThat(uid(ceremony)).isEqualTo(uid(ceremonyForAnotherGuest)).isNotEqualTo(uid(reception));
         assertThat(service.create(preview, EventType.CEREMONY, "ID", "https://invite.example/a", "Asia/Jakarta").orElseThrow().filename())
                 .isEqualTo("wedding-ceremony.ics");
+        assertThat(content(service.create(preview(event(EventType.CEREMONY, LocalTime.of(9, 0), null, "Gereja", "Jl. Mawar", null)),
+                EventType.CEREMONY, "ID", "https://invite.example/a", "Asia/Jakarta").orElseThrow()))
+                .contains("DTEND;TZID=Asia/Jakarta:20270502T100000");
     }
 
     @Test
@@ -52,7 +60,7 @@ class CalendarServiceTest {
         assertThat(unfolded).contains("LOCATION:Gedung\\, A\\; " + "\\\\" + "\\, Jalan\\, Semicolon\\; Slash" + "\\\\" + "\\n");
         assertThat(unfolded).contains("é".repeat(40));
         assertThat(unfolded).contains("Map: https://maps.example/a\\nInvitation: https://invite.example/a");
-        assertThat(calendar).matches("(?s)(?:[^\\r]|\\r\\n)*").endsWith("\r\n");
+        assertThat(calendar).matches("(?s)(?:[^\\r\\n]|\\r\\n)*").endsWith("\r\n");
         for (String line : calendar.split("\\r\\n", -1)) {
             assertThat(line.getBytes(UTF_8).length).isLessThanOrEqualTo(75);
         }
