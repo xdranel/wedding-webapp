@@ -13,11 +13,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class CalendarService {
+    private static final String TIME_ZONE = "Asia/Jakarta";
+    private static final ZoneId JAKARTA = ZoneId.of(TIME_ZONE);
     private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
     private static final DateTimeFormatter UTC_DATE_TIME = DATE_TIME.withZone(ZoneOffset.UTC);
 
     public Optional<CalendarFile> create(WeddingPreview preview, EventType type, String language, String invitationUrl, String timeZone) {
-        ZoneId zoneId = ZoneId.of(timeZone);
+        if (!TIME_ZONE.equals(timeZone)) return Optional.empty();
+        ZoneId zoneId = JAKARTA;
         WeddingPreview.EventView event = preview.events().stream().filter(candidate -> candidate.type() == type).findFirst().orElse(null);
         if (event == null || !complete(event)) return Optional.empty();
 

@@ -50,6 +50,12 @@ class CalendarServiceTest {
     }
 
     @Test
+    void rejectsNonJakartaTimeZones() {
+        assertThat(service.create(preview(event(EventType.CEREMONY, LocalTime.of(9, 0), null, "Gereja", "Jl. Mawar", null)),
+                EventType.CEREMONY, "ID", "https://invite.example/a", "Asia/Makassar")).isEmpty();
+    }
+
+    @Test
     void escapesTextAndUsesOnlyCrLfWithUtf8SafeFolding() {
         String address = "Jalan, Semicolon; Slash\\\n" + "é".repeat(40);
         CalendarFile file = service.create(preview(event(EventType.CEREMONY, LocalTime.of(9, 0), null, "Gedung, A; \\", address, "https://maps.example/a")),
