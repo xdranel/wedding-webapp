@@ -97,6 +97,16 @@ class SecurityRoutesTest {
 	}
 
 	@Test
+	void reminderAdministrationRoutesRequireAnAdministrator() throws Exception {
+		MockHttpSession staff = login("staff");
+		mockMvc.perform(get("/admin/reminders"))
+				.andExpect(status().is3xxRedirection());
+		mockMvc.perform(get("/admin/reminders").session(staff))
+				.andExpect(status().isForbidden())
+				.andExpect(forwardedUrl("/forbidden"));
+	}
+
+	@Test
 	void anonymousMediaReadsArePublicButWritesAreDenied() throws Exception {
 		mockMvc.perform(get("/media/wedding/audio"))
 				.andExpect(status().isNotFound());

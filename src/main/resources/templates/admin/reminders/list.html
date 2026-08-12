@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Reminders</title></head>
+<body>
+<main>
+  <h1>Reminders</h1>
+  <p><a th:href="@{/admin}">Back to administrator home</a></p>
+  <nav aria-label="Reminder queues">
+    <a th:href="@{/admin/reminders(kind=RSVP,categoryId=${categoryId})}" th:aria-current="${kind.name() == 'RSVP' ? 'page' : null}">RSVP reminders</a>
+    <a th:href="@{/admin/reminders(kind=EVENT,categoryId=${categoryId})}" th:aria-current="${kind.name() == 'EVENT' ? 'page' : null}">Event reminders</a>
+  </nav>
+  <form method="get" th:action="@{/admin/reminders}">
+    <label>Reminder queue
+      <select name="kind"><option value="RSVP" th:selected="${kind.name() == 'RSVP'}">RSVP</option><option value="EVENT" th:selected="${kind.name() == 'EVENT'}">Event</option></select>
+    </label>
+    <label>Category
+      <select name="categoryId"><option value="">All categories</option><option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.displayName}" th:selected="${category.id == categoryId}">Category</option></select>
+    </label>
+    <button type="submit">Filter</button>
+  </form>
+  <p th:if="${reminderError}" th:text="${reminderError}" role="alert">Reminder error</p>
+  <p th:if="${reminderCompletion}" th:text="${reminderCompletion}" role="status">Reminder queue complete.</p>
+  <p th:if="${queue.empty}">No eligible guests remain.</p>
+  <p th:if="${!queue.empty}"><a th:href="${'#guest-' + queue.get(0).id}">Next guest</a></p>
+  <table th:unless="${queue.empty}">
+    <thead><tr><th>Name</th><th>Category</th><th>WhatsApp</th><th>Preferred language</th><th>RSVP</th><th>Last sent</th><th>Actions</th></tr></thead>
+    <tbody>
+      <tr th:each="guest : ${queue}" th:id="${'guest-' + guest.id}">
+        <td th:text="${guest.displayName}">Guest</td>
+        <td th:text="${guest.categoryName == null ? 'Uncategorized' : guest.categoryName}">Uncategorized</td>
+        <td th:text="${guest.whatsappNumber}">+62</td>
+        <td th:text="${guest.preferredLanguage}">ID</td>
+        <td th:text="${guest.rsvpResponse == null ? 'No RSVP' : guest.rsvpResponse}">No RSVP</td>
+        <td th:text="${guest.lastSentAt == null ? 'Never' : guest.lastSentAt}">Never</td>
+        <td>
+          <form method="post" th:action="@{/admin/reminders/{kind}/{guestId}/open-whatsapp(kind=${kind},guestId=${guest.id})}">
+            <input type="hidden" name="categoryId" th:value="${categoryId}">
+            <label>Message language
+              <select name="language"><option value="ID" th:selected="${guest.preferredLanguage.name() == 'ID'}">Indonesian</option><option value="EN" th:selected="${guest.preferredLanguage.name() == 'EN'}">English</option></select>
+            </label>
+            <button type="submit">Open WhatsApp</button>
+          </form>
+          <form method="post" th:action="@{/admin/reminders/{kind}/{guestId}/confirm-sent(kind=${kind},guestId=${guest.id})}">
+            <input type="hidden" name="version" th:value="${guest.version}">
+            <input type="hidden" name="categoryId" th:value="${categoryId}">
+            <button type="submit">Confirm sent</button>
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</main>
+</body>
+</html>
