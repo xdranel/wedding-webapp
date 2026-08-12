@@ -14,6 +14,7 @@ import myweddinginvitation.webapp.rsvp.PublicGreetingView;
 import myweddinginvitation.webapp.rsvp.RsvpService;
 import myweddinginvitation.webapp.rsvp.RsvpView;
 import myweddinginvitation.webapp.wedding.WeddingMediaService;
+import myweddinginvitation.webapp.wedding.CalendarService;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,14 +28,16 @@ public class PublicInvitationController {
 	private final RsvpService rsvps;
 	private final GuestVerificationSession verification;
 	private final WeddingMediaService weddingMedia;
+	private final CalendarService calendars;
 	private final Clock clock;
 
 	public PublicInvitationController(InvitationAccessService access, RsvpService rsvps,
-			GuestVerificationSession verification, WeddingMediaService weddingMedia, Clock clock) {
+			GuestVerificationSession verification, WeddingMediaService weddingMedia, CalendarService calendars, Clock clock) {
 		this.access = access;
 		this.rsvps = rsvps;
 		this.verification = verification;
 		this.weddingMedia = weddingMedia;
+		this.calendars = calendars;
 		this.clock = clock;
 	}
 
@@ -60,6 +63,8 @@ public class PublicInvitationController {
 		model.addAttribute("media", weddingMedia.publicView(access.language()));
 		model.addAttribute("accentColor", safeAccent(access.preview().accentColor()));
 		model.addAttribute("invitationPath", invitationPath);
+		model.addAttribute("calendarEventTypes", access.wedding().isCalendarDownloadsEnabled()
+				? calendars.availableEventTypes(access.preview()) : java.util.Set.of());
 		model.addAttribute("plusOneAllowed", access.guest().isPlusOneAllowed());
 		model.addAttribute("greetingsEnabled", access.wedding().isGreetingsEnabled());
 		model.addAttribute("privateNoteEnabled", access.wedding().isPrivateOrganizerNoteEnabled());

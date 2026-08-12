@@ -65,6 +65,11 @@
         <p th:if="${!#strings.isEmpty(event.address)}" th:text="${event.address}">Address</p>
         <a th:if="${!#strings.isEmpty(event.mapUrl)}" th:href="${event.mapUrl}" rel="noopener noreferrer"
            target="_blank" th:text="${language == 'EN'} ? 'Open map' : 'Buka peta'">Buka peta</a>
+        <a th:if="${calendarEventTypes.contains(event.type)}"
+           th:href="${invitationPath + '/calendar/' + event.type.name() + '.ics?language=' + language}"
+           th:text="${event.type.name() == 'CEREMONY'} ? (${language == 'EN'} ? 'Add Ceremony to Calendar' : 'Tambahkan Akad ke Kalender') : (${language == 'EN'} ? 'Add Reception to Calendar' : 'Tambahkan Resepsi ke Kalender')">
+            Tambahkan ke Kalender
+        </a>
     </section>
 
     <section th:if="${!preview.story.empty}" aria-labelledby="story-title">

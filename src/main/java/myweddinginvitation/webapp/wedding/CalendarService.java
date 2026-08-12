@@ -10,8 +10,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class CalendarService {
     private static final String TIME_ZONE = "Asia/Jakarta";
     private static final ZoneId JAKARTA = ZoneId.of(TIME_ZONE);
@@ -36,6 +41,11 @@ public class CalendarService {
                 "LOCATION:" + text(event.venueName() + ", " + event.address()),
                 "DESCRIPTION:" + text(description(event, invitationUrl)), "URL:" + invitationUrl, "END:VEVENT", "END:VCALENDAR");
         return Optional.of(new CalendarFile("wedding-" + type.name().toLowerCase() + ".ics", content(properties)));
+    }
+
+    public Set<EventType> availableEventTypes(WeddingPreview preview) {
+        return preview.events().stream().filter(this::complete).map(WeddingPreview.EventView::type)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     private boolean complete(WeddingPreview.EventView event) {

@@ -29,6 +29,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 @SpringBootTest(properties = {
 		"app.bootstrap-admin.username=test-admin",
@@ -111,6 +112,19 @@ class SecurityRoutesTest {
 		mockMvc.perform(get("/media/wedding/audio"))
 				.andExpect(status().isNotFound());
 		mockMvc.perform(post("/media/wedding/audio").with(csrf()))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrl("/login"));
+	}
+
+	@Test
+	void calendarNamespaceExposesOnlyTheExactSignedGetRoute() throws Exception {
+		String signedBase = "/i/77a3ecbf-f719-44b9-ae55-cb2364340746/1/signature";
+
+		mockMvc.perform(post(signedBase + "/calendar/CEREMONY.ics").with(csrf()))
+				.andExpect(status().isInternalServerError())
+				.andExpect(result -> assertThat(result.getResolvedException())
+						.isInstanceOf(HttpRequestMethodNotSupportedException.class));
+		mockMvc.perform(get("/calendar"))
 				.andExpect(status().is3xxRedirection())
 				.andExpect(redirectedUrl("/login"));
 	}

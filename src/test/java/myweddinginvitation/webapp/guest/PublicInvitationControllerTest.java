@@ -2,6 +2,7 @@ package myweddinginvitation.webapp.guest;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -61,6 +62,7 @@ class PublicInvitationControllerTest {
 				opening_text_id = null, opening_text_en = null, closing_text_id = null,
 				closing_text_en = null, rsvp_deadline = '2027-04-30 23:59:59', event_closed = false,
 				greetings_enabled = true, private_organizer_note_enabled = false,
+				calendar_downloads_enabled = false,
 				accent_color = '#7A5C48', font_preset = 'CLASSIC'
 				where id = 1
 				""");
@@ -118,6 +120,53 @@ class PublicInvitationControllerTest {
 				.andExpect(content().string(containsString("Wedding invitation")));
 	}
 
+	@Test
+	void enabledCompleteEventsRenderLocalizedSignedCalendarLinksBesideTheirEvent() throws Exception {
+		Guest guest = savedActiveGuest(MessageLanguage.ID);
+		publishWedding();
+		jdbc.update("update wedding_settings set calendar_downloads_enabled = true where id = 1");
+		jdbc.update("""
+				insert into event_part (event_type, visible, event_date, start_time, venue_name, address_id, address_en, map_url)
+				values ('RECEPTION', true, '2027-05-01', '18:00:00', 'Ballroom', 'Jakarta', 'Jakarta',
+				'https://maps.example.test/reception')
+				""");
+		String invitationPath = path(signer.urlFor(guest));
+
+		String indonesian = mockMvc.perform(get(invitationPath).param("language", "ID"))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		String english = mockMvc.perform(get(invitationPath).param("language", "EN"))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+		String idLink = invitationPath + "/calendar/CEREMONY.ics?language=ID";
+		String enLink = invitationPath + "/calendar/CEREMONY.ics?language=EN";
+		String idReceptionLink = invitationPath + "/calendar/RECEPTION.ics?language=ID";
+		String enReceptionLink = invitationPath + "/calendar/RECEPTION.ics?language=EN";
+		assertThat(indonesian).contains("<h2 id=\"event-CEREMONY\">Akad", "href=\"" + idLink + "\"",
+				"Tambahkan Akad ke Kalender", "href=\"" + idReceptionLink + "\"", "Tambahkan Resepsi ke Kalender");
+		assertThat(indonesian.indexOf(idLink)).isGreaterThan(indonesian.indexOf("id=\"event-CEREMONY\""));
+		assertThat(english).contains("<h2 id=\"event-CEREMONY\">Ceremony", "href=\"" + enLink + "\"",
+				"Add Ceremony to Calendar", "href=\"" + enReceptionLink + "\"", "Add Reception to Calendar");
+		assertThat(english.indexOf(enLink)).isGreaterThan(english.indexOf("id=\"event-CEREMONY\""));
+	}
+
+	@Test
+	void disabledHiddenAndIncompleteEventsDoNotRenderCalendarLinks() throws Exception {
+		Guest guest = savedActiveGuest(MessageLanguage.ID);
+		publishWedding();
+		String invitationPath = path(signer.urlFor(guest));
+
+		String disabled = page(invitationPath);
+		jdbc.update("update wedding_settings set calendar_downloads_enabled = true where id = 1");
+		jdbc.update("update event_part set visible = false where event_type = 'CEREMONY'");
+		String hidden = page(invitationPath);
+		jdbc.update("update event_part set visible = true, address_id = null where event_type = 'CEREMONY'");
+		String incomplete = page(invitationPath);
+
+		assertThat(disabled).doesNotContain("/calendar/", "Tambahkan Akad ke Kalender");
+		assertThat(hidden).doesNotContain("/calendar/", "Tambahkan Akad ke Kalender");
+		assertThat(incomplete).doesNotContain("/calendar/", "Tambahkan Akad ke Kalender");
+	}
+
 	@ParameterizedTest
 	@EnumSource(UnavailableCase.class)
 	void unavailableStatesUseOneNeutralViewWithoutGuestData(UnavailableCase unavailableCase) throws Exception {
@@ -164,6 +213,11 @@ class PublicInvitationControllerTest {
 	private Guest savedActiveGuest(MessageLanguage language) {
 		return guestService.create(new GuestForm(
 				GUEST_NAME, "Ibu", "ID", WHATSAPP, null, false, language, INTERNAL_NOTE), false);
+	}
+
+	private String page(String invitationPath) throws Exception {
+		return mockMvc.perform(get(invitationPath).param("language", "ID"))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 	}
 
 	private void publishWedding() {

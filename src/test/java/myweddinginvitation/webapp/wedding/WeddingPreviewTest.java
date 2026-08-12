@@ -67,6 +67,7 @@ class WeddingPreviewTest {
 		jdbc.update("""
 				update wedding_settings set couple_title = null, opening_text_id = null, opening_text_en = null,
 				closing_text_id = null, closing_text_en = null, accent_color = '#7A5C48', font_preset = 'CLASSIC',
+				calendar_downloads_enabled = false,
 				gallery_enabled = false, background_audio_enabled = false, background_audio_path = null
 				where id = 1
 				""");
@@ -214,6 +215,48 @@ class WeddingPreviewTest {
 		assertThat(blank).doesNotContain("id=\"background-audio\"", "id=\"audio-toggle\"");
 	}
 
+	@Test
+	void settingsCheckboxRoundTripsCalendarDownloadsToggle() throws Exception {
+		long version = jdbc.queryForObject("select version from wedding_settings where id = 1", Long.class);
+
+		mockMvc.perform(post("/admin/wedding/settings").session(adminSession).with(csrf())
+				.param("version", Long.toString(version))
+				.param("openingTextId", "Dengan hormat")
+				.param("closingTextId", "Terima kasih")
+				.param("timeZone", "Asia/Jakarta")
+				.param("defaultPhoneCountry", "ID")
+				.param("accentColor", "#7A5C48")
+				.param("fontPreset", "CLASSIC")
+				.param("calendarDownloadsEnabled", "true"))
+				.andExpect(status().is3xxRedirection());
+
+		String settings = mockMvc.perform(get("/admin/wedding/settings").session(adminSession))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		assertThat(jdbc.queryForObject("select calendar_downloads_enabled from wedding_settings where id = 1", Boolean.class))
+				.isTrue();
+		assertThat(settings).contains("id=\"calendar-downloads-enabled\"", "checked=\"checked\"",
+				"Enable calendar downloads");
+	}
+
+	@Test
+	void previewShowsDisabledLocalizedCalendarButtonWithoutInventingAPublicSignature() throws Exception {
+		seedCompleteIndonesianContentWithEnglishMissing();
+		jdbc.update("update wedding_settings set calendar_downloads_enabled = true where id = 1");
+		jdbc.update("""
+				update event_part set visible = true, event_date = '2027-05-01', start_time = '18:00:00',
+				venue_name = 'Ballroom', address_id = 'Jakarta', address_en = 'Jakarta',
+				map_url = 'https://maps.example.test/reception' where event_type = 'RECEPTION'
+				""");
+
+		String enabled = preview("EN");
+		jdbc.update("update event_part set address_id = null where event_type = 'CEREMONY'");
+		String incomplete = preview("EN");
+
+		assertThat(enabled).contains("Add Ceremony to Calendar", "Add Reception to Calendar", "disabled")
+				.doesNotContain("/calendar/", "/i/");
+		assertThat(incomplete).doesNotContain("Add Ceremony to Calendar", "/calendar/", "/i/");
+	}
+
 	private void seedCompleteIndonesianContentWithEnglishMissing() {
 		jdbc.update("""
 				update wedding_settings set couple_title = 'Rama & Shinta', opening_text_id = 'Dengan hormat',
@@ -233,6 +276,12 @@ class WeddingPreviewTest {
 		jdbc.update("""
 				insert into event_part (event_type, visible, venue_name) values ('RECEPTION', false, 'Reception hidden probe')
 				""");
+	}
+
+	private String preview(String language) throws Exception {
+		return mockMvc.perform(get("/admin/wedding/preview/render").session(adminSession)
+				.param("salutation", "Bapak/Ibu").param("guestName", "Nama Tamu").param("language", language))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 	}
 
 	private MockHttpSession login(String username) throws Exception {

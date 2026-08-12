@@ -19,10 +19,13 @@ import org.springframework.dao.OptimisticLockingFailureException;
 public class WeddingContentController {
     private final WeddingContentService weddingContent;
     private final WeddingMediaService weddingMedia;
+    private final CalendarService calendars;
 
-    public WeddingContentController(WeddingContentService weddingContent, WeddingMediaService weddingMedia) {
+    public WeddingContentController(WeddingContentService weddingContent, WeddingMediaService weddingMedia,
+                                    CalendarService calendars) {
         this.weddingContent = weddingContent;
         this.weddingMedia = weddingMedia;
+        this.calendars = calendars;
     }
 
     @GetMapping("/admin/wedding")
@@ -96,6 +99,8 @@ public class WeddingContentController {
         model.addAttribute("preview", preview);
         model.addAttribute("media", weddingMedia.publicView(form.getLanguage()));
         model.addAttribute("accentColor", safeAccent(preview.accentColor()));
+        model.addAttribute("calendarEventTypes", weddingContent.settingsForm().isCalendarDownloadsEnabled()
+                ? calendars.availableEventTypes(preview) : java.util.Set.of());
         return "admin/wedding/preview";
     }
 

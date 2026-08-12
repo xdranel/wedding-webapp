@@ -71,6 +71,10 @@
             <a th:if="${!#strings.isEmpty(event.mapUrl)}" th:href="${event.mapUrl}" rel="noopener noreferrer"
                target="_blank"
                th:text="${form.language == 'EN'} ? 'Open map' : 'Buka peta'">Open map</a>
+            <button th:if="${calendarEventTypes.contains(event.type)}" type="button" disabled
+                    th:text="${event.type.name() == 'CEREMONY'} ? (${form.language == 'EN'} ? 'Add Ceremony to Calendar' : 'Tambahkan Akad ke Kalender') : (${form.language == 'EN'} ? 'Add Reception to Calendar' : 'Tambahkan Resepsi ke Kalender')">
+                Add to Calendar
+            </button>
         </section>
 
         <section th:if="${!preview.story.empty}" aria-labelledby="story-title">
