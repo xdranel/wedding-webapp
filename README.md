@@ -64,6 +64,22 @@ Opening WhatsApp only opens a prefilled message; it does not record delivery.
 Use **Confirm sent** after sending to record the timestamps. A public signed
 invitation is neutral when unavailable.
 
+Administrators operate manual RSVP and event reminder queues at
+`/admin/reminders`. RSVP reminders include only active, unarchived guests with
+an active invitation, usable WhatsApp number, and no RSVP. Event reminders use
+the same delivery rules but include only `HADIR` guests. Never-reminded guests
+sort first, then previously reminded guests; each group sorts by display name
+and ID and may be filtered by category. Opening ID or EN WhatsApp does not
+change state or the guest's preferred language. Only **Confirm sent** stores
+the corresponding latest reminder timestamp; resend is supported.
+
+Calendar downloads are disabled by default. Enable them in **Wedding Content**
+to show signed ceremony/reception `.ics` links for visible, complete events.
+Downloads use `Asia/Jakarta`, contain stable event UIDs, venue/map/personal
+invitation details, and no alarms. Ceremony defaults to one hour and reception
+to three hours when no end time is configured. Regenerating an invitation
+token invalidates its old calendar URLs.
+
 ## RSVP and check-in QR
 
 Set a future RSVP deadline in **Wedding Content** before guest RSVP writes open.
@@ -101,4 +117,10 @@ Administrators see current counts on `/admin`, current state on guest list and
 detail pages, and may correct or cancel a check-in with a reason. Flyway V10
 stores one current check-in per guest plus append-only correction/cancellation
 history. Automated MySQL coverage is implemented; physical LAN, scanner,
-camera, and multi-device acceptance remains pending user sign-off.
+camera, and multi-device acceptance is complete except for the still-pending
+physical USB scanner check.
+
+Phase 6B reminder/calendar implementation and automated MySQL verification are
+complete. Manual ID/EN WhatsApp, Confirm/Next, and phone/laptop calendar-import
+acceptance remains pending. The separate Phase 5 physical USB scanner check is
+also still pending.

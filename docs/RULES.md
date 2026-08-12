@@ -1,7 +1,7 @@
 # Business Rules
 
-Status: implemented and manually accepted through Phase 6A; the Phase 5
-physical USB scanner check remains deferred
+Status: implemented through Phase 6B; Phase 6B reminder/calendar manual
+acceptance and the Phase 5 physical USB scanner check remain deferred
 
 1. An invitation belongs to one named primary guest.
 2. An invitation may optionally allow one unnamed companion.
@@ -224,3 +224,28 @@ physical USB scanner check remains deferred
      check-in state.
 130. Background audio uses no initial preload; playback rejection or failure
      must not prevent the invitation from opening or hide the labelled control.
+131. RSVP reminder eligibility requires an active, unarchived invitation, a
+     valid E.164 WhatsApp number, and no current RSVP.
+132. Event reminder eligibility requires the same delivery state and a current
+     RSVP of `Hadir`.
+133. Reminder queues may filter by category and must order never-reminded
+     guests before reminded guests, then by case-insensitive display name and
+     guest ID.
+134. Opening an ID or EN reminder must not change a reminder timestamp or the
+     saved guest language preference.
+135. Reminder confirmation requires administrator authority, CSRF, the current
+     guest version after a guest lock, and current eligibility; a changed RSVP
+     rejects confirmation without mutation.
+136. Reminder resend overwrites only the latest timestamp for that reminder
+     kind; no send-history or campaign record is required.
+137. Calendar downloads are disabled by default and use existing event
+     visibility; only a complete visible event receives a link.
+138. A calendar download requires the current signed invitation identity but
+     not the guest PIN, and every unavailable cause returns neutral 404.
+139. Ceremony and reception are separate UTF-8 iCalendar files with stable
+     per-event UIDs, `Asia/Jakarta`, CRLF/folding, venue/address, optional map,
+     personal invitation URL, and no alarm.
+140. Missing event end time defaults to one hour for ceremony and three hours
+     for reception.
+141. Calendar downloads must not change guest, RSVP, QR, check-in, or wedding
+     state; token regeneration invalidates every old calendar URL.

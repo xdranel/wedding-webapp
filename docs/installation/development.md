@@ -68,6 +68,50 @@ The database and CSV export use canonical E.164 numbers.
 send timestamps. Unavailable public `/i/...` links return a neutral page without
 guest data.
 
+## Reminder and calendar operations
+
+The administrator reminder page is
+`GET /admin/reminders?kind=RSVP|EVENT&categoryId=`. It lists only active,
+unarchived invitations with usable WhatsApp numbers. RSVP reminders require no
+RSVP; event reminders require `Hadir`. Never-reminded guests appear first,
+then previously reminded guests; each group sorts by display name and ID. The
+optional category remains active while moving to the next guest.
+
+`POST /admin/reminders/{kind}/{guestId}/open-whatsapp` requires CSRF and an ID
+or EN selection. It renders the existing reminder template and personal signed
+link, then redirects to `wa.me`; it does not mutate timestamps or the saved
+language. After sending manually, use the CSRF-protected
+`POST /admin/reminders/{kind}/{guestId}/confirm-sent` with the current guest
+version. Confirmation locks and revalidates the guest, updates only that
+kind's latest timestamp, and advances under the same category filter. RSVP or
+other eligibility changes reject stale confirmation; resend repeats the same
+explicit flow. There is no scheduler, WhatsApp API, batch send, or history.
+
+`calendarDownloadsEnabled` is a global Wedding Content setting and defaults to
+false. When enabled, each visible complete ceremony/reception gets a signed
+`GET /i/{publicId}/{version}/{signature}/calendar/{eventType}.ics?language=ID|EN`
+link. The request needs the current invitation identity but no guest PIN. It
+returns one UTF-8, no-store attachment with `Asia/Jakarta`, a stable event UID,
+CRLF/folding, venue/address, optional map, personal invitation URL, and no
+alarm. Missing end time defaults to one hour for ceremony and three hours for
+reception. Disabled/incomplete/hidden events, invalid or stale signatures,
+archived guests, unpublished/closed weddings, and old regenerated tokens all
+return neutral 404.
+
+### Phase 6B manual phone/laptop acceptance
+
+Status: implementation and automated MySQL verification complete on
+2026-08-12; device/client acceptance pending.
+
+- [ ] ID and EN WhatsApp text opens correctly on the available phone without changing the saved guest language or timestamps.
+- [ ] Confirm sent and Next guest retain the selected category; resend updates only the latest timestamp.
+- [ ] Ceremony and reception files both import into the available iPhone calendar with the expected local times and no alarms.
+- [ ] Ceremony and reception files both import into the available laptop calendar with the expected local times and no alarms.
+- [x] Automated journey coverage proves that regenerating the invitation token makes old calendar links unavailable.
+
+The Phase 5 physical USB scanner check remains a separate non-blocking
+deferral. Phase 6C-6D and Phase 7 remain pending.
+
 ## RSVP, PIN, greetings, and QR operations
 
 Configure a future RSVP deadline before expecting guest writes to open. A
@@ -231,7 +275,9 @@ docker compose up -d mysql
 The next application startup applies Flyway migrations and bootstraps an
 administrator when the database has no administrator account. V10 creates the
 current check-in and append-only correction tables; V11 adds gallery rows and
-gallery/audio wedding settings. Never edit V1-V11 after they have been applied.
+gallery/audio wedding settings; V12 adds the two nullable guest reminder
+timestamps and default-disabled calendar toggle. Never edit V1-V12 after they
+have been applied.
 
 ## Tests and health
 
@@ -247,6 +293,11 @@ storage, signed ID/EN invitation rendering, exact media delivery, replacement,
 visibility, deletion, and unchanged guest/RSVP/check-in state. Browser media
 behavior, physical scanners, and network topology remain in the manual
 checklists above.
+`ReminderCalendarJourneyTest` exercises the real-MySQL reminder/category/order,
+ID/EN open, confirmation/Next/resend, RSVP-change rejection, both signed
+iCalendar files, old-token invalidation, and unchanged RSVP/QR/check-in state.
+WhatsApp application behavior and calendar-client imports remain in the Phase
+6B manual checklist above.
 
 For rootless Podman, use the socket setup above and run the same command:
 

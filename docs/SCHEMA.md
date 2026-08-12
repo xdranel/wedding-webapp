@@ -1,21 +1,24 @@
 # Data Schema
 
-Status: implemented through Phase 6A by Flyway V1-V11; Phase 6B-6D schema is planned
+Status: implemented through Phase 6B by Flyway V1-V12; Phase 6C-6D schema is planned
 
 Database target: MySQL 8.4 LTS.
 
-Flyway migrations V1-V11 implement the schema required through Phase 6A:
+Flyway migrations V1-V12 implement the schema required through Phase 6B:
 `user_account`, `wedding_settings`, `partner`, `event_part`, `story_entry`,
 `gallery_photo`, `guest_category`, `guest`, `message_template`, `rsvp`,
 `check_in`, and `check_in_correction`. V11 adds gallery/audio state to
-`wedding_settings` and the ordered gallery table. Applied migrations are
+`wedding_settings` and the ordered gallery table. V12 adds exactly nullable
+`guest.last_rsvp_reminder_sent_at timestamp(6)`, nullable
+`guest.last_event_reminder_sent_at timestamp(6)`, and non-null default-false
+`wedding_settings.calendar_downloads_enabled boolean`. Applied migrations are
 immutable; later schema changes require a new migration.
 
 V8 creates `message_template` and seeds its `RSVP_REMINDER` and
-`EVENT_REMINDER` rows. Later sections for gifts, help contacts, reports,
-operational erasure, and reminder scheduling/workflow fields (including guest
-reminder timestamps) remain planned for Phase 6B-7 and are not present in
-V1-V11.
+`EVENT_REMINDER` rows; Phase 6B reuses those rows without a new history or
+campaign table. Later sections for gifts, help contacts, reports, and
+operational erasure remain planned for Phase 6C-7 and are not present in
+V1-V12.
 
 ## Confirmed guest attributes
 
@@ -76,7 +79,9 @@ role, and WhatsApp number.
 Singleton wedding configuration: publication state, event-closed state, time
 zone, default phone country, RSVP deadline, bilingual narrative content,
 visual settings, optional-section visibility, help-page contact, gallery
-enablement, background-audio enablement, and nullable relative MP3 path.
+enablement, background-audio enablement, nullable relative MP3 path, and the
+non-null `calendar_downloads_enabled` global toggle (default `false`). Existing
+ceremony/reception visibility controls individual calendar availability.
 
 ### `partner`
 
@@ -134,7 +139,9 @@ Primary invitation record containing:
 - Nullable category and internal note
 - `+1` allowance and preferred message language
 - Delivery state and confirmation timestamps
-- RSVP/event reminder timestamps
+- Nullable `last_rsvp_reminder_sent_at` and
+  `last_event_reminder_sent_at` timestamps storing only the latest confirmed
+  send for each kind
 - Random public invitation ID and invitation-token version
 - Token regeneration timestamp
 - Failed-PIN count and temporary lock expiry
@@ -151,6 +158,11 @@ existing invitation URL.
 Check-in QR payloads use a separate HMAC purpose over the random public
 invitation ID, invitation-token version, and payload-format version. No QR
 token or image is persisted.
+
+Reminder confirmation updates only the appropriate latest timestamp and the
+guest row's ordinary optimistic-lock/update metadata. Opening WhatsApp writes
+nothing. Calendar files and signatures are derived on request; no calendar
+row, alarm, account authorization, or download history is stored.
 
 ### `rsvp`
 

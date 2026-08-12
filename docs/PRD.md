@@ -1,9 +1,9 @@
 # Product Requirements
 
-Status: implemented and manually accepted through Phase 6A; the Phase 5
-physical USB scanner check remains deferred
+Status: implemented through Phase 6B; Phase 6B reminder/calendar manual
+acceptance and the Phase 5 physical USB scanner check remain deferred
 
-## Implementation status — 2026-08-11
+## Implementation status — 2026-08-12
 
 Phase 5 server implementation and automated MySQL verification are complete:
 restricted staff lifecycle, USB/camera/manual preview and confirmation routes,
@@ -18,10 +18,12 @@ checks have passed; only the physical USB scanner remains deferred.
 Phase 6A gallery, synchronous WebP processing, MP3 background audio,
 administrator media operations, referenced media routes, accessible public and
 preview rendering, and automated MySQL/filesystem verification are implemented.
-Phone/laptop media acceptance passed on 2026-08-11. Phase 6B
-reminders/calendar files, Phase 6C
-reports/exports/moderation/status, Phase 6D integration/acceptance, and Phase 7
-deployment/operations remain pending.
+Phone/laptop media acceptance passed on 2026-08-11. Phase 6B manual RSVP/event
+reminders, signed ceremony/reception calendar files, V12, and automated MySQL
+verification are complete. Manual ID/EN WhatsApp, Confirm/Next, iPhone calendar
+import, and laptop calendar import remain pending. Phase 6C reports/exports/
+moderation/status, Phase 6D integration/acceptance, and Phase 7 deployment/
+operations remain pending.
 
 ## Change management
 
@@ -74,6 +76,21 @@ deployment/operations remain pending.
 - Automatic WhatsApp API delivery is out of scope.
 - Opening WhatsApp does not automatically mark an invitation as sent.
 - Administrators manually confirm that an invitation was actually sent.
+- Administrators operate separate manual RSVP and event reminder queues, may
+  filter by guest category, and may resend reminders.
+- RSVP reminders are eligible only for active, unarchived invitations with a
+  usable WhatsApp number and no RSVP; event reminders require the same delivery
+  state plus current RSVP `Hadir`.
+- Reminder queues place never-reminded guests first, then previously reminded
+  guests, sorting each group by display name and ID.
+- A one-time ID/EN reminder choice does not change the saved guest language;
+  only explicit confirmation stores the selected latest reminder timestamp.
+- Calendar downloads use a disabled-by-default global toggle and existing
+  event visibility/completeness; ceremony and reception are separate signed
+  `.ics` files requiring no guest PIN.
+- Calendar files use `Asia/Jakarta`, stable event UIDs, one-hour ceremony or
+  three-hour reception fallback duration, venue/map/personal link, and no
+  alarms. Old calendar URLs fail after invitation-token regeneration.
 - Guests can be entered individually or imported in bulk from CSV.
 - Direct Excel `.xlsx` import is out of scope; spreadsheet users can export
   their data as CSV.

@@ -1,7 +1,8 @@
 # Architecture
 
-Status: implemented through Phase 6A; Phase 6A phone/laptop acceptance pending
-and the Phase 5 physical USB scanner check remains deferred
+Status: implemented through Phase 6B; Phase 6B phone/laptop WhatsApp and
+calendar-import acceptance pending, and the Phase 5 physical USB scanner check
+remains deferred
 
 ## Selected approach
 
@@ -75,6 +76,10 @@ MariaDB is not a supported runtime target.
 - `/i/{token}` serves personalized invitation, RSVP, and QR access.
 - `/admin/**` serves the administrator dashboard.
 - `/check-in/**` serves restricted staff operations.
+- `/admin/reminders` and its POST actions serve administrator-only manual RSVP
+  and event reminder queues.
+- `/i/{publicId}/{version}/{signature}/calendar/{eventType}.ics` serves a
+  current signed ceremony or reception calendar without guest PIN entry.
 - `/admin/wedding/media` serves administrator gallery/audio management.
 - `/media/partner/{id}`, `/media/gallery/{id}/thumbnail`,
   `/media/gallery/{id}/image`, and `/media/wedding/audio` serve only
@@ -90,6 +95,20 @@ Administrator-only `/admin/accounts` routes manage staff lifecycle.
 Administrator guest-detail routes correct or cancel a current check-in and
 render immutable history. `/admin` and `/admin/guests` read current aggregate
 and per-guest check-in state; they do not create check-ins.
+
+`ReminderService` scans the bounded single-wedding guest set, bulk-loads RSVP
+state, filters by reminder kind/category, and orders never-reminded guests
+before reminded guests, then by case-insensitive display name and ID. Opening
+ID/EN WhatsApp renders the existing template and personal signed link without
+mutation. Confirmation locks the guest, checks its optimistic version and
+current eligibility, updates only the selected reminder timestamp, then
+selects the next eligible guest under the same category filter.
+
+`CalendarService` uses only the Java standard library to generate one UTF-8
+iCalendar attachment per complete visible event. `CalendarController` resolves
+the same current signed invitation identity as the invitation page and fails
+closed with neutral 404 for disabled downloads, stale/invalid tokens, inactive
+invitations, or unavailable events. Calendar GETs do not mutate state.
 
 The application is server-rendered. Browser JavaScript is limited to camera,
 scanner, audio, countdown, gallery, and small interaction enhancements. There
@@ -122,8 +141,10 @@ directly to web forms.
 - MySQL 8.4 LTS is the only supported database.
 - Flyway exclusively manages schema changes.
 - Flyway V10 adds `check_in` and `check_in_correction`; V11 adds
-  `gallery_photo` plus gallery/audio state on `wedding_settings`; V1-V11 are
-  immutable after application.
+  `gallery_photo` plus gallery/audio state on `wedding_settings`; V12 adds
+  `guest.last_rsvp_reminder_sent_at`, `guest.last_event_reminder_sent_at`, and
+  non-null default-false `wedding_settings.calendar_downloads_enabled`.
+  V1-V12 are immutable after application.
 - MySQL constraints and transactions enforce single check-in and allowance
   invariants.
 - Confirmation locks the guest before reading RSVP/current check-in state, and
@@ -161,6 +182,12 @@ directly to web forms.
 - `/admin/**` requires `ADMIN`; `/check-in/**` allows `ADMIN` or `STAFF`;
   `/account/password` requires authentication. CSRF remains required for every
   mutation.
+- Reminder queues and their open/confirm POST actions require `ADMIN`; both
+  POST actions require CSRF, and confirmation also requires the current guest
+  version after a pessimistic lock.
+- Signed calendar GETs are anonymous but require the current invitation
+  public ID, token version, and HMAC signature. They require no PIN, return
+  `no-store`, and expose one neutral 404 for every unavailable state.
 - Account passwords use a strong password encoder.
 - Invitation links and check-in QR payloads use purpose-separated HMAC
   signatures. QR payloads contain only the random public invitation ID, token
@@ -207,7 +234,8 @@ optional operational alternatives, not runtime dependencies.
   fails.
 - No write is accepted when the authoritative MySQL database is unavailable.
 
-Phase 6B reminders/calendar files, Phase 6C reporting/exports/moderation/status,
-and Phase 6D integration/acceptance documentation remain pending. Phase 6A
-automated verification is complete, but phone/laptop Chrome/Safari acceptance
-has not been signed off.
+Phase 6B reminders/calendar implementation and automated verification are
+complete. Manual ID/EN WhatsApp, Confirm/Next, iPhone calendar import, and
+laptop calendar import remain pending. Phase 6C reporting/exports/moderation/
+status, Phase 6D integration/acceptance, and Phase 7 deployment/operations
+remain pending; the Phase 5 physical USB scanner check remains separate.

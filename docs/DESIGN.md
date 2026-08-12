@@ -1,7 +1,7 @@
 # Product Design
 
-Status: implemented through Phase 6A; media phone/laptop acceptance pending and
-the Phase 5 physical USB scanner check remains deferred
+Status: implemented through Phase 6B; reminder/calendar phone/laptop acceptance
+pending and the Phase 5 physical USB scanner check remains deferred
 
 ## Selected product approach
 
@@ -100,6 +100,8 @@ The administrator interface has:
 - Wedding content and event settings
 - Media
 - WhatsApp message templates and manual-send confirmation
+- Manual RSVP/event reminder queues with category filtering, ID/EN override,
+  Confirm sent, and Next guest
 - Greeting moderation
 - Staff accounts
 - Reports
@@ -112,6 +114,25 @@ failed replacement preserves the active file.
 The guest list also provides RSVP filters, response/count columns, individual
 RSVP correction, and PIN-lock clearing. Greeting moderation uses individual
 approve/hide actions with pending, approved, and hidden filters.
+
+## Reminder and calendar flow
+
+The administrator Reminders area keeps RSVP and event reminders separate. RSVP
+eligibility requires no RSVP; event eligibility requires `Hadir`; both require
+an active, unarchived invitation and usable WhatsApp number. Never-reminded
+guests appear before reminded guests, then sort by name and ID. The selected
+category persists through Open WhatsApp, Confirm sent, and Next guest. ID/EN is
+a one-time choice and does not overwrite the guest preference. Opening
+WhatsApp is read-only; confirmation revalidates current eligibility and stores
+only the selected latest-reminder timestamp. Resend is the same explicit flow.
+
+One global setting enables calendar downloads. Each complete visible ceremony
+or reception then shows its own ordinary signed link. The UTF-8 `.ics` file has
+a stable event UID, `Asia/Jakarta` local start/end, venue/address, optional map,
+personal invitation URL, CRLF/folding, and no alarm. Missing end time defaults
+to one hour for the ceremony and three hours for the reception. Downloads need
+no guest PIN and never change RSVP, QR, or check-in state; stale invitation
+tokens return the same neutral unavailable response.
 
 ## Check-in flow
 
@@ -165,7 +186,8 @@ alternative image text, visible audio controls, and reduced-motion behavior.
   endpoint bytes, replacement/toggles/deletion, and unchanged guest token,
   RSVP, and check-in state.
 
-Phase 6A phone/laptop touch, mouse, keyboard, Chrome/Safari, initial MP3-request,
-playback-fallback, throttling, and administrator-operation checks remain manual
-acceptance; they are not represented as passed by MockMvc. The Phase 5 physical
-USB scanner check remains separately deferred. Phase 6B-6D remain pending.
+Phase 6A phone/laptop acceptance is complete. Phase 6B ID/EN WhatsApp,
+Confirm/Next, iPhone calendar import, and laptop calendar import remain manual
+acceptance checks and are not represented as passed by MockMvc. The Phase 5
+physical USB scanner check remains separately deferred. Phase 6C-6D and Phase
+7 remain pending.

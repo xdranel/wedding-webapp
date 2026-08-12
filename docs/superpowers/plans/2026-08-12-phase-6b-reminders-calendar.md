@@ -8,6 +8,8 @@
 
 **Tech Stack:** Java 21, Spring Boot 4.1, Spring MVC/Security/Data JPA/Validation, Thymeleaf, MySQL 8.4/Flyway, Testcontainers, JUnit 5/AssertJ, Java time and UTF-8 standard-library APIs.
 
+**Status (2026-08-12):** Implementation and automated verification are complete. Manual ID/EN WhatsApp checks and phone/laptop calendar-import acceptance remain pending.
+
 ## Global Constraints
 
 - Use one immutable `V12__reminders_calendar.sql`; never edit V1-V11.
@@ -48,7 +50,7 @@
 - Produces: `Guest.getLastRsvpReminderSentAt()`, `Guest.getLastEventReminderSentAt()`, public `Guest.confirmRsvpReminder(Instant)`, and public `Guest.confirmEventReminder(Instant)`.
 - Produces: `WeddingSettings.isCalendarDownloadsEnabled()` and form property `calendarDownloadsEnabled`.
 
-- [ ] **Step 1: Write migration and domain RED tests.** Assert V1-V12 apply on MySQL; existing guest/settings rows survive; both timestamps are nullable; calendar downloads default false; settings form round-trips the toggle; timestamp methods change only their own field and `updatedAt`.
+- [x] **Step 1: Write migration and domain RED tests.** Assert V1-V12 apply on MySQL; existing guest/settings rows survive; both timestamps are nullable; calendar downloads default false; settings form round-trips the toggle; timestamp methods change only their own field and `updatedAt`.
 
 ```java
 assertThat(guest.getLastRsvpReminderSentAt()).isNull();
@@ -57,13 +59,13 @@ assertThat(guest.getLastRsvpReminderSentAt()).isEqualTo(now);
 assertThat(guest.getLastEventReminderSentAt()).isNull();
 ```
 
-- [ ] **Step 2: Run RED.**
+- [x] **Step 2: Run RED.**
 
 Run: `./mvnw -q -Dtest=ReminderCalendarMigrationTest,WeddingContentServiceTest test`
 
 Expected: compilation/schema assertions fail because V12 and the fields do not exist.
 
-- [ ] **Step 3: Implement the minimum schema/domain change.** V12 adds exactly:
+- [x] **Step 3: Implement the minimum schema/domain change.** V12 adds exactly:
 
 ```sql
 alter table guest
@@ -78,13 +80,13 @@ Map the fields, expose getters and public timestamp mutations for the messaging
 service, and carry the boolean through `WeddingSettingsForm`, `settingsForm()`,
 and the existing settings update method. Do not add reminder history.
 
-- [ ] **Step 4: Run GREEN and adjacent settings tests.**
+- [x] **Step 4: Run GREEN and adjacent settings tests.**
 
 Run: `./mvnw -q -Dtest=ReminderCalendarMigrationTest,WeddingContentMigrationTest,WeddingContentServiceTest,WeddingContentControllerTest test`
 
 Expected: all selected tests pass against MySQL.
 
-- [ ] **Step 5: Refresh and commit.**
+- [x] **Step 5: Refresh and commit.**
 
 ```bash
 graphify update .
@@ -114,7 +116,7 @@ Long confirmSent(long guestId, long version, ReminderKind kind, Long categoryId,
 
 `confirmSent` returns the next eligible guest ID or `null` when complete.
 
-- [ ] **Step 1: Write service RED tests.** Cover RSVP eligibility only without RSVP; event eligibility only for `Hadir`; published-wedding and usable reminder-content requirements; archived/inactive/unusable-number rejection; optional category filtering; never-sent before sent then display-name/ID ordering; ID/EN rendering; language override without preference mutation; personalized link; no QR; open without mutation; resend; stale version; RSVP change before confirm; correct timestamp only; and next-ID selection.
+- [x] **Step 1: Write service RED tests.** Cover RSVP eligibility only without RSVP; event eligibility only for `Hadir`; published-wedding and usable reminder-content requirements; archived/inactive/unusable-number rejection; optional category filtering; never-sent before sent then display-name/ID ordering; ID/EN rendering; language override without preference mutation; personalized link; no QR; open without mutation; resend; stale version; RSVP change before confirm; correct timestamp only; and next-ID selection.
 
 ```java
 URI uri = reminders.whatsappUri(guestId, ReminderKind.RSVP, MessageLanguage.EN);
@@ -125,13 +127,13 @@ Long next = reminders.confirmSent(guestId, version, ReminderKind.RSVP, categoryI
 assertThat(reload(guestId).getLastRsvpReminderSentAt()).isEqualTo(now);
 ```
 
-- [ ] **Step 2: Run RED.**
+- [x] **Step 2: Run RED.**
 
 Run: `./mvnw -q -Dtest=ReminderServiceTest test`
 
 Expected: compilation fails because reminder types/services are absent.
 
-- [ ] **Step 3: Implement minimal queue logic.** Add `@EntityGraph(attributePaths = "category")` to a reminder-safe ordered guest fetch or a dedicated equivalent. Fetch RSVP rows in one bulk call, derive eligibility in memory for fewer than 2,000 guests, and sort with a comparator on `lastSent == null`, case-insensitive display name, then ID. Mark the bounded in-memory choice:
+- [x] **Step 3: Implement minimal queue logic.** Add `@EntityGraph(attributePaths = "category")` to a reminder-safe ordered guest fetch or a dedicated equivalent. Fetch RSVP rows in one bulk call, derive eligibility in memory for fewer than 2,000 guests, and sort with a comparator on `lastSent == null`, case-insensitive display name, then ID. Mark the bounded in-memory choice:
 
 ```java
 // ponytail: bounded single-wedding scan; add a database projection only if guest volume exceeds the documented 2,000 limit.
@@ -144,13 +146,13 @@ at least one visible complete event for event reminders. `confirmSent` must
 lock, compare version, re-evaluate eligibility and current wedding content,
 mutate, flush, then calculate the next ID.
 
-- [ ] **Step 4: Run GREEN and message regressions.**
+- [x] **Step 4: Run GREEN and message regressions.**
 
 Run: `./mvnw -q -Dtest=ReminderServiceTest,MessageTemplateServiceTest,GuestDeliveryServiceTest,RsvpServiceTest test`
 
 Expected: all selected tests pass; query-count assertion proves no per-guest RSVP/category reads.
 
-- [ ] **Step 5: Refresh and commit.**
+- [x] **Step 5: Refresh and commit.**
 
 ```bash
 graphify update .
@@ -178,23 +180,23 @@ POST /admin/reminders/{kind}/{guestId}/open-whatsapp
 POST /admin/reminders/{kind}/{guestId}/confirm-sent
 ```
 
-- [ ] **Step 1: Write MVC/security RED tests.** Assert admin-only access; staff forbidden; anonymous login redirect; CSRF on both POST routes; both tabs; category retained; preferred language selected; last sent time shown; Open WhatsApp redirect without mutation; Confirm sent redirect to next guest; completion state; stale/ineligible safe error; and no batch controls.
+- [x] **Step 1: Write MVC/security RED tests.** Assert admin-only access; staff forbidden; anonymous login redirect; CSRF on both POST routes; both tabs; category retained; preferred language selected; last sent time shown; Open WhatsApp redirect without mutation; Confirm sent redirect to next guest; completion state; stale/ineligible safe error; and no batch controls.
 
-- [ ] **Step 2: Run RED.**
+- [x] **Step 2: Run RED.**
 
 Run: `./mvnw -q -Dtest=ReminderAdminControllerTest,SecurityRoutesTest test`
 
 Expected: 404/route failures because controller and page do not exist.
 
-- [ ] **Step 3: Implement thin controller and one page.** Bind `ReminderKind` and `MessageLanguage` explicitly, inject the existing `Clock` for confirmation timestamps, pass category through every form, call one service method per POST, and use PRG. Render one table/form page with semantic labels and buttons `Open WhatsApp`, `Confirm sent`, and `Next guest`; do not add JavaScript or batch actions. Add a `Reminders` link to the admin home.
+- [x] **Step 3: Implement thin controller and one page.** Bind `ReminderKind` and `MessageLanguage` explicitly, inject the existing `Clock` for confirmation timestamps, pass category through every form, call one service method per POST, and use PRG. Render one table/form page with semantic labels and buttons `Open WhatsApp`, `Confirm sent`, and `Next guest`; do not add JavaScript or batch actions. Add a `Reminders` link to the admin home.
 
-- [ ] **Step 4: Run GREEN.**
+- [x] **Step 4: Run GREEN.**
 
 Run: `./mvnw -q -Dtest=ReminderAdminControllerTest,SecurityRoutesTest,GuestDeliveryControllerTest test`
 
 Expected: all tests pass with role and CSRF matrix intact.
 
-- [ ] **Step 5: Refresh and commit.**
+- [x] **Step 5: Refresh and commit.**
 
 ```bash
 graphify update .
@@ -221,7 +223,7 @@ Optional<CalendarFile> create(WeddingPreview preview, EventType type,
 record CalendarFile(String filename, byte[] content) {}
 ```
 
-- [ ] **Step 1: Write pure unit RED tests.** Cover separate ceremony/reception output; invisible-by-absence/incomplete event empty result; localized summary/address; stable UID; `TZID=Asia/Jakarta`; explicit end; one-hour ceremony and three-hour reception fallback; map/personal link; no `VALARM`; UTF-8; comma/semicolon/backslash/newline escaping; CRLF only; 75-octet folding with continuation space; and safe attachment filename.
+- [x] **Step 1: Write pure unit RED tests.** Cover separate ceremony/reception output; invisible-by-absence/incomplete event empty result; localized summary/address; stable UID; `TZID=Asia/Jakarta`; explicit end; one-hour ceremony and three-hour reception fallback; map/personal link; no `VALARM`; UTF-8; comma/semicolon/backslash/newline escaping; CRLF only; 75-octet folding with continuation space; and safe attachment filename.
 
 ```java
 CalendarFile file = service.create(preview, EventType.CEREMONY, "ID", invitationUrl,
@@ -231,21 +233,21 @@ assertThat(new String(file.content(), UTF_8))
         .doesNotContain("BEGIN:VALARM");
 ```
 
-- [ ] **Step 2: Run RED.**
+- [x] **Step 2: Run RED.**
 
 Run: `./mvnw -q -Dtest=CalendarServiceTest test`
 
 Expected: compilation fails because calendar types do not exist.
 
-- [ ] **Step 3: Implement with Java standard library only.** Build a fixed list of iCalendar properties, escape text before folding, fold UTF-8 content without splitting a multibyte code point, join physical lines with `\r\n`, and end the file with CRLF. Generate a deterministic UID from event type plus a stable application wedding namespace; do not include guest identity in the UID. Use `DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss")` and validated `ZoneId`.
+- [x] **Step 3: Implement with Java standard library only.** Build a fixed list of iCalendar properties, escape text before folding, fold UTF-8 content without splitting a multibyte code point, join physical lines with `\r\n`, and end the file with CRLF. Generate a deterministic UID from event type plus a stable application wedding namespace; do not include guest identity in the UID. Use `DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss")` and validated `ZoneId`.
 
-- [ ] **Step 4: Run GREEN.**
+- [x] **Step 4: Run GREEN.**
 
 Run: `./mvnw -q -Dtest=CalendarServiceTest test`
 
 Expected: all pure unit tests pass without Spring or MySQL.
 
-- [ ] **Step 5: Refresh and commit.**
+- [x] **Step 5: Refresh and commit.**
 
 ```bash
 graphify update .
@@ -275,23 +277,23 @@ git commit -m "feat: generate wedding calendars"
 GET /i/{publicId}/{version}/{signature}/calendar/{eventType}.ics?language=ID|EN
 ```
 
-- [ ] **Step 1: Write endpoint/rendering RED tests.** Assert anonymous signed GET succeeds with exact bytes, `text/calendar;charset=UTF-8`, safe `Content-Disposition`, and `no-store`; no PIN required; current ID/EN links render beside matching events; toggle-off and hidden/incomplete event omit markup and return neutral 404; malformed type/signature, archived guest, stale token, unpublished/closed wedding return neutral 404; POST and unrelated calendar listing are denied.
+- [x] **Step 1: Write endpoint/rendering RED tests.** Assert anonymous signed GET succeeds with exact bytes, `text/calendar;charset=UTF-8`, safe `Content-Disposition`, and `no-store`; no PIN required; current ID/EN links render beside matching events; toggle-off and hidden/incomplete event omit markup and return neutral 404; malformed type/signature, archived guest, stale token, unpublished/closed wedding return neutral 404; POST and unrelated calendar listing are denied.
 
-- [ ] **Step 2: Run RED.**
+- [x] **Step 2: Run RED.**
 
 Run: `./mvnw -q -Dtest=CalendarControllerTest,PublicInvitationControllerTest,WeddingPreviewTest,SecurityRoutesTest test`
 
 Expected: missing route/toggle/button assertions fail.
 
-- [ ] **Step 3: Implement public integration.** Add the settings checkbox. In the invitation model expose a map/set of available event types only when the global toggle and event completeness pass. Render ordinary localized links using the current `invitationPath` and language. The controller resolves the same signed access, rejects closed/disabled/unavailable state, invokes `CalendarService`, and returns bytes with fixed headers. Reuse the existing public `/i/**` security rule; expose only a controller GET mapping and add no broader namespace or security change.
+- [x] **Step 3: Implement public integration.** Add the settings checkbox. In the invitation model expose a map/set of available event types only when the global toggle and event completeness pass. Render ordinary localized links using the current `invitationPath` and language. The controller resolves the same signed access, rejects closed/disabled/unavailable state, invokes `CalendarService`, and returns bytes with fixed headers. Reuse the existing public `/i/**` security rule; expose only a controller GET mapping and add no broader namespace or security change.
 
-- [ ] **Step 4: Run GREEN and RSVP regressions.**
+- [x] **Step 4: Run GREEN and RSVP regressions.**
 
 Run: `./mvnw -q -Dtest=CalendarControllerTest,PublicInvitationControllerTest,WeddingPreviewTest,WeddingContentControllerTest,SecurityRoutesTest,PublicRsvpControllerTest test`
 
 Expected: all tests pass; RSVP and signed invitation behavior remain unchanged.
 
-- [ ] **Step 5: Refresh and commit.**
+- [x] **Step 5: Refresh and commit.**
 
 ```bash
 graphify update .
@@ -318,9 +320,9 @@ git commit -m "feat: add signed calendar downloads"
 - Consumes: Tasks 1-5 complete behavior.
 - Produces: executable admin-to-public acceptance coverage and canonical Phase 6B documentation.
 
-- [ ] **Step 1: Write journey RED/GREEN coverage.** Against real MySQL and a mutable test clock: create categorized guests with no RSVP, `Hadir`, and `Tidak hadir`; prove queue order/filter; open ID/EN WhatsApp without mutation; confirm then advance; resend; reject an RSVP-changed stale confirmation; enable calendars; download ceremony and reception through signed links; import-level assert both ICS bodies; regenerate token and prove the old URL fails; prove guest RSVP/QR/check-in state remains unchanged.
+- [x] **Step 1: Write journey RED/GREEN coverage.** Against real MySQL and a mutable test clock: create categorized guests with no RSVP, `Hadir`, and `Tidak hadir`; prove queue order/filter; open ID/EN WhatsApp without mutation; confirm then advance; resend; reject an RSVP-changed stale confirmation; enable calendars; download ceremony and reception through signed links; import-level assert both ICS bodies; regenerate token and prove the old URL fails; prove guest RSVP/QR/check-in state remains unchanged.
 
-- [ ] **Step 2: Run focused Phase 6B verification.**
+- [x] **Step 2: Run focused Phase 6B verification.**
 
 Run:
 
@@ -330,18 +332,25 @@ Run:
 
 Expected: zero failures, errors, and skips. Temporarily invert one confirmed-timestamp assertion, observe one deterministic RED, restore it, and rerun GREEN.
 
-- [ ] **Step 3: Update canonical documentation.** Record V12, exact fields, manual-only semantics, eligibility, queue ordering, confirmation timing, calendar toggle/routes/content, no alarms, timezone/fallback durations, security, and Phase 6B manual acceptance pending. Preserve the Phase 5 USB-scanner reminder and mark Phase 6C-6D/7 pending.
+- [x] **Step 3: Update canonical documentation.** Record V12, exact fields, manual-only semantics, eligibility, queue ordering, confirmation timing, calendar toggle/routes/content, no alarms, timezone/fallback durations, security, and Phase 6B manual acceptance pending. Preserve the Phase 5 USB-scanner reminder and mark Phase 6C-6D/7 pending.
 
-- [ ] **Step 4: Run final gates.**
+- [x] **Step 4: Run final automated gates.**
 
 ```bash
 git diff --check
 ./mvnw -q clean test
 ```
 
-Expected: all Flyway V1-V12 migrations and the complete MySQL/Testcontainers suite pass. Then manually verify on available devices: ID/EN WhatsApp text, Confirm/Next guest, ceremony/reception import into iPhone calendar, and import into the available laptop calendar.
+Result: the focused suite passed 52 tests and the clean MySQL/Testcontainers suite passed 393 tests across 68 suites, with zero failures, errors, or skips. Flyway applied V1-V12.
 
-- [ ] **Step 5: Refresh, review, and commit.**
+Manual acceptance remains pending on available devices:
+
+- [ ] Verify ID and EN WhatsApp text.
+- [ ] Verify Confirm sent and Next guest on a phone.
+- [ ] Import ceremony and reception files into iPhone Calendar.
+- [ ] Import ceremony and reception files into the available laptop calendar.
+
+- [x] **Step 5: Refresh, review, and commit.**
 
 ```bash
 graphify update .
@@ -352,4 +361,4 @@ git commit -m "docs: complete phase 6b reminders and calendars"
 
 ## Final acceptance gate
 
-Phase 6B is implementation-complete only when Tasks 1-6 are checked, review has no open Critical/Important findings, V1-V12 and the clean MySQL/Testcontainers suite pass, and canonical documentation matches the shipped routes/schema. It is user-accepted only after the available phone/laptop WhatsApp and calendar-import checklist passes. The physical USB scanner remains a separate non-blocking Phase 5 deferral.
+Phase 6B is implementation-complete: Tasks 1-5 and Task 6's implementation and automated verification steps are checked, V1-V12 and the clean MySQL/Testcontainers suite pass, and canonical documentation matches the shipped routes/schema. It is not yet user-accepted; that requires the available phone/laptop WhatsApp and calendar-import checklist above to pass. The physical USB scanner remains a separate non-blocking Phase 5 deferral, and Phases 6C-6D/7 remain pending.
