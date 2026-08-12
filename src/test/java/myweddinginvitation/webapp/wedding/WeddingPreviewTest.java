@@ -17,6 +17,7 @@ import myweddinginvitation.webapp.account.UserAccount;
 import myweddinginvitation.webapp.account.UserAccountRepository;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -248,13 +249,19 @@ class WeddingPreviewTest {
 				map_url = 'https://maps.example.test/reception' where event_type = 'RECEPTION'
 				""");
 
-		String enabled = preview("EN");
+		String enabledId = preview("ID");
+		String enabledEn = preview("EN");
 		jdbc.update("update event_part set address_id = null where event_type = 'CEREMONY'");
 		String incomplete = preview("EN");
 
-		assertThat(enabled).contains("Add Ceremony to Calendar", "Add Reception to Calendar", "disabled")
+		assertThat(enabledId).containsPattern(disabledCalendarButton("Tambahkan Akad ke Kalender"))
+				.containsPattern(disabledCalendarButton("Tambahkan Resepsi ke Kalender"))
 				.doesNotContain("/calendar/", "/i/");
-		assertThat(incomplete).doesNotContain("Add Ceremony to Calendar", "/calendar/", "/i/");
+		assertThat(enabledEn).containsPattern(disabledCalendarButton("Add Ceremony to Calendar"))
+				.containsPattern(disabledCalendarButton("Add Reception to Calendar"))
+				.doesNotContain("/calendar/", "/i/");
+		assertThat(incomplete).doesNotContain("Add Ceremony to Calendar", "/calendar/", "/i/")
+				.containsPattern(disabledCalendarButton("Add Reception to Calendar"));
 	}
 
 	private void seedCompleteIndonesianContentWithEnglishMissing() {
@@ -282,6 +289,11 @@ class WeddingPreviewTest {
 		return mockMvc.perform(get("/admin/wedding/preview/render").session(adminSession)
 				.param("salutation", "Bapak/Ibu").param("guestName", "Nama Tamu").param("language", language))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+	}
+
+	private Pattern disabledCalendarButton(String label) {
+		return Pattern.compile("(?s)<button(?=[^>]*\\bdisabled(?:=\\\"disabled\\\")?)[^>]*>\\s*"
+				+ Pattern.quote(label) + "\\s*</button>");
 	}
 
 	private MockHttpSession login(String username) throws Exception {

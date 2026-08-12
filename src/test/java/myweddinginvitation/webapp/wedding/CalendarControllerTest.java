@@ -95,6 +95,24 @@ class CalendarControllerTest {
 				.andExpect(content().bytes(calendar("EN", invitationUrl)));
 	}
 
+	@Test
+	void receptionGetReturnsExactEnglishCalendarAndReceptionFilename() throws Exception {
+		jdbc.update("""
+				insert into event_part (event_type, visible, event_date, start_time, venue_name, address_id, address_en, map_url)
+				values ('RECEPTION', true, '2027-05-01', '18:00:00', 'Ballroom', 'Jakarta', 'Jakarta',
+				'https://maps.example.test/reception')
+				""");
+		Guest guest = guest();
+		String invitationUrl = signer.urlFor(guest);
+
+		mockMvc.perform(get(path(invitationUrl) + "/calendar/RECEPTION.ics").param("language", "EN"))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType("text/calendar;charset=UTF-8"))
+				.andExpect(header().string("Content-Disposition", "attachment; filename=\"wedding-reception.ics\""))
+				.andExpect(header().string("Cache-Control", "no-store"))
+				.andExpect(content().bytes(calendar("EN", invitationUrl)));
+	}
+
 	@ParameterizedTest
 	@EnumSource(UnavailableCase.class)
 	void unavailableCalendarStatesReturnTheSameNeutralNotFound(UnavailableCase unavailableCase) throws Exception {
