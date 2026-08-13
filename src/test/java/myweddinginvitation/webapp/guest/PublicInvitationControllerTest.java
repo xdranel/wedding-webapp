@@ -62,7 +62,7 @@ class PublicInvitationControllerTest {
 				opening_text_id = null, opening_text_en = null, closing_text_id = null,
 				closing_text_en = null, rsvp_deadline = '2027-04-30 23:59:59', event_closed = false,
 				greetings_enabled = true, private_organizer_note_enabled = false,
-				calendar_downloads_enabled = false,
+				calendar_downloads_enabled = false, time_zone = 'Asia/Jakarta',
 				accent_color = '#7A5C48', font_preset = 'CLASSIC'
 				where id = 1
 				""");
@@ -165,6 +165,22 @@ class PublicInvitationControllerTest {
 		assertThat(disabled).doesNotContain("/calendar/", "Tambahkan Akad ke Kalender");
 		assertThat(hidden).doesNotContain("/calendar/", "Tambahkan Akad ke Kalender");
 		assertThat(incomplete).doesNotContain("/calendar/", "Tambahkan Akad ke Kalender");
+	}
+
+	@Test
+	void legacyNonJakartaWeddingOmitsCalendarLinksAndRejectsDownloads() throws Exception {
+		Guest guest = savedActiveGuest(MessageLanguage.ID);
+		publishWedding();
+		jdbc.update("update wedding_settings set calendar_downloads_enabled = true, time_zone = 'Asia/Makassar' where id = 1");
+		String invitationPath = path(signer.urlFor(guest));
+
+		mockMvc.perform(get(invitationPath).param("language", "ID"))
+				.andExpect(status().isOk())
+				.andExpect(content().string(not(containsString("/calendar/"))));
+		mockMvc.perform(get(invitationPath + "/calendar/CEREMONY.ics").param("language", "ID"))
+				.andExpect(status().isNotFound())
+				.andExpect(header().string("Cache-Control", "no-store"))
+				.andExpect(content().string(""));
 	}
 
 	@ParameterizedTest

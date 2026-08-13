@@ -64,7 +64,7 @@ public class PublicInvitationController {
 		model.addAttribute("accentColor", safeAccent(access.preview().accentColor()));
 		model.addAttribute("invitationPath", invitationPath);
 		model.addAttribute("calendarEventTypes", access.wedding().isCalendarDownloadsEnabled()
-				? calendars.availableEventTypes(access.preview()) : java.util.Set.of());
+				? calendars.availableEventTypes(access.preview(), access.wedding().getTimeZone()) : java.util.Set.of());
 		model.addAttribute("plusOneAllowed", access.guest().isPlusOneAllowed());
 		model.addAttribute("greetingsEnabled", access.wedding().isGreetingsEnabled());
 		model.addAttribute("privateNoteEnabled", access.wedding().isPrivateOrganizerNoteEnabled());

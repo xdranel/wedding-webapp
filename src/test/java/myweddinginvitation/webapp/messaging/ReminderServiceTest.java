@@ -58,7 +58,7 @@ class ReminderServiceTest {
 		jdbc.update("delete from event_part");
 		jdbc.update("""
 				update wedding_settings set publication_state = 'PUBLISHED', rsvp_deadline = '2030-08-12 12:00:00',
-				couple_title = 'Rama & Shinta', default_phone_country = 'ID' where id = 1
+				couple_title = 'Rama & Shinta', default_phone_country = 'ID', event_closed = false where id = 1
 				""");
 		jdbc.update("""
 				update message_template set body = 'ID {{guest_name}} {{rsvp_deadline}} {{invitation_link}}'
@@ -128,6 +128,36 @@ class ReminderServiceTest {
 		assertThat(reminders.queue(ReminderKind.EVENT, null)).extracting(ReminderGuestView::id).containsExactly(guest.getId());
 		jdbc.update("update event_part set visible = false");
 		assertThatThrownBy(() -> reminders.queue(ReminderKind.EVENT, null)).isInstanceOf(IllegalStateException.class);
+	}
+
+	@Test
+	void closedWeddingRejectsReminderQueue() {
+		guest("Ready", null, MessageLanguage.ID);
+		jdbc.update("update wedding_settings set event_closed = true where id = 1");
+
+		assertThatThrownBy(() -> reminders.queue(ReminderKind.RSVP, null))
+				.isInstanceOf(IllegalStateException.class);
+	}
+
+	@Test
+	void closedWeddingRejectsWhatsappOpenWithoutMutation() {
+		Guest guest = guest("Ready", null, MessageLanguage.ID);
+		jdbc.update("update wedding_settings set event_closed = true where id = 1");
+
+		assertThatThrownBy(() -> reminders.whatsappUri(guest.getId(), ReminderKind.RSVP, MessageLanguage.ID))
+				.isInstanceOf(IllegalStateException.class);
+		assertThat(reload(guest.getId()).getLastRsvpReminderSentAt()).isNull();
+	}
+
+	@Test
+	void closedWeddingRejectsConfirmationWithoutMutation() {
+		Guest guest = guest("Ready", null, MessageLanguage.ID);
+		jdbc.update("update wedding_settings set event_closed = true where id = 1");
+
+		assertThatThrownBy(() -> reminders.confirmSent(
+				guest.getId(), guest.getVersion(), ReminderKind.RSVP, null, FIRST))
+				.isInstanceOf(IllegalStateException.class);
+		assertThat(reload(guest.getId()).getLastRsvpReminderSentAt()).isNull();
 	}
 
 	@Test

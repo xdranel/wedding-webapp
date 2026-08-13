@@ -122,6 +122,7 @@ public class ReminderService {
 		if (wedding.getPublicationState() != PublicationState.PUBLISHED) {
 			throw new IllegalStateException("Reminders require a published wedding.");
 		}
+		if (wedding.isEventClosed()) throw new IllegalStateException("Reminders require an open wedding.");
 		if (kind == ReminderKind.RSVP && wedding.getRsvpDeadline() == null) {
 			throw new IllegalStateException("RSVP reminders require a deadline.");
 		}

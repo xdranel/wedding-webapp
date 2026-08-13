@@ -2,6 +2,7 @@ package myweddinginvitation.webapp.wedding;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.net.URI;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -9,6 +10,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -36,14 +38,15 @@ public class CalendarService {
                 "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//myweddinginvitation.webapp//Wedding Invitation//EN", "CALSCALE:GREGORIAN",
                 "BEGIN:VTIMEZONE", "TZID:" + zoneId.getId(), "BEGIN:STANDARD", "DTSTART:19700101T000000", "TZOFFSETFROM:+0700", "TZOFFSETTO:+0700",
                 "TZNAME:WIB", "END:STANDARD", "END:VTIMEZONE",
-                "BEGIN:VEVENT", "UID:" + uid(type), "DTSTAMP:" + UTC_DATE_TIME.format(Instant.now()) + "Z", "SUMMARY:" + text(name + " - " + preview.coupleTitle()),
+                "BEGIN:VEVENT", "UID:" + uid(type, invitationUrl), "DTSTAMP:" + UTC_DATE_TIME.format(Instant.now()) + "Z", "SUMMARY:" + text(name + " - " + preview.coupleTitle()),
                 dateTime("DTSTART", start, zoneId), dateTime("DTEND", end, zoneId),
                 "LOCATION:" + text(event.venueName() + ", " + event.address()),
                 "DESCRIPTION:" + text(description(event, invitationUrl)), "URL:" + invitationUrl, "END:VEVENT", "END:VCALENDAR");
         return Optional.of(new CalendarFile("wedding-" + type.name().toLowerCase() + ".ics", content(properties)));
     }
 
-    public Set<EventType> availableEventTypes(WeddingPreview preview) {
+    public Set<EventType> availableEventTypes(WeddingPreview preview, String timeZone) {
+        if (!TIME_ZONE.equals(timeZone)) return Set.of();
         return preview.events().stream().filter(this::complete).map(WeddingPreview.EventView::type)
                 .collect(Collectors.toUnmodifiableSet());
     }
@@ -61,8 +64,13 @@ public class CalendarService {
         return event.address() + map + "\nInvitation: " + invitationUrl;
     }
 
-    private String uid(EventType type) {
-        return UUID.nameUUIDFromBytes(("myweddinginvitation.webapp:wedding:" + type).getBytes(UTF_8)) + "@myweddinginvitation.webapp";
+    private String uid(EventType type, String invitationUrl) {
+        URI invitation = URI.create(invitationUrl);
+        String scheme = invitation.getScheme().toLowerCase(Locale.ROOT);
+        String host = invitation.getHost().toLowerCase(Locale.ROOT);
+        int port = invitation.getPort() >= 0 ? invitation.getPort() : "https".equals(scheme) ? 443 : 80;
+        return UUID.nameUUIDFromBytes((scheme + "://" + host + ":" + port + ":" + type).getBytes(UTF_8))
+                + "@myweddinginvitation.webapp";
     }
 
     private String text(String value) {

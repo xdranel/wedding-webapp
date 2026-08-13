@@ -3,11 +3,13 @@ package myweddinginvitation.webapp.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,12 +27,12 @@ class WebErrorHandlerTest {
 	}
 
 	@Test
-	void unsupportedMethodUsesNeutralNotFoundInsteadOfInternalError() throws Exception {
-		MockMvcBuilders.standaloneSetup(new ErrorProbeController()).setControllerAdvice(new WebErrorHandler()).build()
+	void unsupportedMethodPreservesMethodNotAllowedAndAllowHeader() throws Exception {
+		MockMvcBuilders.standaloneSetup(new ErrorProbeController())
+				.setControllerAdvice(new CalendarMethodErrorHandler(), new WebErrorHandler()).build()
 				.perform(post("/only-get"))
-				.andExpect(status().isNotFound())
-				.andExpect(view().name("guest/unavailable"))
-				.andExpect(model().attributeDoesNotExist("reference"));
+				.andExpect(status().isMethodNotAllowed())
+				.andExpect(header().string(HttpHeaders.ALLOW, "GET"));
 	}
 
 	@Test

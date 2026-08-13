@@ -1,8 +1,5 @@
 package myweddinginvitation.webapp.wedding;
 
-import java.time.DateTimeException;
-import java.time.ZoneId;
-
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -44,7 +41,6 @@ public class WeddingContentController {
 
     @PostMapping("/admin/wedding/settings")
     String saveSettings(@Valid @ModelAttribute("form") WeddingSettingsForm form, BindingResult result, Model model) {
-        validateTimeZone(form, result);
         validateAccent(form, result);
         if (result.hasErrors()) {
             model.addAttribute("fontPresets", FontPreset.values());
@@ -99,18 +95,10 @@ public class WeddingContentController {
         model.addAttribute("preview", preview);
         model.addAttribute("media", weddingMedia.publicView(form.getLanguage()));
         model.addAttribute("accentColor", safeAccent(preview.accentColor()));
-        model.addAttribute("calendarEventTypes", weddingContent.settingsForm().isCalendarDownloadsEnabled()
-                ? calendars.availableEventTypes(preview) : java.util.Set.of());
+        WeddingSettingsForm settings = weddingContent.settingsForm();
+        model.addAttribute("calendarEventTypes", settings.isCalendarDownloadsEnabled()
+                ? calendars.availableEventTypes(preview, settings.getTimeZone()) : java.util.Set.of());
         return "admin/wedding/preview";
-    }
-
-    private void validateTimeZone(WeddingSettingsForm form, BindingResult result) {
-        if (result.hasFieldErrors("timeZone")) return;
-        try {
-            ZoneId.of(form.getTimeZone());
-        } catch (DateTimeException exception) {
-            result.rejectValue("timeZone", "timeZone.invalid", "Choose a valid time zone");
-        }
     }
 
     private void validateAccent(WeddingSettingsForm form, BindingResult result) {

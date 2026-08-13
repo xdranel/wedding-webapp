@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,11 +34,6 @@ public class WebErrorHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     ModelAndView uploadTooLarge(MaxUploadSizeExceededException exception) {
         return error("error/413", HttpStatus.PAYLOAD_TOO_LARGE);
-    }
-
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    ModelAndView methodNotSupported() {
-        return error("guest/unavailable", HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)

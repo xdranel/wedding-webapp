@@ -18,7 +18,10 @@ class CalendarServiceTest {
                 event(EventType.RECEPTION, LocalTime.of(18, 0), null, "Ballroom", "Rose Street", "https://maps.example/reception"));
 
         String ceremony = content(service.create(preview, EventType.CEREMONY, "ID", "https://invite.example/a", "Asia/Jakarta").orElseThrow());
-        String ceremonyForAnotherGuest = content(service.create(preview, EventType.CEREMONY, "ID", "https://invite.example/b", "Asia/Jakarta").orElseThrow());
+        String ceremonyForAnotherGuest = content(service.create(preview, EventType.CEREMONY, "ID",
+                "https://INVITE.EXAMPLE:443/b?guest=2", "Asia/Jakarta").orElseThrow());
+        String ceremonyForAnotherDeployment = content(service.create(preview, EventType.CEREMONY, "ID",
+                "https://other.example/a", "Asia/Jakarta").orElseThrow());
         String reception = content(service.create(preview, EventType.RECEPTION, "EN", "https://invite.example/a", "Asia/Jakarta").orElseThrow());
 
         assertThat(ceremony).contains("SUMMARY:Akad - A & B", "LOCATION:Gereja\\, Jl. Mawar", "DTSTART;TZID=Asia/Jakarta:20270502T090000",
@@ -32,7 +35,9 @@ class CalendarServiceTest {
         assertThat(ceremony.indexOf("END:VEVENT")).isLessThan(ceremony.indexOf("END:VCALENDAR"));
         assertThat(reception).contains("SUMMARY:Reception - A & B", "LOCATION:Ballroom\\, Rose Street",
                 "DTEND;TZID=Asia/Jakarta:20270502T210000", "https://maps.example/reception");
-        assertThat(uid(ceremony)).isEqualTo(uid(ceremonyForAnotherGuest)).isNotEqualTo(uid(reception));
+        assertThat(uid(ceremony)).isEqualTo(uid(ceremonyForAnotherGuest))
+                .isNotEqualTo(uid(ceremonyForAnotherDeployment))
+                .isNotEqualTo(uid(reception));
         assertThat(service.create(preview, EventType.CEREMONY, "ID", "https://invite.example/a", "Asia/Jakarta").orElseThrow().filename())
                 .isEqualTo("wedding-ceremony.ics");
         assertThat(content(service.create(preview(event(EventType.CEREMONY, LocalTime.of(9, 0), null, "Gereja", "Jl. Mawar", null)),

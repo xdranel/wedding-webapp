@@ -30,6 +30,7 @@ public class WeddingSettingsForm {
     private String closingTextEn;
 
     @NotBlank
+    @Pattern(regexp = "Asia/Jakarta", message = "Choose Asia/Jakarta")
     private String timeZone = "Asia/Jakarta";
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)

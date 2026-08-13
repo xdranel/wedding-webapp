@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -19,6 +20,7 @@ import myweddinginvitation.webapp.account.UserAccountRepository;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -123,6 +125,9 @@ class SecurityRoutesTest {
 				.andExpect(status().isNotFound())
 				.andExpect(view().name("guest/unavailable"))
 				.andExpect(content().string(not(containsString("Something went wrong"))));
+		mockMvc.perform(post("/i").with(csrf()))
+				.andExpect(status().isMethodNotAllowed())
+				.andExpect(header().string(HttpHeaders.ALLOW, "GET"));
 		mockMvc.perform(get("/calendar"))
 				.andExpect(status().is3xxRedirection())
 				.andExpect(redirectedUrl("/login"));

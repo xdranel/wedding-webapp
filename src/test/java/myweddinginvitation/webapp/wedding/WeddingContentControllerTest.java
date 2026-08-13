@@ -160,6 +160,25 @@ class WeddingContentControllerTest {
 	}
 
 	@Test
+	void settingsRejectNonJakartaTimeZone() throws Exception {
+		mockMvc.perform(post("/admin/wedding/settings")
+				.session(adminSession)
+				.with(csrf())
+				.param("version", Long.toString(currentSettingsVersion()))
+				.param("openingTextId", "Dengan hormat")
+				.param("closingTextId", "Terima kasih")
+				.param("timeZone", "Asia/Makassar")
+				.param("defaultPhoneCountry", "ID")
+				.param("accentColor", "#7a5c48")
+				.param("fontPreset", "CLASSIC"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("admin/wedding/settings"))
+				.andExpect(model().attributeHasFieldErrors("form", "timeZone"));
+
+		assertThat(settings.getSingleton().orElseThrow().getTimeZone()).isEqualTo("Asia/Jakarta");
+	}
+
+	@Test
 	void staleSettingsSubmissionShowsConflictInsteadOfFailing() throws Exception {
 		long staleVersion = currentSettingsVersion();
 		WeddingSettingsForm newer = weddingContent.settingsForm();
@@ -227,7 +246,8 @@ class WeddingContentControllerTest {
 		jdbc.update("""
 				update wedding_settings set publication_state = 'DRAFT', couple_title = null,
 				opening_text_id = null, opening_text_en = null, closing_text_id = null,
-				closing_text_en = null, accent_color = '#7A5C48', font_preset = 'CLASSIC'
+				closing_text_en = null, time_zone = 'Asia/Jakarta', event_closed = false,
+				accent_color = '#7A5C48', font_preset = 'CLASSIC'
 				where id = 1
 				""");
 	}
