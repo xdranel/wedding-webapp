@@ -230,8 +230,8 @@ operations remain pending.
 - Missing English narrative content falls back to its Indonesian version.
 - The dashboard indicates missing translations without blocking invitation
   publication.
-- One administrator-configured time zone applies to the entire wedding,
-  including event times and RSVP deadline; it defaults to `Asia/Jakarta`.
+- The wedding uses the fixed `Asia/Jakarta` time zone for all event times and
+  the RSVP deadline.
 - The wedding has one global `Draft/Published` state.
 - Guest links do not expose invitation content while in draft.
 - Administrators can preview the invitation in draft and can publish or return
@@ -752,8 +752,8 @@ in the dashboard without blocking publication.
 
 **Question:** Is one global wedding time zone sufficient?
 
-**Answer:** Yes. Use one administrator-configured time zone for all event and
-RSVP times, defaulting to `Asia/Jakarta`.
+**Answer:** Yes. Use the fixed `Asia/Jakarta` time zone for all event and RSVP
+times.
 
 **Question:** Is a global `Draft/Published` state required?
 
