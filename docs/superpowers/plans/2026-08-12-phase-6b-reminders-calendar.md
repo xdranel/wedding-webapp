@@ -8,7 +8,7 @@
 
 **Tech Stack:** Java 21, Spring Boot 4.1, Spring MVC/Security/Data JPA/Validation, Thymeleaf, MySQL 8.4/Flyway, Testcontainers, JUnit 5/AssertJ, Java time and UTF-8 standard-library APIs.
 
-**Status (2026-08-12):** Implementation and automated verification are complete. Manual ID/EN WhatsApp checks and phone/laptop calendar-import acceptance remain pending.
+**Status (2026-08-17):** Implementation, automated verification, and manual ID/EN WhatsApp and phone/laptop calendar-import acceptance are complete.
 
 ## Global Constraints
 
@@ -332,7 +332,7 @@ Run:
 
 Expected: zero failures, errors, and skips. Temporarily invert one confirmed-timestamp assertion, observe one deterministic RED, restore it, and rerun GREEN.
 
-- [x] **Step 3: Update canonical documentation.** Record V12, exact fields, manual-only semantics, eligibility, queue ordering, confirmation timing, calendar toggle/routes/content, no alarms, timezone/fallback durations, security, and Phase 6B manual acceptance pending. Preserve the Phase 5 USB-scanner reminder and mark Phase 6C-6D/7 pending.
+- [x] **Step 3: Update canonical documentation.** Record V12, exact fields, manual-only semantics, eligibility, queue ordering, confirmation timing, calendar toggle/routes/content, no alarms, timezone/fallback durations, security, and Phase 6B manual acceptance. Preserve the Phase 5 USB-scanner reminder and mark Phase 6C-6D/7 pending.
 
 - [x] **Step 4: Run final automated gates.**
 
@@ -343,12 +343,12 @@ git diff --check
 
 Result: the focused suite passed 52 tests and the clean MySQL/Testcontainers suite passed 393 tests across 68 suites, with zero failures, errors, or skips. Flyway applied V1-V12.
 
-Manual acceptance remains pending on available devices:
+Manual acceptance passed on available devices on 2026-08-17:
 
-- [ ] Verify ID and EN WhatsApp text.
-- [ ] Verify Confirm sent and Next guest on a phone.
-- [ ] Import ceremony and reception files into iPhone Calendar.
-- [ ] Import ceremony and reception files into the available laptop calendar.
+- [x] Verify ID and EN WhatsApp text.
+- [x] Verify Confirm sent and Next guest on a phone.
+- [x] Import ceremony and reception files into iPhone Calendar.
+- [x] Import ceremony and reception files into the available laptop calendar.
 
 - [x] **Step 5: Refresh, review, and commit.**
 
@@ -361,4 +361,4 @@ git commit -m "docs: complete phase 6b reminders and calendars"
 
 ## Final acceptance gate
 
-Phase 6B is implementation-complete: Tasks 1-5 and Task 6's implementation and automated verification steps are checked, V1-V12 and the clean MySQL/Testcontainers suite pass, and canonical documentation matches the shipped routes/schema. It is not yet user-accepted; that requires the available phone/laptop WhatsApp and calendar-import checklist above to pass. The physical USB scanner remains a separate non-blocking Phase 5 deferral, and Phases 6C-6D/7 remain pending.
+Phase 6B is implementation-complete and user-accepted as of 2026-08-17: Tasks 1-5 and Task 6 are checked, V1-V12 and the clean MySQL/Testcontainers suite pass, canonical documentation matches the shipped routes/schema, and the available phone/laptop WhatsApp and calendar-import checklist passed. The physical USB scanner remains a separate non-blocking Phase 5 deferral, and Phases 6C-6D/7 remain pending.

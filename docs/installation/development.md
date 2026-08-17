@@ -101,12 +101,12 @@ return neutral 404.
 ### Phase 6B manual phone/laptop acceptance
 
 Status: implementation and automated MySQL verification complete on
-2026-08-12; device/client acceptance pending.
+2026-08-12; device/client acceptance passed on 2026-08-17.
 
-- [ ] ID and EN WhatsApp text opens correctly on the available phone without changing the saved guest language or timestamps.
-- [ ] Confirm sent and Next guest retain the selected category; resend updates only the latest timestamp.
-- [ ] Ceremony and reception files both import into the available iPhone calendar with the expected local times and no alarms.
-- [ ] Ceremony and reception files both import into the available laptop calendar with the expected local times and no alarms.
+- [x] ID and EN WhatsApp text opens correctly on the available phone without changing the saved guest language or timestamps.
+- [x] Confirm sent and Next guest retain the selected category; resend updates only the latest timestamp.
+- [x] Ceremony and reception files both import into the available iPhone calendar with the expected local times and no alarms.
+- [x] Ceremony and reception files both import into the available laptop calendar with the expected local times and no alarms.
 - [x] Automated journey coverage proves that regenerating the invitation token makes old calendar links unavailable.
 
 The Phase 5 physical USB scanner check remains a separate non-blocking

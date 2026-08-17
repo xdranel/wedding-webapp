@@ -1,9 +1,9 @@
 # Product Requirements
 
-Status: implemented through Phase 6B; Phase 6B reminder/calendar manual
-acceptance and the Phase 5 physical USB scanner check remain deferred
+Status: implemented and accepted through Phase 6B; the Phase 5 physical USB
+scanner check remains deferred
 
-## Implementation status — 2026-08-12
+## Implementation status — 2026-08-17
 
 Phase 5 server implementation and automated MySQL verification are complete:
 restricted staff lifecycle, USB/camera/manual preview and confirmation routes,
@@ -21,7 +21,7 @@ preview rendering, and automated MySQL/filesystem verification are implemented.
 Phone/laptop media acceptance passed on 2026-08-11. Phase 6B manual RSVP/event
 reminders, signed ceremony/reception calendar files, V12, and automated MySQL
 verification are complete. Manual ID/EN WhatsApp, Confirm/Next, iPhone calendar
-import, and laptop calendar import remain pending. Phase 6C reports/exports/
+import, and laptop calendar import passed on 2026-08-17. Phase 6C reports/exports/
 moderation/status, Phase 6D integration/acceptance, and Phase 7 deployment/
 operations remain pending.
 

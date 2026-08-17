@@ -1,7 +1,7 @@
 # Business Rules
 
-Status: implemented through Phase 6B; Phase 6B reminder/calendar manual
-acceptance and the Phase 5 physical USB scanner check remain deferred
+Status: implemented and accepted through Phase 6B; the Phase 5 physical USB
+scanner check remains deferred
 
 1. An invitation belongs to one named primary guest.
 2. An invitation may optionally allow one unnamed companion.

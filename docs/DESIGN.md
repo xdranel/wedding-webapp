@@ -1,7 +1,7 @@
 # Product Design
 
-Status: implemented through Phase 6B; reminder/calendar phone/laptop acceptance
-pending and the Phase 5 physical USB scanner check remains deferred
+Status: implemented and accepted through Phase 6B; the Phase 5 physical USB
+scanner check remains deferred
 
 ## Selected product approach
 
@@ -187,7 +187,7 @@ alternative image text, visible audio controls, and reduced-motion behavior.
   RSVP, and check-in state.
 
 Phase 6A phone/laptop acceptance is complete. Phase 6B ID/EN WhatsApp,
-Confirm/Next, iPhone calendar import, and laptop calendar import remain manual
-acceptance checks and are not represented as passed by MockMvc. The Phase 5
+Confirm/Next, iPhone calendar import, and laptop calendar import passed manual
+acceptance on 2026-08-17. The Phase 5
 physical USB scanner check remains separately deferred. Phase 6C-6D and Phase
 7 remain pending.

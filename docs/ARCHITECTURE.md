@@ -1,8 +1,7 @@
 # Architecture
 
-Status: implemented through Phase 6B; Phase 6B phone/laptop WhatsApp and
-calendar-import acceptance pending, and the Phase 5 physical USB scanner check
-remains deferred
+Status: implemented and accepted through Phase 6B; the Phase 5 physical USB
+scanner check remains deferred
 
 ## Selected approach
 
@@ -236,6 +235,6 @@ optional operational alternatives, not runtime dependencies.
 
 Phase 6B reminders/calendar implementation and automated verification are
 complete. Manual ID/EN WhatsApp, Confirm/Next, iPhone calendar import, and
-laptop calendar import remain pending. Phase 6C reporting/exports/moderation/
+laptop calendar import passed on 2026-08-17. Phase 6C reporting/exports/moderation/
 status, Phase 6D integration/acceptance, and Phase 7 deployment/operations
 remain pending; the Phase 5 physical USB scanner check remains separate.

@@ -122,5 +122,5 @@ physical USB scanner check.
 
 Phase 6B reminder/calendar implementation and automated MySQL verification are
 complete. Manual ID/EN WhatsApp, Confirm/Next, and phone/laptop calendar-import
-acceptance remains pending. The separate Phase 5 physical USB scanner check is
-also still pending.
+acceptance passed on 2026-08-17. The separate Phase 5 physical USB scanner
+check is still pending.
