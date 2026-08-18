@@ -1,5 +1,6 @@
 package myweddinginvitation.webapp.wedding;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -57,6 +58,24 @@ public class WeddingSettings {
 
     @Column(name = "event_closed", nullable = false)
     private boolean eventClosed;
+
+    @Column(name = "event_status_changed_at")
+    private Instant eventStatusChangedAt;
+
+    @Column(name = "event_status_changed_by", length = 100)
+    private String eventStatusChangedBy;
+
+    @Column(name = "closed_title_id", length = 160)
+    private String closedTitleId;
+
+    @Column(name = "closed_title_en", length = 160)
+    private String closedTitleEn;
+
+    @Column(name = "closed_message_id", length = 1000)
+    private String closedMessageId;
+
+    @Column(name = "closed_message_en", length = 1000)
+    private String closedMessageEn;
 
     @Column(name = "greetings_enabled", nullable = false)
     private boolean greetingsEnabled = true;
@@ -139,6 +158,30 @@ public class WeddingSettings {
         return eventClosed;
     }
 
+    public Instant getEventStatusChangedAt() {
+        return eventStatusChangedAt;
+    }
+
+    public String getEventStatusChangedBy() {
+        return eventStatusChangedBy;
+    }
+
+    public String getClosedTitleId() {
+        return closedTitleId;
+    }
+
+    public String getClosedTitleEn() {
+        return closedTitleEn;
+    }
+
+    public String getClosedMessageId() {
+        return closedMessageId;
+    }
+
+    public String getClosedMessageEn() {
+        return closedMessageEn;
+    }
+
     public boolean isGreetingsEnabled() {
         return greetingsEnabled;
     }
@@ -192,6 +235,25 @@ public class WeddingSettings {
         return removed;
     }
 
+    void closeEvent(String username, Instant changedAt) {
+        eventClosed = true;
+        eventStatusChangedBy = username;
+        eventStatusChangedAt = changedAt;
+    }
+
+    void reopenEvent(String username, Instant changedAt) {
+        eventClosed = false;
+        eventStatusChangedBy = username;
+        eventStatusChangedAt = changedAt;
+    }
+
+    void updateEventStatusMessage(EventStatusMessageForm form) {
+        closedTitleId = nullableCopy(form.getTitleId(), 160);
+        closedTitleEn = nullableCopy(form.getTitleEn(), 160);
+        closedMessageId = nullableCopy(form.getMessageId(), 1000);
+        closedMessageEn = nullableCopy(form.getMessageEn(), 1000);
+    }
+
     void update(WeddingSettingsForm form) {
         coupleTitle = form.getCoupleTitle();
         openingTextId = form.getOpeningTextId();
@@ -203,9 +265,16 @@ public class WeddingSettings {
         defaultPhoneCountry = form.getDefaultPhoneCountry();
         accentColor = form.getAccentColor();
         fontPreset = form.getFontPreset();
-        eventClosed = form.isEventClosed();
         greetingsEnabled = form.isGreetingsEnabled();
         privateOrganizerNoteEnabled = form.isPrivateOrganizerNoteEnabled();
         calendarDownloadsEnabled = form.isCalendarDownloadsEnabled();
+    }
+
+    private String nullableCopy(String value, int maxLength) {
+        if (value == null) return null;
+        String normalized = value.strip();
+        if (normalized.isEmpty()) return null;
+        if (normalized.length() > maxLength) throw new IllegalArgumentException("Event status message is too long");
+        return normalized;
     }
 }

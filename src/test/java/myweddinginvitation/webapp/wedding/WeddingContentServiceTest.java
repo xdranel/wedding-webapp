@@ -3,6 +3,7 @@ package myweddinginvitation.webapp.wedding;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
@@ -138,16 +139,67 @@ class WeddingContentServiceTest {
 	@Test
 	void settingsRoundTripPhaseFourSwitches() {
 		WeddingSettingsForm form = service.settingsForm();
-		form.setEventClosed(true);
 		form.setGreetingsEnabled(false);
 		form.setPrivateOrganizerNoteEnabled(true);
 
 		service.saveSettings(form);
 
 		assertThat(service.settingsForm())
-				.extracting(WeddingSettingsForm::isEventClosed, WeddingSettingsForm::isGreetingsEnabled,
-						WeddingSettingsForm::isPrivateOrganizerNoteEnabled)
-				.containsExactly(true, false, true);
+				.extracting(WeddingSettingsForm::isGreetingsEnabled, WeddingSettingsForm::isPrivateOrganizerNoteEnabled)
+				.containsExactly(false, true);
+	}
+
+	@Test
+	void eventStatusTracksCloseReopenAndKeepsClosureOutsideGeneralSettings() {
+		WeddingSettings wedding = settings.getSingleton().orElseThrow();
+		Instant closedAt = Instant.parse("2026-08-18T03:04:05Z");
+		wedding.closeEvent("owner", closedAt);
+		settings.saveAndFlush(wedding);
+
+		WeddingSettingsForm form = service.settingsForm();
+		form.setCoupleTitle("Updated while closed");
+		service.saveSettings(form);
+
+		assertThat(settings.getSingleton().orElseThrow())
+				.extracting(WeddingSettings::isEventClosed, WeddingSettings::getEventStatusChangedAt,
+						WeddingSettings::getEventStatusChangedBy, WeddingSettings::getCoupleTitle)
+				.containsExactly(true, closedAt, "owner", "Updated while closed");
+		Instant reopenedAt = Instant.parse("2026-08-18T03:05:06Z");
+		wedding = settings.getSingleton().orElseThrow();
+		wedding.reopenEvent("owner", reopenedAt);
+
+		assertThat(wedding)
+				.extracting(WeddingSettings::isEventClosed, WeddingSettings::getEventStatusChangedAt,
+						WeddingSettings::getEventStatusChangedBy)
+				.containsExactly(false, reopenedAt, "owner");
+	}
+
+	@Test
+	void eventStatusMessagesRoundTripAsStrippedNullableCopy() {
+		EventStatusMessageForm form = new EventStatusMessageForm();
+		form.setTitleId("  Acara selesai  ");
+		form.setTitleEn("  Event complete  ");
+		form.setMessageId("  Terima kasih  ");
+		form.setMessageEn("   ");
+		WeddingSettings wedding = settings.getSingleton().orElseThrow();
+
+		wedding.updateEventStatusMessage(form);
+		settings.saveAndFlush(wedding);
+
+		assertThat(settings.getSingleton().orElseThrow())
+				.extracting(WeddingSettings::getClosedTitleId, WeddingSettings::getClosedTitleEn,
+						WeddingSettings::getClosedMessageId, WeddingSettings::getClosedMessageEn)
+				.containsExactly("Acara selesai", "Event complete", "Terima kasih", null);
+	}
+
+	@Test
+	void eventStatusMessageRejectsPostStripOverlengthCopy() {
+		EventStatusMessageForm form = new EventStatusMessageForm();
+		form.setMessageEn(" " + "x".repeat(1001) + " ");
+
+		assertThatThrownBy(() -> settings.getSingleton().orElseThrow().updateEventStatusMessage(form))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Event status message is too long");
 	}
 
 	@Test

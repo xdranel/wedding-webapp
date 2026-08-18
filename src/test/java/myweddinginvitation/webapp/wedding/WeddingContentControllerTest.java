@@ -93,16 +93,16 @@ class WeddingContentControllerTest {
 		assertThat(saved.getCoupleTitle()).isEqualTo("Rama & Shinta");
 		assertThat(saved.getOpeningTextId()).isEqualTo("Dengan hormat");
 		assertThat(saved.getClosingTextId()).isEqualTo("Terima kasih");
-		assertThat(saved.isEventClosed()).isTrue();
+		assertThat(saved.isEventClosed()).isFalse();
 		assertThat(saved.isGreetingsEnabled()).isFalse();
 		assertThat(saved.isPrivateOrganizerNoteEnabled()).isTrue();
 	}
 
 	@Test
-	void eventClosureExplainsThatRsvpAndQrGuestAccessAreDisabled() throws Exception {
+	void generalSettingsDoesNotOfferEventClosureControl() throws Exception {
 		mockMvc.perform(get("/admin/wedding/settings").session(adminSession))
 				.andExpect(status().isOk())
-				.andExpect(content().string(containsString("Close the event: guest RSVP and QR access are disabled")));
+				.andExpect(content().string(org.hamcrest.Matchers.not(containsString("Close the event"))));
 	}
 
 	@Test

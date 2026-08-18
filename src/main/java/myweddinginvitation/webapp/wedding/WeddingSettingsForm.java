@@ -45,8 +45,6 @@ public class WeddingSettingsForm {
     @NotNull
     private FontPreset fontPreset = FontPreset.CLASSIC;
 
-    private boolean eventClosed;
-
     private boolean greetingsEnabled = true;
 
     private boolean privateOrganizerNoteEnabled;
@@ -139,14 +137,6 @@ public class WeddingSettingsForm {
 
     public void setFontPreset(FontPreset fontPreset) {
         this.fontPreset = fontPreset;
-    }
-
-    public boolean isEventClosed() {
-        return eventClosed;
-    }
-
-    public void setEventClosed(boolean eventClosed) {
-        this.eventClosed = eventClosed;
     }
 
     public boolean isGreetingsEnabled() {
