@@ -23,29 +23,33 @@ public class EventStatusAdminController {
 
 	@GetMapping("/admin/wedding/event-status")
 	String eventStatus(Model model) {
-		page(model, messageForm(status.view()));
+		EventStatusView current = status.view();
+		page(model, current, messageForm(current));
 		return PAGE;
 	}
 
 	@PostMapping("/admin/wedding/event-status/messages")
 	String saveMessages(@Valid @ModelAttribute("form") EventStatusMessageForm form, BindingResult result, Model model) {
+		EventStatusView current = null;
 		if (!result.hasErrors()) {
 			try {
 				status.saveMessages(form);
 				return "redirect:/admin/wedding/event-status?messagesSaved";
 			} catch (OptimisticLockingFailureException exception) {
-				rejectConflict(result, form);
+				current = status.view();
+				rejectConflict(result, form, current);
 			} catch (IllegalArgumentException exception) {
 				result.reject("eventStatus.invalid", exception.getMessage());
 			}
 		}
-		page(model, form);
+		page(model, current == null ? status.view() : current, form);
 		return PAGE;
 	}
 
 	@GetMapping("/admin/wedding/event-status/close")
 	String closeConfirmation(Model model) {
-		return confirmation(model, true, changeForm(status.view()));
+		EventStatusView current = status.view();
+		return confirmation(model, current, changeForm(current));
 	}
 
 	@PostMapping("/admin/wedding/event-status/close")
@@ -55,7 +59,8 @@ public class EventStatusAdminController {
 
 	@GetMapping("/admin/wedding/event-status/reopen")
 	String reopenConfirmation(Model model) {
-		return confirmation(model, false, changeForm(status.view()));
+		EventStatusView current = status.view();
+		return confirmation(model, current, changeForm(current));
 	}
 
 	@PostMapping("/admin/wedding/event-status/reopen")
@@ -64,38 +69,39 @@ public class EventStatusAdminController {
 	}
 
 	private String change(boolean closed, EventStatusChangeForm form, BindingResult result, Principal principal, Model model) {
+		EventStatusView current = null;
 		if (!result.hasErrors()) {
 			try {
 				status.change(closed, form.getVersion(), form.isConfirmed(), principal == null ? null : principal.getName());
 				return "redirect:/admin/wedding/event-status?statusChanged";
 			} catch (OptimisticLockingFailureException exception) {
-				rejectConflict(result, form);
+				current = status.view();
+				rejectConflict(result, form, current);
 			} catch (IllegalArgumentException | IllegalStateException exception) {
 				result.reject("eventStatus.invalid", exception.getMessage());
 			}
 		}
-		return confirmation(model, closed, form);
+		return confirmation(model, current == null ? status.view() : current, form);
 	}
 
-	private void page(Model model, EventStatusMessageForm form) {
-		model.addAttribute("status", status.view());
+	private void page(Model model, EventStatusView current, EventStatusMessageForm form) {
+		model.addAttribute("status", current);
 		if (!model.containsAttribute("form")) model.addAttribute("form", form);
 	}
 
-	private String confirmation(Model model, boolean closed, EventStatusChangeForm form) {
-		model.addAttribute("status", status.view());
-		model.addAttribute("closed", closed);
+	private String confirmation(Model model, EventStatusView current, EventStatusChangeForm form) {
+		model.addAttribute("status", current);
 		if (!model.containsAttribute("form")) model.addAttribute("form", form);
 		return CONFIRMATION_PAGE;
 	}
 
-	private void rejectConflict(BindingResult result, EventStatusMessageForm form) {
-		form.setVersion(status.view().version());
+	private void rejectConflict(BindingResult result, EventStatusMessageForm form, EventStatusView current) {
+		form.setVersion(current.version());
 		result.reject("eventStatus.conflict", "Wedding settings changed by another administrator. Reload and try again.");
 	}
 
-	private void rejectConflict(BindingResult result, EventStatusChangeForm form) {
-		form.setVersion(status.view().version());
+	private void rejectConflict(BindingResult result, EventStatusChangeForm form, EventStatusView current) {
+		form.setVersion(current.version());
 		result.reject("eventStatus.conflict", "Wedding settings changed by another administrator. Reload and try again.");
 	}
 

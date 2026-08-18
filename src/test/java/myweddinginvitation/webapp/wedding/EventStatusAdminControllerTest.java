@@ -86,20 +86,36 @@ class EventStatusAdminControllerTest {
 	}
 
 	@Test
-	void invalidOrStaleStatusSubmissionsRedisplayCurrentStateWithoutChangingIt() throws Exception {
+	void staleCloseSubmissionRedisplaysTheCurrentClosedStateAsAReopenAction() throws Exception {
 		long staleVersion = service.view().version();
 		service.saveMessages(messageForm(staleVersion, "new copy"));
+		service.change(true, service.view().version(), true, "admin");
 
 		mockMvc.perform(post("/admin/wedding/event-status/close").session(adminSession).with(csrf())
 				.param("version", Long.toString(staleVersion)).param("confirmed", "true"))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/wedding/event-status-confirm"))
 				.andExpect(model().attributeHasErrors("form"))
-				.andExpect(content().string(containsString("changed by another administrator")));
-		mockMvc.perform(post("/admin/wedding/event-status/close").session(adminSession).with(csrf())
-				.param("version", Long.toString(service.view().version())))
+				.andExpect(content().string(containsString("changed by another administrator")))
+				.andExpect(content().string(containsString("<h1>Reopen event</h1>")))
+				.andExpect(content().string(containsString("action=\"/admin/wedding/event-status/reopen\"")));
+		assertThatClosed();
+	}
+
+	@Test
+	void staleReopenSubmissionRedisplaysTheCurrentOpenStateAsACloseAction() throws Exception {
+		service.change(true, service.view().version(), true, "admin");
+		long staleVersion = service.view().version();
+		service.saveMessages(messageForm(staleVersion, "new copy"));
+		service.change(false, service.view().version(), true, "admin");
+
+		mockMvc.perform(post("/admin/wedding/event-status/reopen").session(adminSession).with(csrf())
+				.param("version", Long.toString(staleVersion)).param("confirmed", "true"))
 				.andExpect(status().isOk())
-				.andExpect(model().attributeHasFieldErrors("form", "confirmed"));
+				.andExpect(view().name("admin/wedding/event-status-confirm"))
+				.andExpect(model().attributeHasErrors("form"))
+				.andExpect(content().string(containsString("<h1>Close event</h1>")))
+				.andExpect(content().string(containsString("action=\"/admin/wedding/event-status/close\"")));
 		assertThatOpen();
 	}
 
@@ -128,6 +144,10 @@ class EventStatusAdminControllerTest {
 
 	private void assertThatOpen() {
 		org.assertj.core.api.Assertions.assertThat(settings.getSingleton().orElseThrow().isEventClosed()).isFalse();
+	}
+
+	private void assertThatClosed() {
+		org.assertj.core.api.Assertions.assertThat(settings.getSingleton().orElseThrow().isEventClosed()).isTrue();
 	}
 
 	private MockHttpSession login(String username) throws Exception {

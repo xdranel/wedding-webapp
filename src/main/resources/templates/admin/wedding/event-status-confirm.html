@@ -3,21 +3,21 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${closed} ? 'Close event' : 'Reopen event'">Change event status</title>
+    <title th:text="${status.closed} ? 'Reopen event' : 'Close event'">Change event status</title>
 </head>
 <body>
 <main>
-    <h1 th:text="${closed} ? 'Close event' : 'Reopen event'">Change event status</h1>
-    <p th:if="${closed}">Block new invitations, RSVP responses, QR access, calendar downloads, check-ins, and message delivery.</p>
-    <p th:unless="${closed}">Restore normal guest-facing operations when the wedding is published.</p>
-    <form method="post" th:action="${closed} ? @{/admin/wedding/event-status/close} : @{/admin/wedding/event-status/reopen}" th:object="${form}">
+	<h1 th:text="${status.closed} ? 'Reopen event' : 'Close event'">Change event status</h1>
+    <p th:unless="${status.closed}">Block new invitations, RSVP responses, QR access, calendar downloads, check-ins, and message delivery.</p>
+    <p th:if="${status.closed}">Restore normal guest-facing operations when the wedding is published.</p>
+    <form method="post" th:action="${status.closed} ? @{/admin/wedding/event-status/reopen} : @{/admin/wedding/event-status/close}" th:object="${form}">
 		<p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}">Status error</p>
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <input type="hidden" th:field="*{version}">
         <input id="confirmed" type="checkbox" th:field="*{confirmed}">
-        <label for="confirmed" th:text="${closed} ? 'I confirm that guest-facing operations must be blocked.' : 'I confirm that guest-facing operations may be restored.'">Confirmation</label>
+		<label for="confirmed" th:text="${status.closed} ? 'I confirm that guest-facing operations may be restored.' : 'I confirm that guest-facing operations must be blocked.'">Confirmation</label>
         <p th:if="${#fields.hasErrors('confirmed')}" th:errors="*{confirmed}">Confirmation is required</p>
-        <button type="submit" th:text="${closed} ? 'Close event' : 'Reopen event'">Change status</button>
+		<button type="submit" th:text="${status.closed} ? 'Reopen event' : 'Close event'">Change status</button>
     </form>
     <p><a th:href="@{/admin/wedding/event-status}">Back to event status</a></p>
 </main>
