@@ -1,0 +1,6 @@
+@media print {
+  .screen-only { display: none; }
+  body { font-size: 11pt; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #000; padding: .25rem; text-align: left; }
+}

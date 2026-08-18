@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockHttpSession;
@@ -50,6 +51,9 @@ class SecurityRoutesTest {
 	@Autowired
 	private AccountSecurityService accountSecurity;
 
+	@Autowired
+	private JdbcTemplate jdbc;
+
 	@BeforeEach
 	void setUpAccounts() {
 		accounts.deleteAll();
@@ -58,6 +62,7 @@ class SecurityRoutesTest {
 		accounts.save(new UserAccount("staff", "{noop}" + PASSWORD, AccountRole.STAFF));
 		accountSecurity.changePassword("staff", PASSWORD, PASSWORD);
 		accounts.save(new UserAccount("new-admin", "{noop}" + PASSWORD, AccountRole.ADMIN));
+		jdbc.update("update wedding_settings set event_closed = false where id = 1");
 	}
 
 	@Test
@@ -106,6 +111,28 @@ class SecurityRoutesTest {
 		mockMvc.perform(get("/admin/reminders").session(staff))
 				.andExpect(status().isForbidden())
 				.andExpect(forwardedUrl("/forbidden"));
+	}
+
+	@Test
+	void reportAndCsvRoutesRequireAnAdministrator() throws Exception {
+		jdbc.update("update wedding_settings set event_closed = true where id = 1");
+		MockHttpSession staff = login("staff");
+		mockMvc.perform(get("/admin/reports"))
+				.andExpect(status().is3xxRedirection());
+		mockMvc.perform(get("/admin/reports/print").session(staff))
+				.andExpect(status().isForbidden())
+				.andExpect(forwardedUrl("/forbidden"));
+		mockMvc.perform(get("/admin/guests/export.csv").session(staff))
+				.andExpect(status().isForbidden())
+				.andExpect(forwardedUrl("/forbidden"));
+
+		MockHttpSession admin = login("admin");
+		mockMvc.perform(get("/admin/reports").session(admin))
+				.andExpect(status().isOk());
+		mockMvc.perform(get("/admin/reports/print").session(admin))
+				.andExpect(status().isOk());
+		mockMvc.perform(get("/admin/guests/export.csv").session(admin))
+				.andExpect(status().isOk());
 	}
 
 	@Test
@@ -164,7 +191,8 @@ class SecurityRoutesTest {
 		mockMvc.perform(get("/admin").session(session))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/home"))
-				.andExpect(content().string(containsString("Wedding Overview")));
+				.andExpect(content().string(containsString("Wedding Overview")))
+				.andExpect(content().string(containsString("Operational reports")));
 		mockMvc.perform(get("/check-in").session(session))
 				.andExpect(status().isOk())
 				.andExpect(view().name("checkin/home"));

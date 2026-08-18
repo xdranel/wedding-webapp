@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operational report print view</title>
+  <link rel="stylesheet" th:href="@{/css/report-print.css}">
+</head>
+<body>
+<main>
+  <h1>Operational report</h1>
+  <p class="screen-only"><a th:href="@{/admin/reports(categoryId=${categoryId})}">Back to reports</a> Use your browser Print or Save as PDF.</p>
+  <p th:if="${rows.empty}">No active guests match this filter.</p>
+  <table th:unless="${rows.empty}">
+    <thead><tr><th>Guest</th><th>Category</th><th>RSVP</th><th>Planned people</th><th>Check-in status</th><th>Actual people</th><th>Checked in at</th></tr></thead>
+    <tbody><tr th:each="row : ${rows}">
+      <td th:text="${row.displayName}">Guest</td>
+      <td th:text="${row.categoryName}">Uncategorized</td>
+      <td th:text="${row.rsvpResponse == null ? 'No RSVP' : row.rsvpResponse}">No RSVP</td>
+      <td th:text="${row.plannedPeople}">0</td>
+      <td th:text="${row.checkedIn ? 'Checked in' : 'Not checked in'}">Not checked in</td>
+      <td th:text="${row.checkedIn ? row.actualPeople : '—'}">—</td>
+      <td><time th:if="${row.checkedInAt != null}" th:text="${row.checkedInAt}">Time</time><span th:unless="${row.checkedInAt != null}">—</span></td>
+    </tr></tbody>
+  </table>
+</main>
+</body>
+</html>
