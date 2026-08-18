@@ -151,6 +151,20 @@ class SecurityRoutesTest {
 	}
 
 	@Test
+	void systemStatusRouteRequiresAnAdministrator() throws Exception {
+		MockHttpSession staff = login("staff");
+		mockMvc.perform(get("/admin/system-status"))
+				.andExpect(status().is3xxRedirection());
+		mockMvc.perform(get("/admin/system-status").session(staff))
+				.andExpect(status().isForbidden())
+				.andExpect(forwardedUrl("/forbidden"));
+
+		mockMvc.perform(get("/admin/system-status").session(login("admin")))
+				.andExpect(status().isOk())
+				.andExpect(view().name("admin/system-status"));
+	}
+
+	@Test
 	void anonymousMediaReadsArePublicButWritesAreDenied() throws Exception {
 		mockMvc.perform(get("/media/wedding/audio"))
 				.andExpect(status().isNotFound());

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>System status</title>
+</head>
+<body>
+<main>
+  <h1>System status</h1>
+  <p><a th:href="@{/admin/system-status}">Refresh</a> <a th:href="@{/admin}">Back to administrator home</a></p>
+  <dl>
+    <div th:each="check : ${status.checks}">
+      <dt th:text="${check.label}">Check</dt>
+      <dd><strong th:text="${check.ok} ? 'OK' : 'Problem'">OK</strong> <span th:text="${check.value}">Value</span></dd>
+    </div>
+  </dl>
+  <p>Checked at <time th:datetime="${status.checkedAt}" th:text="${status.checkedAt}">2026-08-18T00:00:00Z</time>.</p>
+</main>
+</body>
+</html>
