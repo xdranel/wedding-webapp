@@ -7,6 +7,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.time.Instant;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import myweddinginvitation.webapp.guest.DeliveryState;
 import myweddinginvitation.webapp.guest.Guest;
@@ -15,6 +21,7 @@ import myweddinginvitation.webapp.guest.GuestRepository;
 import myweddinginvitation.webapp.guest.GuestService;
 import myweddinginvitation.webapp.guest.MessageLanguage;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
+import myweddinginvitation.webapp.wedding.WeddingSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +29,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootTest(properties = {
 		"app.bootstrap-admin.username=test-admin",
@@ -43,6 +52,12 @@ class GuestDeliveryServiceTest {
 
 	@Autowired
 	private JdbcTemplate jdbc;
+
+	@Autowired
+	private WeddingSettingsRepository settings;
+
+	@Autowired
+	private PlatformTransactionManager transactions;
 
 	@BeforeEach
 	void setUp() {
@@ -138,6 +153,42 @@ class GuestDeliveryServiceTest {
 		assertThat(guests.findById(guest.getId())).get()
 				.extracting(Guest::getDeliveryState, Guest::getFirstSentAt, Guest::getLastSentAt)
 				.containsExactly(DeliveryState.UNSENT, null, null);
+	}
+
+	@Test
+	void confirmationWaitsForTheEventStatusLockBeforeMutatingDelivery() throws Exception {
+		Guest guest = savedGuest();
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		CountDownLatch started = new CountDownLatch(1);
+		Future<?>[] confirmation = new Future<?>[1];
+		try {
+			new TransactionTemplate(transactions).executeWithoutResult(status -> {
+				settings.findSingletonForUpdate().orElseThrow();
+				confirmation[0] = executor.submit(() -> {
+					started.countDown();
+					service.confirmSent(guest.getId(), guest.getVersion(), FIRST);
+				});
+				await(started);
+				assertThatThrownBy(() -> confirmation[0].get(250, TimeUnit.MILLISECONDS))
+						.isInstanceOf(TimeoutException.class);
+			});
+
+			confirmation[0].get(5, TimeUnit.SECONDS);
+			assertThat(guests.findById(guest.getId())).get()
+					.extracting(Guest::getDeliveryState, Guest::getFirstSentAt, Guest::getLastSentAt)
+					.containsExactly(DeliveryState.SENT, FIRST, FIRST);
+		} finally {
+			executor.shutdownNow();
+		}
+	}
+
+	private void await(CountDownLatch latch) {
+		try {
+			if (!latch.await(5, TimeUnit.SECONDS)) throw new AssertionError("Confirmation did not start");
+		} catch (InterruptedException exception) {
+			Thread.currentThread().interrupt();
+			throw new AssertionError(exception);
+		}
 	}
 
 	private Guest savedGuest() {

@@ -11,6 +11,7 @@ import myweddinginvitation.webapp.wedding.EventType;
 import myweddinginvitation.webapp.wedding.PublicationState;
 import myweddinginvitation.webapp.wedding.WeddingContentService;
 import myweddinginvitation.webapp.wedding.WeddingPreview;
+import myweddinginvitation.webapp.wedding.WeddingSettings;
 import myweddinginvitation.webapp.wedding.WeddingSettingsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,13 +53,17 @@ public class GuestDeliveryService {
 				.build().encode().toUri();
 	}
 
+	@Transactional
 	public void confirmSent(long guestId, long version, Instant now) {
-		requireOpen();
+		requireOpen(settings.findSingletonForUpdate().orElseThrow());
 		guests.confirmSent(guestId, version, now);
 	}
 
 	private void requireOpen() {
-		var wedding = settings.getSingleton().orElseThrow();
+		requireOpen(settings.getSingleton().orElseThrow());
+	}
+
+	private void requireOpen(WeddingSettings wedding) {
 		if (wedding.getPublicationState() != PublicationState.PUBLISHED) {
 			throw new IllegalStateException("Initial delivery requires a published wedding.");
 		}
