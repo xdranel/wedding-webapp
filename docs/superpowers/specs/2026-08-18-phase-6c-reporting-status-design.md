@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-18
 
-**Status:** Approved in conversation; awaiting written-spec review
+**Status:** Approved
 
 **Scope:** Administrator reports, operational print view, event closure, and local system status
 
