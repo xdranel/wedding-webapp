@@ -109,6 +109,21 @@ class SecurityRoutesTest {
 	}
 
 	@Test
+	void eventStatusAdministrationRoutesRequireAnAdministratorAndCsrf() throws Exception {
+		MockHttpSession staff = login("staff");
+		mockMvc.perform(get("/admin/wedding/event-status"))
+				.andExpect(status().is3xxRedirection());
+		mockMvc.perform(get("/admin/wedding/event-status").session(staff))
+				.andExpect(status().isForbidden())
+				.andExpect(forwardedUrl("/forbidden"));
+
+		MockHttpSession admin = login("admin");
+		mockMvc.perform(post("/admin/wedding/event-status/close").session(admin)
+				.param("version", "0").param("confirmed", "true"))
+				.andExpect(status().isForbidden());
+	}
+
+	@Test
 	void anonymousMediaReadsArePublicButWritesAreDenied() throws Exception {
 		mockMvc.perform(get("/media/wedding/audio"))
 				.andExpect(status().isNotFound());

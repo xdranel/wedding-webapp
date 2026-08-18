@@ -16,9 +16,12 @@ class AdminHomeControllerTest {
 		CheckInService checkIns = mock(CheckInService.class);
 		CheckInService.CheckInSummary summary = new CheckInService.CheckInSummary(3, 4);
 		when(checkIns.summary()).thenReturn(summary);
+		EventStatusService eventStatus = mock(EventStatusService.class);
+		EventStatusView eventStatusView = new EventStatusView(false, 0, null, null, null, null, null, null);
+		when(eventStatus.view()).thenReturn(eventStatusView);
 
-		new AdminHomeController(mock(RsvpService.class), checkIns).home(model);
+		new AdminHomeController(mock(RsvpService.class), checkIns, eventStatus).home(model);
 
-		assertThat(model).containsEntry("checkInSummary", summary);
+		assertThat(model).containsEntry("checkInSummary", summary).containsEntry("eventStatus", eventStatusView);
 	}
 }

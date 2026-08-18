@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Event status</title>
+</head>
+<body>
+<main>
+    <h1>Event status</h1>
+    <p th:if="${status.closed}">Event is closed</p>
+    <p th:unless="${status.closed}">Event is open</p>
+    <p th:if="${status.changedAt != null}">Last changed by <span th:text="${status.changedBy}">administrator</span>.</p>
+    <p th:if="${statusChanged}">Event status updated.</p>
+    <p th:if="${messagesSaved}">Completed-event messages saved.</p>
+    <p th:if="${!status.closed}"><a th:href="@{/admin/wedding/event-status/close}">Close event</a></p>
+    <p th:if="${status.closed}"><a th:href="@{/admin/wedding/event-status/reopen}">Reopen event</a></p>
+
+    <h2>Completed-event messages</h2>
+    <form method="post" th:action="@{/admin/wedding/event-status/messages}" th:object="${form}">
+        <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}">Message error</p>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <input type="hidden" th:field="*{version}">
+        <label for="closed-title-id">Title (Indonesian)</label>
+        <input id="closed-title-id" th:field="*{titleId}" maxlength="160"
+               th:attr="aria-describedby=${#fields.hasErrors('titleId')} ? 'closed-title-id-error' : null">
+        <p id="closed-title-id-error" th:if="${#fields.hasErrors('titleId')}" th:errors="*{titleId}">Title error</p>
+        <label for="closed-title-en">Title (English)</label>
+        <input id="closed-title-en" th:field="*{titleEn}" maxlength="160"
+               th:attr="aria-describedby=${#fields.hasErrors('titleEn')} ? 'closed-title-en-error' : null">
+        <p id="closed-title-en-error" th:if="${#fields.hasErrors('titleEn')}" th:errors="*{titleEn}">Title error</p>
+        <label for="closed-message-id">Message (Indonesian)</label>
+        <textarea id="closed-message-id" th:field="*{messageId}" maxlength="1000"
+                  th:attr="aria-describedby=${#fields.hasErrors('messageId')} ? 'closed-message-id-error' : null"></textarea>
+        <p id="closed-message-id-error" th:if="${#fields.hasErrors('messageId')}" th:errors="*{messageId}">Message error</p>
+        <label for="closed-message-en">Message (English)</label>
+        <textarea id="closed-message-en" th:field="*{messageEn}" maxlength="1000"
+                  th:attr="aria-describedby=${#fields.hasErrors('messageEn')} ? 'closed-message-en-error' : null"></textarea>
+        <p id="closed-message-en-error" th:if="${#fields.hasErrors('messageEn')}" th:errors="*{messageEn}">Message error</p>
+        <button type="submit">Save messages</button>
+    </form>
+</main>
+</body>
+</html>
