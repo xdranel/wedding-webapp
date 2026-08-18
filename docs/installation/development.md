@@ -110,7 +110,46 @@ Status: implementation and automated MySQL verification complete on
 - [x] Automated journey coverage proves that regenerating the invitation token makes old calendar links unavailable.
 
 The Phase 5 physical USB scanner check remains a separate non-blocking
-deferral. Phase 6C-6D and Phase 7 remain pending.
+deferral. Phase 6C manual acceptance, Phase 6D, and Phase 7 remain pending.
+
+### Phase 6C reports, closure, and System Status
+
+Use `/admin/reports` for current active-guest totals and category breakdown;
+the same category filter carries into `/admin/reports/print`. Print contains no
+phone, notes, greetings, PIN state, or correction reasons. Use browser Print or
+Save as PDF. **Export complete CSV** continues to download
+`/admin/guests/export.csv`, including archived guests and the existing complete
+one-row-per-guest fields.
+
+At `/admin/wedding/event-status`, save optional ID/EN completed copy before
+closing. Close and reopen each require the displayed current version and an
+explicit confirmation. Closed guest requests are neutral and identity-free.
+RSVP, QR, calendar, initial delivery, reminders, and check-in are blocked;
+reports, CSV, moderation, guest history, wedding content, media administration,
+and System Status remain available. EN completed copy falls back to ID and then
+application defaults. Close/reopen preserves guest activity and tokens.
+
+`/admin/system-status` is a refresh-only local diagnostic for application,
+database, media-directory access/usable bytes, timezone, publication, and event
+state. It stores no history, sends no alert, does not test a remote phone or
+laptop, and does not replace `/actuator/health`, logs, backups, or manual device
+checks. Filesystem failures show `Problem` without a configured path.
+
+### Phase 6C manual phone/laptop acceptance
+
+Status: implementation journey and the 118-test focused MySQL/Flyway V1-V13
+suite pass. The clean full-suite gate and user acceptance are pending.
+
+- [ ] Compare known guest data with report totals and category breakdown.
+- [ ] Filter by category and print/save the operational view as PDF.
+- [ ] Close the event and verify neutral ID/EN completed pages without guest data.
+- [ ] Verify RSVP, QR, calendar, initial delivery, reminders, and check-in are blocked.
+- [ ] Verify reports, CSV, moderation, history, content, and media admin remain available.
+- [ ] Reopen the event and verify normal rules resume without data changes.
+- [ ] Refresh System Status on the available laptop and phone.
+
+The physical USB scanner remains a separate Phase 5 hardware check. Phase 6D
+and Phase 7 remain pending.
 
 ## RSVP, PIN, greetings, and QR operations
 
@@ -276,8 +315,9 @@ The next application startup applies Flyway migrations and bootstraps an
 administrator when the database has no administrator account. V10 creates the
 current check-in and append-only correction tables; V11 adds gallery rows and
 gallery/audio wedding settings; V12 adds the two nullable guest reminder
-timestamps and default-disabled calendar toggle. Never edit V1-V12 after they
-have been applied.
+timestamps and default-disabled calendar toggle. V13 adds six nullable closure
+metadata/copy columns while V9 continues to own `event_closed`. Never edit
+V1-V13 after they have been applied.
 
 ## Tests and health
 
@@ -298,6 +338,18 @@ ID/EN open, confirmation/Next/resend, RSVP-change rejection, both signed
 iCalendar files, old-token invalidation, and unchanged RSVP/QR/check-in state.
 WhatsApp application behavior and calendar-client imports remain in the Phase
 6B manual checklist above.
+`ReportingStatusJourneyTest` exercises reports/category/print/CSV, completed
+copy, close/reopen, every blocked and retained boundary, local status, and
+unchanged RSVP/token/delivery/QR/history state. Its single-test mutation RED and
+GREEN pass, and the focused Phase 6C suite passed 118 tests with zero failures,
+errors, or skips against MySQL 8.4/Flyway V1-V13 on 2026-08-19. The one
+permitted `./mvnw -q clean test` run reached 429 tests but failed with three
+failures and two errors from stale V12 migration and draft-event delivery-test
+fixtures. After those fixtures were corrected,
+`./mvnw -q -Dtest='GuestDeliveryControllerTest,ReminderCalendarMigrationTest' test`
+passed all seven affected tests with zero failures, errors, or skips. The clean
+full-suite gate was not repeated, and the Phase 6C device checklist remains
+manual.
 
 For rootless Podman, use the socket setup above and run the same command:
 

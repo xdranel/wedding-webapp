@@ -1,24 +1,29 @@
 # Data Schema
 
-Status: implemented through Phase 6B by Flyway V1-V12; Phase 6C-6D schema is planned
+Status: implemented through Phase 6C by Flyway V1-V13; Phase 6D schema is pending
 
 Database target: MySQL 8.4 LTS.
 
-Flyway migrations V1-V12 implement the schema required through Phase 6B:
+Flyway migrations V1-V13 implement the schema required through Phase 6C:
 `user_account`, `wedding_settings`, `partner`, `event_part`, `story_entry`,
 `gallery_photo`, `guest_category`, `guest`, `message_template`, `rsvp`,
 `check_in`, and `check_in_correction`. V11 adds gallery/audio state to
 `wedding_settings` and the ordered gallery table. V12 adds exactly nullable
 `guest.last_rsvp_reminder_sent_at timestamp(6)`, nullable
 `guest.last_event_reminder_sent_at timestamp(6)`, and non-null default-false
-`wedding_settings.calendar_downloads_enabled boolean`. Applied migrations are
-immutable; later schema changes require a new migration.
+`wedding_settings.calendar_downloads_enabled boolean`. V9 remains the owner of
+non-null default-false `wedding_settings.event_closed`. V13 adds exactly six
+nullable columns to the same singleton: `event_status_changed_at timestamp(6)`,
+`event_status_changed_by varchar(100)`, `closed_title_id varchar(160)`,
+`closed_title_en varchar(160)`, `closed_message_id varchar(1000)`, and
+`closed_message_en varchar(1000)`. Applied migrations are immutable; later
+schema changes require a new migration.
 
 V8 creates `message_template` and seeds its `RSVP_REMINDER` and
 `EVENT_REMINDER` rows; Phase 6B reuses those rows without a new history or
 campaign table. Later sections for gifts, help contacts, reports, and
-operational erasure remain planned for Phase 6C-7 and are not present in
-V1-V12.
+operational erasure remain planned for Phase 7. Reports and System Status are
+computed from current state and add no table; closure reuses V9/V13 state.
 
 ## Confirmed guest attributes
 
@@ -82,6 +87,10 @@ visual settings, optional-section visibility, help-page contact, gallery
 enablement, background-audio enablement, nullable relative MP3 path, and the
 non-null `calendar_downloads_enabled` global toggle (default `false`). Existing
 ceremony/reception visibility controls individual calendar availability.
+V13 closure metadata records the latest close/reopen actor and timestamp;
+nullable bilingual title/message columns hold completed-event copy. The
+ordinary optimistic-lock `version` guards copy and state changes. Reopening
+does not clear copy, guest state, or activity history.
 
 ### `partner`
 

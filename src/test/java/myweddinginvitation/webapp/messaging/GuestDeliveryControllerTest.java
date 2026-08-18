@@ -79,7 +79,7 @@ class GuestDeliveryControllerTest {
 	void setUp() throws Exception {
 		jdbc.update("delete from guest");
 		jdbc.update("""
-				update wedding_settings set publication_state = 'DRAFT',
+				update wedding_settings set publication_state = 'PUBLISHED',
 				couple_title = 'Rama & Shinta', default_phone_country = 'ID' where id = 1
 				""");
 		jdbc.update("""

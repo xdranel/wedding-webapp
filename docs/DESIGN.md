@@ -1,7 +1,8 @@
 # Product Design
 
-Status: implemented and accepted through Phase 6B; the Phase 5 physical USB
-scanner check remains deferred
+Status: implemented and accepted through Phase 6B; Phase 6C functionality is
+focused-verified while its clean full-suite gate and manual acceptance remain
+pending; the Phase 5 physical USB scanner check remains deferred
 
 ## Selected product approach
 
@@ -115,6 +116,20 @@ The guest list also provides RSVP filters, response/count columns, individual
 RSVP correction, and PIN-lock clearing. Greeting moderation uses individual
 approve/hide actions with pending, approved, and hidden filters.
 
+Operational Reports presents plain current totals and a sorted category table,
+with invitation and people units labelled separately. One category selector is
+preserved into the browser-print view. Print/Save as PDF is the only PDF path;
+the print table is intentionally limited to name, category, RSVP, planned
+people, current check-in status/actual people, and check-in time. Complete CSV
+continues to use the existing export.
+
+Event Status provides bilingual completed-page copy plus separate confirmed
+close/reopen screens. While closed, ID/EN guest requests show one neutral page
+with no identity, media, calendar, RSVP, or invitation details. Administrator
+reports, moderation, history, content, media, and status screens remain usable.
+System Status has a Refresh link and a small current check list; it makes no
+historical trend, notification, or remote-device claim.
+
 ## Reminder and calendar flow
 
 The administrator Reminders area keeps RSVP and event reminders separate. RSVP
@@ -159,6 +174,7 @@ usable and displays that fallback; WAN loss does not affect these LAN paths.
 - Invalid, archived, or regenerated guest links share one neutral unavailable
   response.
 - Closed events show a neutral completed-event response.
+- Missing completed EN copy falls back to ID, then safe application defaults.
 - Validation errors remain next to the relevant field without discarding
   entered values.
 - CSV validation prevents the entire import until corrected.
@@ -185,9 +201,11 @@ alternative image text, visible audio controls, and reduced-motion behavior.
   journey covers administrator publication through signed ID/EN invitations,
   endpoint bytes, replacement/toggles/deletion, and unchanged guest token,
   RSVP, and check-in state.
+- `ReportingStatusJourneyTest` exercises current reports/category/print/CSV,
+  bilingual closure and every guarded/allowed boundary, reopen, System Status,
+  and unchanged RSVP/token/delivery/QR/history state against real MySQL.
 
-Phase 6A phone/laptop acceptance is complete. Phase 6B ID/EN WhatsApp,
-Confirm/Next, iPhone calendar import, and laptop calendar import passed manual
-acceptance on 2026-08-17. The Phase 5
-physical USB scanner check remains separately deferred. Phase 6C-6D and Phase
-7 remain pending.
+Phase 6A and Phase 6B manual acceptance are complete. Phase 6C functionality
+and focused automated verification are complete; its clean full-suite gate and
+phone/laptop checklist are pending. The Phase 5 physical USB scanner check
+remains separately deferred. Phase 6D and Phase 7 remain pending.

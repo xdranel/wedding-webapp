@@ -1,7 +1,8 @@
 # Business Rules
 
-Status: implemented and accepted through Phase 6B; the Phase 5 physical USB
-scanner check remains deferred
+Status: implemented and accepted through Phase 6B; Phase 6C functionality is
+focused-verified while its clean full-suite gate and manual acceptance remain
+pending; the Phase 5 physical USB scanner check remains deferred
 
 1. An invitation belongs to one named primary guest.
 2. An invitation may optionally allow one unnamed companion.
@@ -249,3 +250,27 @@ scanner check remains deferred
      for reception.
 141. Calendar downloads must not change guest, RSVP, QR, check-in, or wedding
      state; token regeneration invalidates every old calendar URL.
+142. Reports count only active guests; archived guests remain available in the
+     existing complete CSV export but never contribute to report/category/print
+     totals.
+143. Invitations, potential people, planned people, and actual people are
+     distinct report units; remaining planned people is never below zero.
+144. Report category filtering applies to totals and print rows; unknown
+     category identifiers return a safe not-found response.
+145. Report print output is limited to display name, category, RSVP, planned
+     count, check-in status, actual count, and check-in time. It must not expose
+     WhatsApp numbers, notes, greetings, PIN state, or correction reasons.
+146. Closing or reopening requires administrator authority, CSRF, explicit
+     confirmation, and the current wedding optimistic-lock version.
+147. Event closure blocks invitation identity resolution, RSVP and QR actions,
+     calendars, initial delivery, reminders, and check-in preview/confirmation.
+148. Reports, print, complete CSV, greeting moderation, correction history,
+     wedding content, media administration, and System Status remain available
+     to administrators while closed.
+149. Completed-event pages are `no-store`, contain no guest identity, and use
+     selected-language copy with EN to ID to application-default fallback.
+150. Close/reopen must preserve RSVP, invitation-token version, delivery
+     timestamps, QR eligibility, and append-only check-in correction history.
+151. System Status is computed only on request, stores no result, exposes no
+     filesystem path or exception detail, and provides no alerting or remote
+     client/network guarantee.

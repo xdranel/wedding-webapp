@@ -407,7 +407,7 @@ git commit -m "feat: show local system status"
 - Consumes Tasks 1-6 through public/controller/service boundaries.
 - Produces executable Phase 6C acceptance evidence and the manual checklist.
 
-- [ ] **Step 1: Write one real-MySQL journey.** Seed category, active/archived guests, `+1`, RSVP states, three delivery types, pending greeting, active/corrected/cancelled check-ins, published wedding, bilingual completed copy, and media directory. As ADMIN:
+- [x] **Step 1: Write one real-MySQL journey.** Seed category, active/archived guests, `+1`, RSVP states, three delivery types, pending greeting, active/corrected/cancelled check-ins, published wedding, bilingual completed copy, and media directory. As ADMIN:
 
 ```text
 open reports and verify known totals/category/print/CSV
@@ -422,13 +422,13 @@ verify invitation and allowed operations resume without guest-state mutation
 
 Assert original RSVP, token version, delivery timestamps, QR eligibility, and correction history remain unchanged across close/reopen.
 
-- [ ] **Step 2: Run journey RED/GREEN and mutation proof.** Run against Tasks 1-6. Temporarily invert one closure assertion, run the single test and observe exactly one intended failure, restore, then rerun GREEN.
+- [x] **Step 2: Run journey RED/GREEN and mutation proof.** Run against Tasks 1-6. Temporarily invert one closure assertion, run the single test and observe exactly one intended failure, restore, then rerun GREEN.
 
 Run: `./mvnw -q -Dtest=ReportingStatusJourneyTest test`
 
 Expected final result: one test, zero failures/errors/skips.
 
-- [ ] **Step 3: Run focused Phase 6C verification.**
+- [x] **Step 3: Run focused Phase 6C verification.**
 
 ```bash
 ./mvnw -q -Dtest='ReportingEventStatusMigrationTest,EventStatusServiceTest,EventStatusAdminControllerTest,PublicInvitationControllerTest,GuestDeliveryServiceTest,ReminderServiceTest,PublicRsvpControllerTest,PublicQrControllerTest,CalendarControllerTest,CheckInServiceTest,ReportServiceTest,ReportAdminControllerTest,SystemStatusServiceTest,SystemStatusAdminControllerTest,ReportingStatusJourneyTest,SecurityRoutesTest' test
@@ -436,7 +436,13 @@ Expected final result: one test, zero failures/errors/skips.
 
 Expected: zero failures/errors/skips against MySQL 8.4/Flyway V1-V13.
 
-- [ ] **Step 4: Update canonical documentation.** Record V13's six columns, V9 closure ownership, report definitions/routes/filter/archive rules, print privacy, CSV reuse, close/reopen guard matrix, completed-copy fallback, system-status limitations, security, and exact automated result. Add this unchecked manual list:
+Evidence (2026-08-19): the restored journey passed 1 test with zero
+failures/errors/skips. The temporary closed-RSVP view mutation produced exactly
+one intended failure (`guest/invitation` expected, `guest/closed` actual). The
+exact focused command passed 118 tests with zero failures/errors/skips against
+MySQL 8.4 and Flyway V1-V13.
+
+- [x] **Step 4: Update canonical documentation.** Record V13's six columns, V9 closure ownership, report definitions/routes/filter/archive rules, print privacy, CSV reuse, close/reopen guard matrix, completed-copy fallback, system-status limitations, security, and exact automated result. Add this unchecked manual list:
 
 ```markdown
 - [ ] Compare known guest data with report totals and category breakdown.
@@ -459,7 +465,16 @@ git diff --check
 
 Expected: all tests pass with zero failures/errors/skips and Flyway V1-V13 validates.
 
-- [ ] **Step 6: Refresh, self-review, and commit.** Review for personal-data leakage, alternate closure paths, report-unit mistakes, staged generated files, and unsupported completion claims.
+Evidence (2026-08-19): `git diff --check` passed. The one permitted clean full
+suite validated Flyway V1-V13 and ran 429 tests, then failed with three failures
+and two errors: four stale draft-event assumptions in
+`GuestDeliveryControllerTest` and the old V1-V12 list in
+`ReminderCalendarMigrationTest`. After correcting only those fixtures, the
+focused affected-class command passed seven tests with zero
+failures/errors/skips. The clean full suite was not repeated, so this step and
+the implementation-complete gate remain pending.
+
+- [x] **Step 6: Refresh, self-review, and commit.** Review for personal-data leakage, alternate closure paths, report-unit mistakes, staged generated files, and unsupported completion claims.
 
 ```bash
 graphify update .
@@ -467,6 +482,12 @@ git diff --check
 git add src/test/java/myweddinginvitation/webapp/reporting/ReportingStatusJourneyTest.java README.md docs
 git commit -m "docs: complete phase 6c reporting and status"
 ```
+
+Evidence (2026-08-19): `graphify update .` rebuilt 3,534 nodes and 10,111
+edges. Self-review confirmed identity-free completed pages, privacy-limited
+print, active-guest report units, closed/open boundary coverage, unchanged guest
+state, and explicit pending full/manual gates. Generated `graphify-out/` files
+remain unstaged.
 
 ## Final Acceptance Gate
 

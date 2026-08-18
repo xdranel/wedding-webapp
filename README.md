@@ -80,6 +80,31 @@ invitation details, and no alarms. Ceremony defaults to one hour and reception
 to three hours when no end time is configured. Regenerating an invitation
 token invalidates its old calendar URLs.
 
+## Reports and event status
+
+Administrators use `/admin/reports` for current operational totals and the
+category breakdown. The optional `categoryId` filter applies to both the page
+and `/admin/reports/print`; archived guests are excluded. Invitations and
+people are separate units: potential people follows `+1`, planned people comes
+from current `HADIR` RSVP rows, and actual people comes from current check-ins.
+The print view contains only name, category, RSVP, planned count, check-in
+status/count/time and relies on browser Print/Save as PDF. The existing complete
+CSV remains `/admin/guests/export.csv` and includes archived rows.
+
+At `/admin/wedding/event-status`, an administrator can save bilingual
+completed-event copy and close or reopen with confirmation and the current
+version. Closure keeps reports, print, CSV, moderation, guest history, wedding
+content, media administration, and `/admin/system-status` available, but blocks
+personalized invitation content, RSVP, QR, calendar, initial delivery,
+reminders, and check-in. Completed pages contain no guest identity; missing EN
+copy falls back to ID, then application defaults. Close/reopen preserves guest,
+RSVP, delivery, invitation-token, QR-eligibility, and correction-history state.
+
+`/admin/system-status` is an administrator-only, on-demand local snapshot of
+application/database reachability, media-directory readability/writability and
+usable bytes, configured timezone validity, publication state, and event state.
+It stores no history, sends no alert, and is not an external monitoring system.
+
 ## RSVP and check-in QR
 
 Set a future RSVP deadline in **Wedding Content** before guest RSVP writes open.
@@ -123,4 +148,8 @@ physical USB scanner check.
 Phase 6B reminder/calendar implementation and automated MySQL verification are
 complete. Manual ID/EN WhatsApp, Confirm/Next, and phone/laptop calendar-import
 acceptance passed on 2026-08-17. The separate Phase 5 physical USB scanner
-check is still pending.
+check is still pending. Phase 6C functionality has real-MySQL journey and
+focused verification coverage. Its one permitted clean full-suite run exposed
+stale test fixtures that now pass a focused recheck, so the clean full-suite
+gate and phone/laptop checklist remain pending. Phase 6D and Phase 7 remain
+pending.

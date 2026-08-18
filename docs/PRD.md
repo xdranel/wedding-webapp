@@ -1,7 +1,9 @@
 # Product Requirements
 
-Status: implemented and accepted through Phase 6B; the Phase 5 physical USB
-scanner check remains deferred
+Status: implemented and accepted through Phase 6B; Phase 6C functionality and
+focused automated verification are complete, but the clean full-suite gate and
+manual acceptance remain pending; the Phase 5 physical USB scanner check
+remains deferred
 
 ## Implementation status — 2026-08-17
 
@@ -21,9 +23,16 @@ preview rendering, and automated MySQL/filesystem verification are implemented.
 Phone/laptop media acceptance passed on 2026-08-11. Phase 6B manual RSVP/event
 reminders, signed ceremony/reception calendar files, V12, and automated MySQL
 verification are complete. Manual ID/EN WhatsApp, Confirm/Next, iPhone calendar
-import, and laptop calendar import passed on 2026-08-17. Phase 6C reports/exports/
-moderation/status, Phase 6D integration/acceptance, and Phase 7 deployment/
-operations remain pending.
+import, and laptop calendar import passed on 2026-08-17. Phase 6C current-state
+reports, privacy-limited print, existing complete CSV reuse, reversible closure,
+neutral completed pages, and local System Status are implemented. The Phase 6C
+real-MySQL journey passes, and its focused suite passed 118 tests with zero
+failures, errors, or skips on 2026-08-19. The one permitted clean full-suite run
+then exposed five stale test expectations (429 tests: three failures and two
+errors); both affected classes were corrected and their seven tests pass, but
+the clean full-suite gate was not repeated. Manual phone/laptop acceptance,
+Phase 6D integration/acceptance, and Phase 7 deployment/operations remain
+pending.
 
 ## Change management
 
@@ -94,8 +103,9 @@ operations remain pending.
 - Guests can be entered individually or imported in bulk from CSV.
 - Direct Excel `.xlsx` import is out of scope; spreadsheet users can export
   their data as CSV.
-- Administrators can export one complete CSV containing invitation delivery,
-  RSVP, planned attendance, and actual check-in data.
+- Administrators can export one complete CSV containing active/archived guest,
+  invitation-delivery, and RSVP fields. Current check-in values remain in the
+  operational report/print view rather than adding another CSV shape.
 - A general-purpose audit-log system is out of scope.
 - Sensitive check-in corrections retain the acting administrator, timestamp,
   and reason.
@@ -266,10 +276,27 @@ operations remain pending.
 - A local-network address is used only for venue operations when internet
   access is unavailable.
 - Administrators can set a global `Event Closed` state after the wedding.
-- Closing the event disables guest RSVP, QR access, and new check-ins while
-  retaining administrator dashboard and export access.
+- Closing the event disables personalized invitation content, guest RSVP, QR,
+  calendar downloads, initial delivery, reminders, and new check-ins while
+  retaining reports, print, complete CSV, greeting moderation, guest history,
+  wedding content, media administration, and local System Status.
 - Closed guest links show a neutral event-completed message without personal
   guest data.
+- Administrators save optional ID and EN completed-event titles/messages; EN
+  falls back to ID and then safe application defaults.
+- Close and reopen require confirmation and the current wedding version, and
+  must not change guest, RSVP, delivery, invitation-token, QR-eligibility, or
+  check-in correction-history state.
+- Operational reports include current active guests only, support category
+  filtering, and keep invitation counts distinct from potential, planned, and
+  actual people counts.
+- The operational print view contains only display name, category, RSVP,
+  planned people, current check-in status, actual people, and check-in time.
+- Reports reuse the existing complete administrator CSV export; no second CSV,
+  PDF generator, chart, or spreadsheet format is required.
+- Local System Status is an administrator-only refreshable snapshot, not
+  stored monitoring history, alerting, remote probing, or a guarantee of client
+  connectivity.
 - After export, the operator can permanently erase all guest personal and
   activity data through a server-side operation.
 - Bulk guest erasure is not exposed in the dashboard and may retain wedding

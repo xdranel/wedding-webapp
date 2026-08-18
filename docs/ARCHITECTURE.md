@@ -1,7 +1,8 @@
 # Architecture
 
-Status: implemented and accepted through Phase 6B; the Phase 5 physical USB
-scanner check remains deferred
+Status: implemented and accepted through Phase 6B; Phase 6C functionality is
+focused-verified while its clean full-suite gate and manual acceptance remain
+pending; the Phase 5 physical USB scanner check remains deferred
 
 ## Selected approach
 
@@ -80,6 +81,12 @@ MariaDB is not a supported runtime target.
 - `/i/{publicId}/{version}/{signature}/calendar/{eventType}.ics` serves a
   current signed ceremony or reception calendar without guest PIN entry.
 - `/admin/wedding/media` serves administrator gallery/audio management.
+- `/admin/reports` and `/admin/reports/print` serve administrator-only current
+  totals/category filtering and privacy-limited browser print output.
+- `/admin/wedding/event-status` owns administrator-only completed copy and
+  confirmed/versioned close/reopen actions.
+- `/admin/system-status` computes one administrator-only local snapshot per
+  request; it is not persisted or scheduled.
 - `/media/partner/{id}`, `/media/gallery/{id}/thumbnail`,
   `/media/gallery/{id}/image`, and `/media/wedding/audio` serve only
   database-referenced files; there is no path-based media API.
@@ -108,6 +115,26 @@ iCalendar attachment per complete visible event. `CalendarController` resolves
 the same current signed invitation identity as the invitation page and fails
 closed with neutral 404 for disabled downloads, stale/invalid tokens, inactive
 invitations, or unavailable events. Calendar GETs do not mutate state.
+
+`ReportService` performs one bounded active-guest scan (maximum 2,000), then
+bulk-loads current RSVP and current check-in rows. It folds immutable overall
+and sorted category metrics; archived guests and correction-history rows are
+not report inputs. The print projection deliberately omits phone, notes,
+greetings, PIN state, and correction reasons. CSV stays at the existing
+`/admin/guests/export.csv` controller and retains its complete active/archived
+one-row-per-guest contract.
+
+`EventStatusService` serializes message and state changes through the locked
+`wedding_settings` singleton. Public invitation/RSVP controllers check closure
+before guest resolution; QR/calendar controllers fail closed; initial delivery,
+reminder, and check-in services enforce the same state at their shared write or
+preview boundaries. Administrative reporting, export, moderation, history,
+content, media, and status reads deliberately do not use that guard.
+
+`SystemStatusService` synchronously checks application/database, the configured
+media root, usable storage, timezone, publication, and event state. It catches
+filesystem inspection failures without exposing paths. There is no status
+table, scheduler, alert transport, remote device probe, or monitoring stack.
 
 The application is server-rendered. Browser JavaScript is limited to camera,
 scanner, audio, countdown, gallery, and small interaction enhancements. There
@@ -143,7 +170,9 @@ directly to web forms.
   `gallery_photo` plus gallery/audio state on `wedding_settings`; V12 adds
   `guest.last_rsvp_reminder_sent_at`, `guest.last_event_reminder_sent_at`, and
   non-null default-false `wedding_settings.calendar_downloads_enabled`.
-  V1-V12 are immutable after application.
+  V13 adds only six nullable closure metadata/copy columns to
+  `wedding_settings`; V9 remains the owner of `event_closed`. V1-V13 are
+  immutable after application.
 - MySQL constraints and transactions enforce single check-in and allowance
   invariants.
 - Confirmation locks the guest before reading RSVP/current check-in state, and
@@ -184,6 +213,8 @@ directly to web forms.
 - Reminder queues and their open/confirm POST actions require `ADMIN`; both
   POST actions require CSRF, and confirmation also requires the current guest
   version after a pessimistic lock.
+- Reports, print, complete CSV, event status, and System Status require
+  `ADMIN`; state-changing event-status POSTs also require CSRF.
 - Signed calendar GETs are anonymous but require the current invitation
   public ID, token version, and HMAC signature. They require no PIN, return
   `no-store`, and expose one neutral 404 for every unavailable state.
@@ -233,8 +264,10 @@ optional operational alternatives, not runtime dependencies.
   fails.
 - No write is accepted when the authoritative MySQL database is unavailable.
 
-Phase 6B reminders/calendar implementation and automated verification are
-complete. Manual ID/EN WhatsApp, Confirm/Next, iPhone calendar import, and
-laptop calendar import passed on 2026-08-17. Phase 6C reporting/exports/moderation/
-status, Phase 6D integration/acceptance, and Phase 7 deployment/operations
-remain pending; the Phase 5 physical USB scanner check remains separate.
+Phase 6B reminders/calendar implementation and manual acceptance are complete.
+Phase 6C functionality and its 118-test focused MySQL/Flyway V1-V13 suite are
+complete. The affected seven tests pass after correcting stale V12/draft-event
+fixtures exposed by the single clean full-suite attempt, but that full gate was
+not repeated; it and manual phone/laptop acceptance remain pending. Phase 6D
+and Phase 7 remain pending; the Phase 5 physical USB scanner check remains
+separate.
