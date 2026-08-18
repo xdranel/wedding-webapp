@@ -12,6 +12,8 @@ import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import myweddinginvitation.webapp.wedding.WeddingSettingsRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -82,6 +84,20 @@ class SystemStatusServiceTest {
 				new SystemCheck("Media directory", false, "Problem"),
 				new SystemCheck("Media storage", false, "Problem"));
 		assertThat(view.checks()).noneMatch(check -> check.value().contains(missing.toString()));
+	}
+
+	@Test
+	void reportsProblemWhenMediaInspectionIsDeniedWithoutThrowing() {
+		try (MockedStatic<java.nio.file.Files> files = Mockito.mockStatic(java.nio.file.Files.class,
+				Mockito.CALLS_REAL_METHODS)) {
+			files.when(() -> java.nio.file.Files.isDirectory(mediaDirectory)).thenThrow(new SecurityException());
+
+			SystemStatusView view = service.check();
+
+			assertThat(view.checks()).contains(
+					new SystemCheck("Media directory", false, "Problem"),
+					new SystemCheck("Media storage", false, "Problem"));
+		}
 	}
 
 	@TestConfiguration

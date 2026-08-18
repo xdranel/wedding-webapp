@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
+import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,51 +35,44 @@ public class SystemStatusService {
 		checks.add(new SystemCheck("Application", true, "OK"));
 		checks.add(database());
 		checks.addAll(media());
-		try {
-			WeddingSettings wedding = settings.getSingleton().orElseThrow();
-			checks.add(timezone(wedding.getTimeZone()));
-			checks.add(new SystemCheck("Publication", true,
-					wedding.getPublicationState().name().charAt(0) + wedding.getPublicationState().name().substring(1).toLowerCase()));
-			checks.add(new SystemCheck("Event", true, wedding.isEventClosed() ? "Closed" : "Open"));
-		} catch (RuntimeException exception) {
-			checks.add(new SystemCheck("Timezone", false, "Problem"));
-			checks.add(new SystemCheck("Publication", false, "Problem"));
-			checks.add(new SystemCheck("Event", false, "Problem"));
-		}
+		WeddingSettings wedding = settings.getSingleton().orElseThrow();
+		checks.add(timezone(wedding.getTimeZone()));
+		checks.add(new SystemCheck("Publication", true,
+				wedding.getPublicationState().name().charAt(0) + wedding.getPublicationState().name().substring(1).toLowerCase()));
+		checks.add(new SystemCheck("Event", true, wedding.isEventClosed() ? "Closed" : "Open"));
 		return new SystemStatusView(checks, clock.instant());
 	}
 
 	private SystemCheck database() {
-		try {
-			return Integer.valueOf(1).equals(jdbc.queryForObject("select 1", Integer.class))
-					? new SystemCheck("Database", true, "OK")
-					: new SystemCheck("Database", false, "Problem");
-		} catch (RuntimeException exception) {
-			return new SystemCheck("Database", false, "Problem");
-		}
+		return Integer.valueOf(1).equals(jdbc.queryForObject("select 1", Integer.class))
+				? new SystemCheck("Database", true, "OK")
+				: new SystemCheck("Database", false, "Problem");
 	}
 
 	private List<SystemCheck> media() {
-		Path directory = properties.mediaDirectory();
-		if (!Files.isDirectory(directory) || !Files.isReadable(directory) || !Files.isWritable(directory)) {
-			return List.of(new SystemCheck("Media directory", false, "Problem"),
-					new SystemCheck("Media storage", false, "Problem"));
-		}
 		try {
+			Path directory = properties.mediaDirectory();
+			if (!Files.isDirectory(directory) || !Files.isReadable(directory) || !Files.isWritable(directory)) {
+				return problemMedia();
+			}
 			return List.of(new SystemCheck("Media directory", true, "Readable and writable"),
 					new SystemCheck("Media storage", true,
 							Files.getFileStore(directory).getUsableSpace() + " bytes available"));
 		} catch (IOException | SecurityException exception) {
-			return List.of(new SystemCheck("Media directory", false, "Problem"),
-					new SystemCheck("Media storage", false, "Problem"));
+			return problemMedia();
 		}
+	}
+
+	private static List<SystemCheck> problemMedia() {
+		return List.of(new SystemCheck("Media directory", false, "Problem"),
+				new SystemCheck("Media storage", false, "Problem"));
 	}
 
 	private static SystemCheck timezone(String value) {
 		try {
 			ZoneId.of(value);
 			return new SystemCheck("Timezone", true, value);
-		} catch (RuntimeException exception) {
+		} catch (DateTimeException exception) {
 			return new SystemCheck("Timezone", false, "Problem");
 		}
 	}

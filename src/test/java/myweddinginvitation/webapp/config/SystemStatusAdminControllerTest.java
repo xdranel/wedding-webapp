@@ -69,6 +69,7 @@ class SystemStatusAdminControllerTest {
 				.andExpect(content().string(containsString("Asia/Jakarta")))
 				.andExpect(content().string(containsString("Draft")))
 				.andExpect(content().string(containsString("Open")))
+				.andExpect(content().string(containsString("Checked at <time datetime=\"")))
 				.andExpect(content().string(not(containsString(mediaDirectory.toString()))))
 				.andExpect(content().string(not(containsString("jdbc:mysql"))))
 				.andExpect(content().string(not(containsString("Test-Only-Password-2026"))))
