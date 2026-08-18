@@ -63,11 +63,12 @@ and no background work is introduced.
 
 ## Schema
 
-Flyway `V13` adds only these columns to the singleton `wedding_settings` row:
+Flyway V9 already owns `event_closed BOOLEAN NOT NULL DEFAULT FALSE`. Flyway
+`V13` preserves that column and adds only this metadata and bilingual copy to
+the singleton `wedding_settings` row:
 
 | Column | Type | Rule |
 |---|---|---|
-| `event_closed` | `BOOLEAN NOT NULL DEFAULT FALSE` | Existing weddings remain open |
 | `event_status_changed_at` | nullable timestamp | Last close or reopen time |
 | `event_status_changed_by` | nullable `VARCHAR(100)` | Last acting admin username, not a foreign key |
 | `closed_title_id` | nullable `VARCHAR(160)` | Empty uses application default |
@@ -75,8 +76,9 @@ Flyway `V13` adds only these columns to the singleton `wedding_settings` row:
 | `closed_message_id` | nullable `VARCHAR(1000)` | Empty uses application default |
 | `closed_message_en` | nullable `VARCHAR(1000)` | Empty falls back to Indonesian/default |
 
-Close and reopen update the status, timestamp, username, and existing optimistic
-lock version atomically. No status-history, reporting, or audit table is added.
+Close and reopen update the existing V9 status, V13 timestamp/username, and
+existing optimistic-lock version atomically. No status-history, reporting, or
+audit table is added.
 
 ## Administrator Reports
 
