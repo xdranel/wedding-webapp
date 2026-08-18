@@ -50,7 +50,7 @@ class GuestDeliveryServiceTest {
 		jdbc.update("delete from check_in");
 		jdbc.update("delete from guest");
 		jdbc.update("""
-				update wedding_settings set couple_title = 'Rama & Shinta',
+				update wedding_settings set publication_state = 'PUBLISHED', event_closed = false, couple_title = 'Rama & Shinta',
 				default_phone_country = 'ID' where id = 1
 				""");
 		jdbc.update("""
@@ -110,6 +110,34 @@ class GuestDeliveryServiceTest {
 		Guest archived = guests.findById(guest.getId()).orElseThrow();
 		assertThatThrownBy(() -> service.confirmSent(archived.getId(), archived.getVersion(), SECOND))
 				.isInstanceOf(IllegalStateException.class);
+	}
+
+	@Test
+	void closedWeddingRejectsDeliveryOpeningAndConfirmationWithoutMutation() {
+		Guest guest = savedGuest();
+		jdbc.update("update wedding_settings set event_closed = true where id = 1");
+
+		assertThatThrownBy(() -> service.whatsappUri(guest.getId(), MessageLanguage.ID))
+				.isInstanceOf(IllegalStateException.class);
+		assertThatThrownBy(() -> service.confirmSent(guest.getId(), guest.getVersion(), FIRST))
+				.isInstanceOf(IllegalStateException.class);
+		assertThat(guests.findById(guest.getId())).get()
+				.extracting(Guest::getDeliveryState, Guest::getFirstSentAt, Guest::getLastSentAt)
+				.containsExactly(DeliveryState.UNSENT, null, null);
+	}
+
+	@Test
+	void unpublishedWeddingRejectsDeliveryOpeningAndConfirmationWithoutMutation() {
+		Guest guest = savedGuest();
+		jdbc.update("update wedding_settings set publication_state = 'DRAFT' where id = 1");
+
+		assertThatThrownBy(() -> service.whatsappUri(guest.getId(), MessageLanguage.ID))
+				.isInstanceOf(IllegalStateException.class);
+		assertThatThrownBy(() -> service.confirmSent(guest.getId(), guest.getVersion(), FIRST))
+				.isInstanceOf(IllegalStateException.class);
+		assertThat(guests.findById(guest.getId())).get()
+				.extracting(Guest::getDeliveryState, Guest::getFirstSentAt, Guest::getLastSentAt)
+				.containsExactly(DeliveryState.UNSENT, null, null);
 	}
 
 	private Guest savedGuest() {

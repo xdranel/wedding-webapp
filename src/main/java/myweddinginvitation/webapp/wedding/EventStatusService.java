@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.Optional;
 
 import myweddinginvitation.webapp.account.AccountRole;
 import myweddinginvitation.webapp.account.UserAccount;
@@ -27,6 +28,19 @@ public class EventStatusService {
 	@Transactional(readOnly = true)
 	public EventStatusView view() {
 		return view(settings.getSingleton().orElseThrow());
+	}
+
+	@Transactional(readOnly = true)
+	public Optional<ClosedEventView> publicClosure(String requestedLanguage) {
+		WeddingSettings wedding = settings.getSingleton().orElseThrow();
+		if (!wedding.isEventClosed()) return Optional.empty();
+		boolean english = "EN".equals(requestedLanguage);
+		return Optional.of(new ClosedEventView(english ? "EN" : "ID",
+				copy(english ? wedding.getClosedTitleEn() : wedding.getClosedTitleId(), wedding.getClosedTitleId(),
+						english ? "The event has ended" : "Acara telah selesai"),
+				copy(english ? wedding.getClosedMessageEn() : wedding.getClosedMessageId(), wedding.getClosedMessageId(),
+						english ? "Thank you for being part of our celebration."
+								: "Terima kasih telah menjadi bagian dari perayaan kami.")));
 	}
 
 	@Transactional
@@ -77,5 +91,12 @@ public class EventStatusService {
 		return new EventStatusView(wedding.isEventClosed(), wedding.getVersion(), wedding.getEventStatusChangedAt(),
 				wedding.getEventStatusChangedBy(), wedding.getClosedTitleId(), wedding.getClosedTitleEn(),
 				wedding.getClosedMessageId(), wedding.getClosedMessageEn());
+	}
+
+	private static String copy(String preferred, String indonesian, String fallback) {
+		return preferred != null ? preferred : indonesian != null ? indonesian : fallback;
+	}
+
+	public record ClosedEventView(String language, String title, String message) {
 	}
 }

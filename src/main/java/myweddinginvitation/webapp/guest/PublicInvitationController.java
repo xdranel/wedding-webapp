@@ -15,6 +15,8 @@ import myweddinginvitation.webapp.rsvp.RsvpService;
 import myweddinginvitation.webapp.rsvp.RsvpView;
 import myweddinginvitation.webapp.wedding.WeddingMediaService;
 import myweddinginvitation.webapp.wedding.CalendarService;
+import myweddinginvitation.webapp.wedding.EventStatusService;
+import myweddinginvitation.webapp.wedding.EventStatusService.ClosedEventView;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,15 +31,18 @@ public class PublicInvitationController {
 	private final GuestVerificationSession verification;
 	private final WeddingMediaService weddingMedia;
 	private final CalendarService calendars;
+	private final EventStatusService eventStatus;
 	private final Clock clock;
 
 	public PublicInvitationController(InvitationAccessService access, RsvpService rsvps,
-			GuestVerificationSession verification, WeddingMediaService weddingMedia, CalendarService calendars, Clock clock) {
+			GuestVerificationSession verification, WeddingMediaService weddingMedia, CalendarService calendars,
+			EventStatusService eventStatus, Clock clock) {
 		this.access = access;
 		this.rsvps = rsvps;
 		this.verification = verification;
 		this.weddingMedia = weddingMedia;
 		this.calendars = calendars;
+		this.eventStatus = eventStatus;
 		this.clock = clock;
 	}
 
@@ -46,9 +51,10 @@ public class PublicInvitationController {
 			@RequestParam(required = false) String language, @RequestParam(defaultValue = "0") int page,
 			Model model, HttpSession session, HttpServletResponse response) {
 		response.setHeader("Cache-Control", "no-store");
+		ClosedEventView closure = eventStatus.publicClosure(language).orElse(null);
+		if (closure != null) return closed(closure, model);
 		Access resolved = access.resolve(publicId, version, signature, language);
 		if (resolved == null) return unavailable(response);
-		if (resolved.wedding().isEventClosed()) return closed(resolved.language(), model);
 		return render(resolved, invitationPath(publicId, version, signature), null, page, model, session);
 	}
 
@@ -93,8 +99,10 @@ public class PublicInvitationController {
 		return "guest/unavailable";
 	}
 
-	public String closed(String language, Model model) {
-		model.addAttribute("language", language);
+	public String closed(ClosedEventView closure, Model model) {
+		model.addAttribute("language", closure.language());
+		model.addAttribute("title", closure.title());
+		model.addAttribute("message", closure.message());
 		return "guest/closed";
 	}
 

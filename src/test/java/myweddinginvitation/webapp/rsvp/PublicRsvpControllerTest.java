@@ -69,6 +69,7 @@ class PublicRsvpControllerTest {
 		jdbc.update("""
 				update wedding_settings
 				set publication_state = 'PUBLISHED', event_closed = false,
+				    closed_title_id = null, closed_title_en = null, closed_message_id = null, closed_message_en = null,
 				    time_zone = 'Asia/Jakarta', rsvp_deadline = '2026-08-01 08:00:00',
 				    greetings_enabled = true, private_organizer_note_enabled = true
 				where id = 1
@@ -183,7 +184,10 @@ class PublicRsvpControllerTest {
 				.andExpect(content().string(containsString("Batas waktu RSVP telah lewat")));
 		assertThat(rsvps.view(guest.getId())).isEmpty();
 
-		jdbc.update("update wedding_settings set event_closed = true where id = 1");
+		jdbc.update("""
+				update wedding_settings set event_closed = true, closed_title_id = null, closed_title_en = null,
+				closed_message_id = null, closed_message_en = null where id = 1
+				""");
 		mockMvc.perform(get(path(guest)))
 				.andExpect(status().isOk())
 				.andExpect(view().name("guest/closed"))
@@ -202,6 +206,30 @@ class PublicRsvpControllerTest {
 				.andExpect(status().isNotFound())
 				.andExpect(view().name("guest/unavailable"))
 				.andExpect(content().string(not(containsString("Rahasia"))));
+	}
+
+	@Test
+	void closedEventRendersCompletedPageBeforePersonalizedPostResolution() throws Exception {
+		jdbc.update("""
+				update wedding_settings set event_closed = true, closed_title_id = 'Acara selesai',
+				closed_message_id = 'Terima kasih', closed_title_en = null, closed_message_en = null where id = 1
+				""");
+
+		mockMvc.perform(post("/i/not-a-uuid/not-a-version/not-a-signature/rsvp").with(csrf())
+				.param("language", "EN").param("pin", "0000"))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Cache-Control", "no-store"))
+				.andExpect(view().name("guest/closed"))
+				.andExpect(content().string(containsString("Acara selesai")))
+				.andExpect(content().string(not(containsString("PIN tidak cocok"))));
+
+		mockMvc.perform(post("/i/not-a-uuid/not-a-version/not-a-signature/verify-qr").with(csrf())
+				.param("language", "EN").param("pin", "0000"))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Cache-Control", "no-store"))
+				.andExpect(view().name("guest/closed"))
+				.andExpect(content().string(containsString("Terima kasih")))
+				.andExpect(content().string(not(containsString("PIN tidak cocok"))));
 	}
 
 	@Test

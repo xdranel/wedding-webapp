@@ -61,6 +61,7 @@ class PublicInvitationControllerTest {
 				update wedding_settings set publication_state = 'DRAFT', couple_title = null,
 				opening_text_id = null, opening_text_en = null, closing_text_id = null,
 				closing_text_en = null, rsvp_deadline = '2027-04-30 23:59:59', event_closed = false,
+				closed_title_id = null, closed_title_en = null, closed_message_id = null, closed_message_en = null,
 				greetings_enabled = true, private_organizer_note_enabled = false,
 				calendar_downloads_enabled = false, time_zone = 'Asia/Jakarta',
 				accent_color = '#7A5C48', font_preset = 'CLASSIC'
@@ -199,6 +200,48 @@ class PublicInvitationControllerTest {
 				.andExpect(content().string(not(containsString(GUEST_NAME))))
 				.andExpect(content().string(not(containsString(WHATSAPP))))
 				.andExpect(content().string(not(containsString(INTERNAL_NOTE))));
+	}
+
+	@Test
+	void closedEventUsesConfiguredFallbackBeforeSignedGuestResolution() throws Exception {
+		Guest guest = savedActiveGuest(MessageLanguage.ID);
+		jdbc.update("""
+				update wedding_settings set event_closed = true, closed_title_id = 'Acara kami telah selesai',
+				closed_message_id = 'Terima kasih telah hadir', closed_title_en = null, closed_message_en = null
+				where id = 1
+				""");
+
+		mockMvc.perform(get(path(signer.urlFor(guest))).param("language", "ID"))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Cache-Control", "no-store"))
+				.andExpect(view().name("guest/closed"))
+				.andExpect(content().string(containsString("lang=\"id\"")))
+				.andExpect(content().string(containsString("Acara kami telah selesai")))
+				.andExpect(content().string(containsString("Terima kasih telah hadir")))
+				.andExpect(content().string(not(containsString(GUEST_NAME))))
+				.andExpect(content().string(not(containsString("RSVP"))))
+				.andExpect(content().string(not(containsString("/media/"))))
+				.andExpect(content().string(not(containsString("/calendar/"))));
+
+		mockMvc.perform(get("/i/not-a-uuid/not-a-version/not-a-signature").param("language", "EN"))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Cache-Control", "no-store"))
+				.andExpect(view().name("guest/closed"))
+				.andExpect(content().string(containsString("lang=\"en\"")))
+				.andExpect(content().string(containsString("Acara kami telah selesai")))
+				.andExpect(content().string(containsString("Terima kasih telah hadir")))
+				.andExpect(content().string(not(containsString(GUEST_NAME))));
+	}
+
+	@Test
+	void closedEventUsesApplicationDefaultsWhenConfiguredCopyIsMissing() throws Exception {
+		jdbc.update("update wedding_settings set event_closed = true where id = 1");
+
+		mockMvc.perform(get("/i/not-a-uuid/not-a-version/not-a-signature").param("language", "EN"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("guest/closed"))
+				.andExpect(content().string(containsString("The event has ended")))
+				.andExpect(content().string(containsString("Thank you for being part of our celebration.")));
 	}
 
 	private String unavailablePath(UnavailableCase unavailableCase, Guest guest) {

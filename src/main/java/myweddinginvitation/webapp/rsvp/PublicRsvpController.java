@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import myweddinginvitation.webapp.guest.InvitationAccessService;
 import myweddinginvitation.webapp.guest.InvitationAccessService.Access;
 import myweddinginvitation.webapp.guest.PublicInvitationController;
+import myweddinginvitation.webapp.wedding.EventStatusService;
+import myweddinginvitation.webapp.wedding.EventStatusService.ClosedEventView;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,14 +34,16 @@ public class PublicRsvpController {
 	private final RsvpService rsvps;
 	private final GuestPinService pins;
 	private final GuestVerificationSession verification;
+	private final EventStatusService eventStatus;
 
 	public PublicRsvpController(InvitationAccessService invitationAccess, PublicInvitationController invitationPage,
-			RsvpService rsvps, GuestPinService pins, GuestVerificationSession verification) {
+			RsvpService rsvps, GuestPinService pins, GuestVerificationSession verification, EventStatusService eventStatus) {
 		this.invitationAccess = invitationAccess;
 		this.invitationPage = invitationPage;
 		this.rsvps = rsvps;
 		this.pins = pins;
 		this.verification = verification;
+		this.eventStatus = eventStatus;
 	}
 
 	@PostMapping("/i/{publicId}/{version}/{signature}/rsvp")
@@ -48,9 +52,10 @@ public class PublicRsvpController {
 			@Valid @ModelAttribute("rsvpForm") GuestRsvpForm form, BindingResult errors,
 			Model model, HttpServletRequest request, HttpServletResponse response) {
 		response.setHeader("Cache-Control", "no-store");
+		ClosedEventView closure = eventStatus.publicClosure(language).orElse(null);
+		if (closure != null) return invitationPage.closed(closure, model);
 		Access access = invitationAccess.resolve(publicId, version, signature, language);
 		if (access == null) return invitationPage.unavailable(response);
-		if (access.wedding().isEventClosed()) return invitationPage.closed(access.language(), model);
 		String path = path(publicId, version, signature);
 
 		localizeStructuralErrors(form, errors, access.language());
@@ -101,9 +106,10 @@ public class PublicRsvpController {
 			@RequestParam(required = false) String language, @RequestParam(defaultValue = "") String pin,
 			Model model, HttpServletRequest request, HttpServletResponse response) {
 		response.setHeader("Cache-Control", "no-store");
+		ClosedEventView closure = eventStatus.publicClosure(language).orElse(null);
+		if (closure != null) return invitationPage.closed(closure, model);
 		Access access = invitationAccess.resolve(publicId, version, signature, language);
 		if (access == null) return invitationPage.unavailable(response);
-		if (access.wedding().isEventClosed()) return invitationPage.closed(access.language(), model);
 		String path = path(publicId, version, signature);
 		RsvpView rsvp = rsvps.view(access.guest().getId()).orElse(null);
 		if (rsvp == null || rsvp.response() != AttendanceResponse.HADIR) {

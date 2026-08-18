@@ -167,6 +167,7 @@ class CheckInServiceTest {
 
 		jdbc.update("update wedding_settings set event_closed = true where id = 1");
 
+		assertFailure(CheckInFailure.CHECK_IN_CLOSED, () -> service.previewGuest(guest.getId()));
 		assertFailure(CheckInFailure.CHECK_IN_CLOSED,
 				() -> service.confirmGuest(guest.getId(), guest.getVersion(), 1, true, "test-admin"));
 		assertThat(checkIns.count()).isZero();

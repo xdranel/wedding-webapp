@@ -8,8 +8,10 @@ import myweddinginvitation.webapp.guest.GuestService;
 import myweddinginvitation.webapp.guest.InvitationLinkSigner;
 import myweddinginvitation.webapp.guest.MessageLanguage;
 import myweddinginvitation.webapp.wedding.EventType;
+import myweddinginvitation.webapp.wedding.PublicationState;
 import myweddinginvitation.webapp.wedding.WeddingContentService;
 import myweddinginvitation.webapp.wedding.WeddingPreview;
+import myweddinginvitation.webapp.wedding.WeddingSettingsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -20,17 +22,20 @@ public class GuestDeliveryService {
 	private final InvitationLinkSigner signer;
 	private final MessageTemplateService templates;
 	private final WeddingContentService weddingContent;
+	private final WeddingSettingsRepository settings;
 
 	public GuestDeliveryService(GuestService guests, InvitationLinkSigner signer,
-			MessageTemplateService templates, WeddingContentService weddingContent) {
+			MessageTemplateService templates, WeddingContentService weddingContent, WeddingSettingsRepository settings) {
 		this.guests = guests;
 		this.signer = signer;
 		this.templates = templates;
 		this.weddingContent = weddingContent;
+		this.settings = settings;
 	}
 
 	@Transactional(readOnly = true)
 	public URI whatsappUri(long guestId, MessageLanguage language) {
+		requireOpen();
 		Guest guest = guests.get(guestId);
 		requireActive(guest);
 		WeddingPreview preview = weddingContent.preview(
@@ -48,7 +53,16 @@ public class GuestDeliveryService {
 	}
 
 	public void confirmSent(long guestId, long version, Instant now) {
+		requireOpen();
 		guests.confirmSent(guestId, version, now);
+	}
+
+	private void requireOpen() {
+		var wedding = settings.getSingleton().orElseThrow();
+		if (wedding.getPublicationState() != PublicationState.PUBLISHED) {
+			throw new IllegalStateException("Initial delivery requires a published wedding.");
+		}
+		if (wedding.isEventClosed()) throw new IllegalStateException("Initial delivery requires an open wedding.");
 	}
 
 	private WeddingPreview.EventView event(WeddingPreview preview, EventType type) {
