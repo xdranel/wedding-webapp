@@ -44,6 +44,10 @@ public interface GuestRepository extends JpaRepository<Guest, Long>, JpaSpecific
 	@Query("select g from Guest g order by g.displayName asc, g.id asc")
 	List<Guest> findAllForReminderQueue(Pageable pageable);
 
+	@EntityGraph(attributePaths = "category")
+	@Query("select g from Guest g where g.archived = false order by g.displayName asc, g.id asc")
+	List<Guest> findAllActiveForReport(Pageable pageable);
+
 	long countByCategoryIsNull();
 	long countByArchivedFalse();
 }
