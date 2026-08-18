@@ -19,7 +19,7 @@
       <td th:text="${row.rsvpResponse == null ? 'No RSVP' : row.rsvpResponse}">No RSVP</td>
       <td th:text="${row.plannedPeople}">0</td>
       <td th:text="${row.checkedIn ? 'Checked in' : 'Not checked in'}">Not checked in</td>
-      <td th:text="${row.checkedIn ? row.actualPeople : '—'}">—</td>
+      <td th:text="${row.actualPeople}">0</td>
       <td><time th:if="${row.checkedInAt != null}" th:text="${row.checkedInAt}">Time</time><span th:unless="${row.checkedInAt != null}">—</span></td>
     </tr></tbody>
   </table>

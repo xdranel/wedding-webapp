@@ -134,7 +134,8 @@ class ReportAdminControllerTest {
 				.andExpect(content().string(not(containsString("private correction reason"))))
 				.andExpect(content().string(not(containsString("pin_locked_until"))))
 				.andReturn().getResponse().getContentAsString();
-		assertThat(print).contains("Checked in").doesNotContain("WhatsApp", "Internal note", "Greeting", "PIN");
+		assertThat(print).containsPattern("(?s)<td>Second Guest</td>.*?<td>Not checked in</td>\\s*<td>0</td>")
+				.contains("Checked in").doesNotContain("WhatsApp", "Internal note", "Greeting", "PIN");
 	}
 
 	private Guest guest(String name, long categoryId, String phone, String note) {
