@@ -36,6 +36,8 @@ class WeddingMediaRenderingTest {
 
 	@BeforeEach
 	void setUp() {
+		jdbc.update("delete from check_in_correction");
+		jdbc.update("delete from check_in");
 		jdbc.update("delete from rsvp");
 		jdbc.update("delete from guest");
 		jdbc.update("delete from gallery_photo");
