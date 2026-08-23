@@ -1,7 +1,8 @@
 # Data Schema
 
-Status: implemented through Phase 6C by Flyway V1-V13. Phase 6D adds no schema
-change; V1-V13 remains unchanged while its manual acceptance is pending.
+Status: accepted through Phase 6D on 2026-08-23 by Flyway V1-V13. Phase 6D adds
+no schema change; V1-V13 remains unchanged. Its final MySQL/Flyway suite passed
+78 suites / 431 tests with 0 failures, errors, or skips; Phase 7 is pending.
 
 Database target: MySQL 8.4 LTS.
 

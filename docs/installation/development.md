@@ -110,9 +110,11 @@ Status: implementation and automated MySQL verification complete on
 - [x] Automated journey coverage proves that regenerating the invitation token makes old calendar links unavailable.
 
 The Phase 5 physical USB scanner check remains a separate non-blocking
-deferral. Phase 6C manual acceptance is complete; Phase 6D automated evidence
-is complete but manual acceptance remains pending until Task 5. Phase 7
-deployment, backup, Cloudflare, and hardening remain separate.
+deferral. Phase 6C manual acceptance is complete; Phase 6D acceptance passed
+on 2026-08-23 with 2 tracked JavaScript syntax checks and a final clean
+MySQL/Flyway V1-V13 suite of 78 suites / 431 tests / 0 failures, errors, or
+skips. Phase 7 deployment, backup, Cloudflare, and hardening remain pending and
+separate.
 
 ### Phase 6C reports, closure, and System Status
 
@@ -150,8 +152,9 @@ clean MySQL/Flyway V1-V13 suite pass. User acceptance passed on 2026-08-23.
 - [x] Reopen the event and verify normal rules resume without data changes.
 - [x] Refresh System Status on the available laptop and phone.
 
-The physical USB scanner remains a separate Phase 5 hardware check. Phase 6D
-manual acceptance remains pending; Phase 7 remains separate.
+The physical USB scanner remains a separate, non-blocking Phase 5 hardware
+check. Phase 6D acceptance passed on 2026-08-23; Phase 7 remains pending and
+separate.
 
 ### Phase 6D operations and manual acceptance
 
@@ -159,9 +162,12 @@ Use the [owner/staff operations guide](../operations/event-operations.md),
 [bilingual guest guide](../guest-guide.md), and
 [manual acceptance checklist](../testing/phase-6d-manual-acceptance.md).
 The Task 1 real-MySQL integration journey, Task 2 2,000-guest scale regression,
-and Task 3 38-test selected gate pass, but the checklist remains unchecked
-until the owner completes Task 5. Phase 6D adds no production feature,
-dependency, or migration; Flyway V1-V13 remains unchanged.
+Task 3 selected gate, and confirmed manual checklist passed on 2026-08-23. The
+final clean MySQL/Flyway V1-V13 suite recorded 78 suites, 431 tests, and zero
+failures, errors, or skips; 2 tracked JavaScript syntax checks also passed.
+Phase 6D adds no production feature, dependency, or migration; Flyway V1-V13
+remains unchanged. The physical USB scanner remains a separate non-blocking
+Phase 5 deferral, and Phase 7 remains pending.
 
 ## RSVP, PIN, greetings, and QR operations
 

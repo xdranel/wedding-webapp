@@ -1,8 +1,8 @@
 # Product Design
 
-Status: implemented and accepted through Phase 6C; Phase 6D automated
-integration evidence is complete but manual acceptance remains pending. The
-Phase 5 physical USB scanner check remains deferred.
+Status: implemented and accepted through Phase 6D on 2026-08-23. The Phase 5
+physical USB scanner check remains deferred and non-blocking; Phase 7 is
+pending.
 
 ## Selected product approach
 
@@ -208,7 +208,8 @@ alternative image text, visible audio controls, and reduced-motion behavior.
 Phase 6A and Phase 6B manual acceptance are complete. Phase 6C functionality
 and automated verification are complete, including a 429-test clean suite
 against Flyway V1-V13. Its phone/laptop checklist passed on 2026-08-23. Phase
-6D adds no production feature, dependency, or migration and remains pending
-manual acceptance until Task 5. The Phase 5 physical USB scanner check remains
-separately deferred; Phase 7 deployment, backup, Cloudflare, and hardening are
-separate.
+6D acceptance passed on 2026-08-23: 2 tracked JavaScript syntax checks and the
+final clean MySQL/Flyway V1-V13 suite (78 suites, 431 tests, 0 failures, errors,
+or skips). It adds no production feature, dependency, or migration. The Phase 5
+physical USB scanner check remains separately deferred and non-blocking; Phase 7
+deployment, backup, Cloudflare, and hardening are pending and separate.

@@ -1,8 +1,9 @@
 # Business Rules
 
-Status: implemented and accepted through Phase 6C; Phase 6D automated
-integration evidence is complete but manual acceptance remains pending. The
-Phase 5 physical USB scanner check remains deferred.
+Status: implemented and accepted through Phase 6D on 2026-08-23. Final Phase 6D
+evidence: 2 tracked JavaScript syntax checks and 78 MySQL/Flyway V1-V13 suites
+(431 tests, 0 failures, errors, or skips). The Phase 5 physical USB scanner
+check remains deferred and non-blocking; Phase 7 is pending.
 
 1. An invitation belongs to one named primary guest.
 2. An invitation may optionally allow one unnamed companion.

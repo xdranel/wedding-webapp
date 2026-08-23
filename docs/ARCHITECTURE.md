@@ -1,8 +1,8 @@
 # Architecture
 
-Status: implemented and accepted through Phase 6C; Phase 6D automated
-integration evidence is complete but manual acceptance remains pending. The
-Phase 5 physical USB scanner check remains deferred.
+Status: implemented and accepted through Phase 6D on 2026-08-23. The Phase 5
+physical USB scanner check remains deferred and non-blocking; Phase 7 is
+pending.
 
 ## Selected approach
 
@@ -268,7 +268,10 @@ Phase 6B reminders/calendar implementation and manual acceptance are complete.
 Phase 6C functionality and its 118-test focused MySQL/Flyway V1-V13 suite are
 complete. After correcting stale V12/draft-event fixtures exposed by the first
 clean run, the final clean suite passed 429 tests against Flyway V1-V13 on
-2026-08-23. Manual phone/laptop acceptance passed on 2026-08-23. Phase 6D adds
-no production feature, dependency, or migration and remains pending manual
-acceptance until Task 5. Phase 7 deployment, backup, Cloudflare, and hardening
-remain separate; the Phase 5 physical USB scanner check remains separate.
+2026-08-23. Manual phone/laptop acceptance passed on 2026-08-23. Phase 6D
+acceptance passed on 2026-08-23 with 2 tracked JavaScript syntax checks and a
+final clean MySQL/Flyway V1-V13 suite of 78 suites, 431 tests, and zero
+failures, errors, or skips. It adds no production feature, dependency, or
+migration. Phase 7 deployment, backup, Cloudflare, and hardening remain pending
+and separate; the Phase 5 physical USB scanner check remains deferred and
+non-blocking.

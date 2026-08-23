@@ -10,6 +10,13 @@
 
 **Spec:** `docs/superpowers/specs/2026-08-23-phase-6d-integration-acceptance-design.md`
 
+**Status:** Accepted on 2026-08-23. Tasks 1-4 are recorded complete in their
+task reports; Task 5 is checked below. Final evidence: 2 tracked JavaScript
+syntax checks and a clean MySQL/Flyway V1-V13 suite of 78 suites, 431 tests,
+and 0 failures, errors, or skips. No Phase 6D production feature, migration,
+or dependency was added. The physical USB scanner remains a non-blocking Phase
+5 deferral; Phase 7 remains pending.
+
 ## Global Constraints
 
 - Add no product feature, migration, dependency, demo endpoint, background job, service worker, offline queue, or synchronization protocol by default.
@@ -151,9 +158,9 @@ git commit -m "docs: add wedding operations and acceptance guides"
 - Consumes: Tasks 1-4 and the user's physical device results
 - Produces: truthful Phase 6D completion status and Phase 7 readiness
 
-- [ ] **Step 1: Run static checks.** Run `node --check` for each tracked file under `src/main/resources/static/js`, then `git diff --check`. Expected: every command exits `0`.
+- [x] **Step 1: Run static checks.** Run `node --check` for each tracked file under `src/main/resources/static/js`, then `git diff --check`. Expected: every command exits `0`.
 
-- [ ] **Step 2: Run one final clean suite.** First verify no Maven/Surefire process is active. Then run exactly once:
+- [x] **Step 2: Run one final clean suite.** First verify no Maven/Surefire process is active. Then run exactly once:
 
 ```bash
 export DOCKER_HOST="unix://${XDG_RUNTIME_DIR}/podman/podman.sock"
@@ -163,13 +170,13 @@ export TESTCONTAINERS_RYUK_DISABLED=true
 
 Expected: exit `0`, all Surefire reports show zero failures/errors/skips, and Flyway validates V1-V13. After completion, verify no Maven/Surefire Java or Testcontainers MySQL remains; leave the user's Compose MySQL untouched.
 
-- [ ] **Step 3: Ask the user to execute the manual checklist.** Do not mark boxes from inference. The user runs the documented Fedora Chrome/Chromium full journey, Firefox smoke, iPhone Safari checks, two-account conflict, and WAN-off/LAN-on checks, then reports results and any discrepancy.
+- [x] **Step 3: Ask the user to execute the manual checklist.** Do not mark boxes from inference. The user runs the documented Fedora Chrome/Chromium full journey, Firefox smoke, iPhone Safari checks, two-account conflict, and WAN-off/LAN-on checks, then reports results and any discrepancy.
 
-- [ ] **Step 4: Resolve acceptance findings.** For every reported discrepancy, use systematic debugging, add one deterministic regression when automatable, fix the shared root cause minimally, rerun its focused test, and ask the user to retest that exact manual case. Re-run the full clean suite only once more after the final production fix, not after documentation-only edits.
+- [x] **Step 4: Resolve acceptance findings.** For every reported discrepancy, use systematic debugging, add one deterministic regression when automatable, fix the shared root cause minimally, rerun its focused test, and ask the user to retest that exact manual case. Re-run the full clean suite only once more after the final production fix, not after documentation-only edits.
 
-- [ ] **Step 5: Mark acceptance truth.** Only after the user confirms every available checklist item, change the checklist boxes and canonical status to Phase 6D accepted with the actual date and exact final test counts. Keep the physical USB scanner explicitly deferred and Phase 7 pending.
+- [x] **Step 5: Mark acceptance truth.** Only after the user confirms every available checklist item, change the checklist boxes and canonical status to Phase 6D accepted with the actual date and exact final test counts. Keep the physical USB scanner explicitly deferred and Phase 7 pending.
 
-- [ ] **Step 6: Refresh and commit.** Run `graphify update .`, `git diff --check`, inspect `git status --short`, leave generated/ignored artifacts unstaged, and commit:
+- [x] **Step 6: Refresh and commit.** Run `graphify update .`, `git diff --check`, inspect `git status --short`, leave generated/ignored artifacts unstaged, and commit:
 
 ```bash
 git commit -m "docs: complete phase 6d acceptance"
@@ -177,9 +184,8 @@ git commit -m "docs: complete phase 6d acceptance"
 
 ## Final Acceptance Gate
 
-Phase 6D is complete only when Tasks 1-5 are checked, the cross-feature and
-2,000-guest regressions pass, the selected focused gate and one final clean
-MySQL/Flyway V1-V13 suite pass, the user confirms the available device/network
-checklist, no Critical or Important defect remains, and canonical documentation
-matches the shipped application. The physical USB scanner remains the sole
-deferred hardware acceptance item; Phase 7 remains pending.
+Phase 6D was accepted on 2026-08-23 after the recorded cross-feature and
+2,000-guest regressions, selected focused gate, final clean MySQL/Flyway
+V1-V13 suite, and user-confirmed available device/network checklist. No
+Critical or Important defect remains. The physical USB scanner remains the
+sole deferred, non-blocking hardware acceptance item; Phase 7 remains pending.

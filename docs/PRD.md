@@ -1,7 +1,7 @@
 # Product Requirements
 
-Status: implemented and accepted through Phase 6C; the Phase 5 physical USB
-scanner check remains deferred
+Status: implemented and accepted through Phase 6D on 2026-08-23; the Phase 5
+physical USB scanner check remains deferred and non-blocking.
 
 ## Implementation status — 2026-08-23
 
@@ -29,10 +29,12 @@ failures, errors, or skips on 2026-08-19. After correcting the five stale test
 expectations exposed by the first clean run, the final clean suite passed all
 429 tests with zero failures, errors, or skips against Flyway V1-V13 on
 2026-08-23. Manual phone/laptop acceptance also passed on 2026-08-23. Phase 6D
-integration tests and selected regression gate are complete; its manual
-acceptance remains pending until Task 5. It adds no production feature,
-dependency, or migration: Flyway V1-V13 remains the schema. Phase 7 deployment,
-backup, Cloudflare, and hardening remain separate.
+integration tests, 2,000-guest regression, selected gate, and manual acceptance
+passed on 2026-08-23. Its final clean MySQL/Flyway V1-V13 suite recorded 78
+suites, 431 tests, and zero failures, errors, or skips; 2 tracked JavaScript
+syntax checks also passed. It adds no production feature, dependency, or
+migration: Flyway V1-V13 remains the schema. Phase 7 deployment, backup,
+Cloudflare, and hardening remain pending and separate.
 
 ## Change management
 

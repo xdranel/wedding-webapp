@@ -157,7 +157,8 @@ acceptance passed on 2026-08-17. The separate Phase 5 physical USB scanner
 check is still pending. Phase 6C functionality has real-MySQL journey and
 focused verification coverage. After correcting stale fixtures exposed by the
 first clean run, its final clean suite passed all 429 tests against Flyway
-V1-V13. The phone/laptop checklist passed on 2026-08-23. Phase 6D automated
-implementation evidence is complete, but manual acceptance remains pending
-until Task 5; Phase 7 deployment, backup, Cloudflare, and hardening remain
-separate.
+V1-V13. The phone/laptop checklist passed on 2026-08-23. Phase 6D acceptance
+also passed on 2026-08-23: 2 tracked JavaScript syntax checks and the final
+clean MySQL/Flyway V1-V13 suite (78 suites, 431 tests, 0 failures, errors, or
+skips). It adds no production feature, dependency, or migration. Phase 7
+deployment, backup, Cloudflare, and hardening remain pending and separate.
