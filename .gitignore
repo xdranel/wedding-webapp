@@ -1,6 +1,8 @@
 .worktrees/
 .env
 /data/
+/graphify-out/
+/skills-lock.json
 
 HELP.md
 target/
