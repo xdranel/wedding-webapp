@@ -3,6 +3,7 @@
 /data/
 /graphify-out/
 /skills-lock.json
+/.superpowers/
 
 HELP.md
 target/
