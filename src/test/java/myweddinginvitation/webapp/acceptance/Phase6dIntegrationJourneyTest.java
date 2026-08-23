@@ -23,6 +23,9 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import myweddinginvitation.webapp.account.AccountRole;
 import myweddinginvitation.webapp.account.AccountSecurityService;
 import myweddinginvitation.webapp.account.UserAccount;
@@ -39,7 +42,9 @@ import myweddinginvitation.webapp.guest.InvitationLinkSigner;
 import myweddinginvitation.webapp.guest.MessageLanguage;
 import myweddinginvitation.webapp.messaging.GuestDeliveryService;
 import myweddinginvitation.webapp.messaging.ReminderKind;
+import myweddinginvitation.webapp.messaging.ReminderGuestView;
 import myweddinginvitation.webapp.messaging.ReminderService;
+import myweddinginvitation.webapp.reporting.ReportMetrics;
 import myweddinginvitation.webapp.reporting.ReportService;
 import myweddinginvitation.webapp.reporting.ReportView;
 import myweddinginvitation.webapp.rsvp.AttendanceResponse;
@@ -65,6 +70,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @SpringBootTest(properties = {
 		"app.bootstrap-admin.username=test-admin",
@@ -77,7 +83,6 @@ class Phase6dIntegrationJourneyTest {
 	private static final String STAFF_TEMPORARY_PASSWORD = "Temporary-Password-2026";
 	private static final String STAFF_PASSWORD = "Staff-Password-2026";
 	private static final Instant INITIAL_SENT = Instant.parse("2026-08-23T01:00:00Z");
-	private static final Instant EVENT_REMINDER_SENT = Instant.parse("2026-08-23T02:00:00Z");
 	private static final byte[] MP3 = {(byte) 0xff, (byte) 0xfb, 1, 2, 3, 4};
 
 	@TempDir static Path mediaDirectory;
@@ -153,26 +158,38 @@ class Phase6dIntegrationJourneyTest {
 		Guest indonesian = guest("Indonesian Journey Guest", "+6281234567890", MessageLanguage.ID, true, familyId);
 		Guest english = guest("English Journey Guest", "+14155550123", MessageLanguage.EN, false, friendsId);
 		String invitationPath = path(indonesian);
+		String englishInvitationPath = path(english);
 
 		assertInvitation(invitationPath, "ID", "Dengan hormat", photoId);
 		assertInvitation(invitationPath, "EN", "Welcome", photoId);
+		assertInvitation(englishInvitationPath, "EN", "Welcome", photoId);
 		URI openedDelivery = deliveries.whatsappUri(indonesian.getId(), MessageLanguage.ID);
 		deliveries.confirmSent(indonesian.getId(), reload(indonesian).getVersion(), INITIAL_SENT);
 		assertThat(reload(indonesian)).extracting(Guest::getDeliveryState, Guest::getFirstSentAt, Guest::getLastSentAt)
 				.containsExactly(DeliveryState.SENT, INITIAL_SENT, INITIAL_SENT);
-		assertGeneratedLanguageQuery(openedDelivery, indonesian, MessageLanguage.ID);
+		assertGeneratedLanguageMessage(openedDelivery, indonesian, MessageLanguage.ID, "Indonesian Journey Guest");
+		URI openedEnglishDelivery = deliveries.whatsappUri(english.getId(), MessageLanguage.EN);
+		assertThat(reload(english)).extracting(Guest::getDeliveryState, Guest::getFirstSentAt, Guest::getLastSentAt)
+				.containsExactly(DeliveryState.UNSENT, null, null);
+		deliveries.confirmSent(english.getId(), reload(english).getVersion(), INITIAL_SENT.plusSeconds(1));
+		assertThat(reload(english)).extracting(Guest::getDeliveryState, Guest::getFirstSentAt, Guest::getLastSentAt)
+				.containsExactly(DeliveryState.SENT, INITIAL_SENT.plusSeconds(1), INITIAL_SENT.plusSeconds(1));
+		assertGeneratedLanguageMessage(openedEnglishDelivery, english, MessageLanguage.EN, "English Journey Guest");
 
 		MockHttpSession guestSession = submitAttendingRsvp(invitationPath);
 		assertQrAndCalendars(invitationPath, guestSession);
-		reminders.confirmSent(indonesian.getId(), reload(indonesian).getVersion(), ReminderKind.EVENT, familyId,
-				EVENT_REMINDER_SENT);
-		assertThat(reload(indonesian).getLastEventReminderSentAt()).isEqualTo(EVENT_REMINDER_SENT);
+		openAndConfirmEventReminder(indonesian);
 
 		MockHttpSession staff = createStaff();
 		previewAndConfirmCheckIn(staff, indonesian);
 		correctCheckIn(indonesian);
-		assertThat(checkIns.history(indonesian.getId())).extracting(CheckInService.CheckInCorrectionView::action)
-				.containsExactly(CheckInCorrectionAction.CORRECT);
+		assertThat(checkIns.history(indonesian.getId())).singleElement()
+				.extracting(CheckInService.CheckInCorrectionView::action,
+						CheckInService.CheckInCorrectionView::beforeActualAttendeeCount,
+						CheckInService.CheckInCorrectionView::afterActualAttendeeCount,
+						CheckInService.CheckInCorrectionView::reason,
+						CheckInService.CheckInCorrectionView::correctedByUsername)
+				.containsExactly(CheckInCorrectionAction.CORRECT, 2, 1, "Companion did not arrive", "admin");
 		assertReportsPrintAndCsv();
 
 		JourneySnapshot snapshot = snapshot(indonesian, photoId);
@@ -262,9 +279,9 @@ class Phase6dIntegrationJourneyTest {
 				.andExpect(content().string(containsString("id=\"background-audio\"")));
 	}
 
-	private void assertGeneratedLanguageQuery(URI delivery, Guest guest, MessageLanguage language) {
+	private void assertGeneratedLanguageMessage(URI delivery, Guest guest, MessageLanguage language, String text) {
 		String message = URLDecoder.decode(delivery.getRawQuery(), UTF_8);
-		assertThat(message).contains(invitationLinks.urlFor(reload(guest), language));
+		assertThat(message).contains(text, invitationLinks.urlFor(reload(guest), language));
 	}
 
 	private MockHttpSession submitAttendingRsvp(String invitationPath) throws Exception {
@@ -286,6 +303,28 @@ class Phase6dIntegrationJourneyTest {
 				.andExpect(status().isOk()).andExpect(content().string(containsString("SUMMARY:")));
 		mockMvc.perform(get(invitationPath + "/calendar/RECEPTION.ics").param("language", "EN"))
 				.andExpect(status().isOk()).andExpect(content().string(containsString("SUMMARY:")));
+	}
+
+	private void openAndConfirmEventReminder(Guest guest) throws Exception {
+		assertThat(reminders.queue(ReminderKind.EVENT, familyId)).singleElement()
+				.extracting(ReminderGuestView::id, ReminderGuestView::preferredLanguage, ReminderGuestView::lastSentAt)
+				.containsExactly(guest.getId(), MessageLanguage.ID, null);
+		MvcResult opened = mockMvc.perform(post("/admin/reminders/{kind}/{guestId}/open-whatsapp", "EVENT", guest.getId())
+				.session(admin).with(csrf()).param("language", "ID").param("categoryId", Long.toString(familyId)))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(MockMvcResultMatchers.header().string("Location", org.hamcrest.Matchers.startsWith("https://wa.me/")))
+				.andReturn();
+		assertGeneratedLanguageMessage(URI.create(opened.getResponse().getRedirectedUrl()), guest, MessageLanguage.ID,
+				"akad");
+		assertThat(reload(guest).getLastEventReminderSentAt()).isNull();
+		mockMvc.perform(post("/admin/reminders/{kind}/{guestId}/confirm-sent", "EVENT", guest.getId())
+				.session(admin).with(csrf()).param("version", Long.toString(reload(guest).getVersion()))
+				.param("categoryId", Long.toString(familyId)))
+				.andExpect(redirectedUrl("/admin/reminders?kind=EVENT&categoryId=" + familyId));
+		assertThat(reload(guest).getLastEventReminderSentAt()).isNotNull();
+		assertThat(reminders.queue(ReminderKind.EVENT, familyId)).singleElement()
+				.extracting(ReminderGuestView::id, ReminderGuestView::lastSentAt)
+				.containsExactly(guest.getId(), reload(guest).getLastEventReminderSentAt());
 	}
 
 	private MockHttpSession createStaff() throws Exception {
@@ -323,16 +362,28 @@ class Phase6dIntegrationJourneyTest {
 	}
 
 	private void assertReportsPrintAndCsv() throws Exception {
-		assertThat(reports.snapshot(null).totals().invitations()).isEqualTo(2);
-		assertThat(reports.snapshot(familyId).totals().invitations()).isEqualTo(1);
-		assertThat(report(get("/admin/reports").session(admin)).totals().invitations()).isEqualTo(2);
-		assertThat(report(get("/admin/reports").session(admin).param("categoryId", Long.toString(familyId))).totals()
-				.invitations()).isEqualTo(1);
-		mockMvc.perform(get("/admin/reports/print").session(admin)).andExpect(status().isOk())
-				.andExpect(view().name("admin/reports/print"))
-				.andExpect(content().string(containsString("Indonesian Journey Guest")));
-		mockMvc.perform(get("/admin/guests/export.csv").session(admin)).andExpect(status().isOk())
-				.andExpect(content().string(containsString("Indonesian Journey Guest")));
+		assertReportMetrics(reports.snapshot(null));
+		assertReportMetrics(reports.snapshot(familyId));
+		assertReportMetrics(report(get("/admin/reports").session(admin)));
+		assertReportMetrics(report(get("/admin/reports").session(admin).param("categoryId", Long.toString(familyId))));
+		String print = mockMvc.perform(get("/admin/reports/print").session(admin)).andExpect(status().isOk())
+				.andExpect(view().name("admin/reports/print")).andReturn().getResponse().getContentAsString();
+		assertThat(print).containsPattern("(?s)<td>Indonesian Journey Guest</td>\\s*<td>Family</td>\\s*<td>HADIR</td>"
+				+ "\\s*<td>2</td>\\s*<td>Checked in</td>\\s*<td>1</td>");
+		String csv = mockMvc.perform(get("/admin/guests/export.csv").session(admin)).andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString(UTF_8);
+		try (CSVParser parser = CSVFormat.RFC4180.builder().setHeader().setSkipHeaderRecord(true).get()
+				.parse(new java.io.StringReader(csv.substring(1)))) {
+			CSVRecord row = parser.getRecords().stream()
+					.filter(record -> "Indonesian Journey Guest".equals(record.get("display_name"))).findFirst().orElseThrow();
+			assertThat(row.get("rsvp_status")).isEqualTo("HADIR");
+			assertThat(row.get("planned_attendee_count")).isEqualTo("2");
+		}
+	}
+
+	private void assertReportMetrics(ReportView report) {
+		assertThat(report.totals()).extracting(ReportMetrics::plannedPeople, ReportMetrics::checkedInInvitations,
+				ReportMetrics::actualPeople).containsExactly(2L, 1L, 1L);
 	}
 
 	private ReportView report(org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder request)
