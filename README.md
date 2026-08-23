@@ -15,6 +15,12 @@ Sign in with the bootstrap credentials from `.env` and change the bootstrap
 password at the first login. See [the development guide](docs/installation/development.md)
 for prerequisites, diagnostics, and database reset instructions.
 
+## Operations guides
+
+- [Owner and staff event operations](docs/operations/event-operations.md)
+- [Guest guide / Panduan tamu](docs/guest-guide.md)
+- [Phase 6D manual acceptance checklist](docs/testing/phase-6d-manual-acceptance.md)
+
 ## Wedding content
 
 Administrators manage settings, both partners, events, and the relationship
@@ -151,5 +157,7 @@ acceptance passed on 2026-08-17. The separate Phase 5 physical USB scanner
 check is still pending. Phase 6C functionality has real-MySQL journey and
 focused verification coverage. After correcting stale fixtures exposed by the
 first clean run, its final clean suite passed all 429 tests against Flyway
-V1-V13. The phone/laptop checklist passed on 2026-08-23. Phase 6D and Phase 7
-remain pending.
+V1-V13. The phone/laptop checklist passed on 2026-08-23. Phase 6D automated
+implementation evidence is complete, but manual acceptance remains pending
+until Task 5; Phase 7 deployment, backup, Cloudflare, and hardening remain
+separate.

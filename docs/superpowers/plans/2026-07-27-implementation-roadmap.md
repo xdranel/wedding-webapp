@@ -8,7 +8,9 @@ USB scanner acceptance and user sign-off pending. Phase 6A implementation and
 phone/laptop acceptance are complete. Phase 6B implementation, automated
 verification, and reminder/calendar phone/laptop acceptance are complete.
 Phase 6C implementation, automated verification, and manual phone/laptop
-acceptance are complete. Phases 6D and 7 remain pending.
+acceptance are complete. Phase 6D implementation and automated evidence are
+complete; manual acceptance remains pending until Task 5. Phase 7 remains
+separate and pending.
 
 Detailed plans are written and executed one phase at a time. A phase must pass
 its tests and review before the next phase begins.
@@ -20,7 +22,7 @@ its tests and review before the next phase begins.
 | 3 | Categories, guest CRUD/archive, CSV import/export, WhatsApp templates, and manual delivery tracking | Plan: `2026-07-28-phase-3-guest-delivery.md` |
 | 4 | RSVP, PIN protection/rate limits, greetings, private notes, and QR display/save | Plan: `2026-08-01-phase-4-rsvp-pin-qr.md` |
 | 5 | Restricted staff scan/search, atomic check-in, duplicate handling, and administrator corrections — implementation/automated tests complete; manual acceptance pending | Plan: `2026-08-02-phase-5-event-check-in.md`; design: `../specs/2026-08-02-phase-5-check-in-design.md` |
-| 6 | 6A gallery/audio/media accepted; 6B reminders/calendars accepted; 6C reports/print/CSV reuse/closure/status accepted; 6D integration/acceptance planned | Plans: `2026-08-11-phase-6a-wedding-media.md`, `2026-08-12-phase-6b-reminders-calendar.md`, `2026-08-18-phase-6c-reporting-status.md`, `2026-08-23-phase-6d-integration-acceptance.md`; designs: `../specs/2026-08-11-phase-6a-media-design.md`, `../specs/2026-08-11-phase-6b-reminders-calendar-design.md`, `../specs/2026-08-18-phase-6c-reporting-status-design.md`, `../specs/2026-08-23-phase-6d-integration-acceptance-design.md` |
+| 6 | 6A gallery/audio/media accepted; 6B reminders/calendars accepted; 6C reports/print/CSV reuse/closure/status accepted; 6D integration tests, 2,000-guest scale regression, 38-test selected gate, and guides complete — manual acceptance pending until Task 5; no Phase 6D production feature, dependency, or migration | Plans: `2026-08-11-phase-6a-wedding-media.md`, `2026-08-12-phase-6b-reminders-calendar.md`, `2026-08-18-phase-6c-reporting-status.md`, `2026-08-23-phase-6d-integration-acceptance.md`; designs: `../specs/2026-08-11-phase-6a-media-design.md`, `../specs/2026-08-11-phase-6b-reminders-calendar-design.md`, `../specs/2026-08-18-phase-6c-reporting-status-design.md`, `../specs/2026-08-23-phase-6d-integration-acceptance-design.md` |
 | 7 | Docker/Cloudflare production packaging, backup/restore/erasure scripts, installation docs, accessibility/performance/security verification — pending | Written after Phase 6 |
 
 ## Progress rules

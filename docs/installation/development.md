@@ -110,8 +110,9 @@ Status: implementation and automated MySQL verification complete on
 - [x] Automated journey coverage proves that regenerating the invitation token makes old calendar links unavailable.
 
 The Phase 5 physical USB scanner check remains a separate non-blocking
-deferral. Phase 6C manual acceptance is complete; Phase 6D and Phase 7 remain
-pending.
+deferral. Phase 6C manual acceptance is complete; Phase 6D automated evidence
+is complete but manual acceptance remains pending until Task 5. Phase 7
+deployment, backup, Cloudflare, and hardening remain separate.
 
 ### Phase 6C reports, closure, and System Status
 
@@ -150,7 +151,17 @@ clean MySQL/Flyway V1-V13 suite pass. User acceptance passed on 2026-08-23.
 - [x] Refresh System Status on the available laptop and phone.
 
 The physical USB scanner remains a separate Phase 5 hardware check. Phase 6D
-and Phase 7 remain pending.
+manual acceptance remains pending; Phase 7 remains separate.
+
+### Phase 6D operations and manual acceptance
+
+Use the [owner/staff operations guide](../operations/event-operations.md),
+[bilingual guest guide](../guest-guide.md), and
+[manual acceptance checklist](../testing/phase-6d-manual-acceptance.md).
+The Task 1 real-MySQL integration journey, Task 2 2,000-guest scale regression,
+and Task 3 38-test selected gate pass, but the checklist remains unchecked
+until the owner completes Task 5. Phase 6D adds no production feature,
+dependency, or migration; Flyway V1-V13 remains unchanged.
 
 ## RSVP, PIN, greetings, and QR operations
 

@@ -1,7 +1,8 @@
 # Architecture
 
-Status: implemented and accepted through Phase 6C;
-the Phase 5 physical USB scanner check remains deferred
+Status: implemented and accepted through Phase 6C; Phase 6D automated
+integration evidence is complete but manual acceptance remains pending. The
+Phase 5 physical USB scanner check remains deferred.
 
 ## Selected approach
 
@@ -34,8 +35,8 @@ MariaDB is not a supported runtime target.
 - Venue operation uses one mini-laptop server and one central database over
   local Wi-Fi
 - Multiple staff laptops and phones must support concurrent check-in
-- Internet-independent LAN operation is required; multi-device offline sync is
-  not required
+- Internet-independent LAN operation is required; every write requires the
+  central server
 - Capacity target: one to five concurrent check-in devices
 - No email service or email-based password recovery is required
 - Deployment must support daily backups of the database and uploaded media
@@ -267,5 +268,7 @@ Phase 6B reminders/calendar implementation and manual acceptance are complete.
 Phase 6C functionality and its 118-test focused MySQL/Flyway V1-V13 suite are
 complete. After correcting stale V12/draft-event fixtures exposed by the first
 clean run, the final clean suite passed 429 tests against Flyway V1-V13 on
-2026-08-23. Manual phone/laptop acceptance passed on 2026-08-23. Phase 6D and
-Phase 7 remain pending; the Phase 5 physical USB scanner check remains separate.
+2026-08-23. Manual phone/laptop acceptance passed on 2026-08-23. Phase 6D adds
+no production feature, dependency, or migration and remains pending manual
+acceptance until Task 5. Phase 7 deployment, backup, Cloudflare, and hardening
+remain separate; the Phase 5 physical USB scanner check remains separate.

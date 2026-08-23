@@ -1,7 +1,8 @@
 # Business Rules
 
-Status: implemented and accepted through Phase 6C;
-the Phase 5 physical USB scanner check remains deferred
+Status: implemented and accepted through Phase 6C; Phase 6D automated
+integration evidence is complete but manual acceptance remains pending. The
+Phase 5 physical USB scanner check remains deferred.
 
 1. An invitation belongs to one named primary guest.
 2. An invitation may optionally allow one unnamed companion.
