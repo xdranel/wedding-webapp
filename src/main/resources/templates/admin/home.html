@@ -4,54 +4,56 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Wedding Overview</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<header>
-    <h1>Wedding Overview</h1>
-    <nav aria-label="Administrator navigation">
-        <a href="#guests">Guests</a>
-        <a href="#settings">Settings</a>
-        <form method="post" th:action="@{/logout}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <button type="submit">Sign out</button>
-        </form>
-    </nav>
-</header>
-<main>
-    <section id="guests">
-        <h2>Guests</h2>
-        <p><a th:href="@{/admin/guests}">Manage guests</a></p>
-        <p><a th:href="@{/admin/guest-categories}">Manage guest categories</a></p>
-		<p><a th:href="@{/admin/reports}">Operational reports</a></p>
-        <p><a th:href="@{/admin/reminders}">Reminders</a></p>
-        <label for="guest-search">Search guests</label>
-        <input id="guest-search" type="search" placeholder="Search by guest name">
-    </section>
-    <section id="rsvp-summary">
-        <h2>RSVP summary</h2>
-        <dl>
-            <dt>Accepted invitations</dt><dd th:text="${rsvpSummary.hadir}">0</dd>
-            <dt>Declined invitations</dt><dd th:text="${rsvpSummary.tidakHadir}">0</dd>
-            <dt>No RSVP</dt><dd th:text="${rsvpSummary.noRsvp}">0</dd>
-            <dt>Planned people</dt><dd th:text="${rsvpSummary.plannedPeople}">0</dd>
-            <dt>Pending greetings</dt><dd th:text="${rsvpSummary.pendingGreetings}">0</dd>
-        </dl>
-        <p><a th:href="@{/admin/greetings}">Moderate greetings</a></p>
-    </section>
-    <section id="check-in-summary">
-        <h2>Check-in summary</h2>
-        <dl>
-            <dt>Checked-in invitations</dt><dd th:text="${checkInSummary.checkedInInvitations}">0</dd>
-            <dt>Actual people</dt><dd th:text="${checkInSummary.actualPeople}">0</dd>
-        </dl>
-    </section>
-    <section id="settings">
-        <h2>Wedding settings</h2>
-        <p><a th:href="@{/admin/wedding}">Manage wedding content</a></p>
-		<p><a th:href="@{/admin/wedding/event-status}">Event status: <span th:text="${eventStatus.closed} ? 'Closed' : 'Open'">Open</span></a></p>
-        <p><a th:href="@{/admin/system-status}">System status</a></p>
-        <p><a th:href="@{/admin/message-templates}">Manage message templates</a></p>
-    </section>
-</main>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+    <nav th:replace="~{fragments/admin-navigation :: sidebar('overview')}"></nav>
+    <div>
+        <header class="app-header">
+            <h1>Wedding Overview</h1>
+        </header>
+        <main id="main-content" class="page-content">
+            <section id="guests" class="card">
+                <h2>Guests</h2>
+                <p><a th:href="@{/admin/guests}">Manage guests</a></p>
+                <p><a th:href="@{/admin/guest-categories}">Manage guest categories</a></p>
+                <p><a th:href="@{/admin/reports}">Operational reports</a></p>
+                <p><a th:href="@{/admin/reminders}">Reminders</a></p>
+                <label for="guest-search">Search guests</label>
+                <input id="guest-search" type="search" placeholder="Search by guest name">
+            </section>
+
+            <section class="summary-grid" aria-label="Wedding summaries">
+                <article id="rsvp-summary" class="card">
+                    <h2>RSVP summary</h2>
+                    <dl>
+                        <dt>Accepted invitations</dt><dd th:text="${rsvpSummary.hadir}">0</dd>
+                        <dt>Declined invitations</dt><dd th:text="${rsvpSummary.tidakHadir}">0</dd>
+                        <dt>No RSVP</dt><dd th:text="${rsvpSummary.noRsvp}">0</dd>
+                        <dt>Planned people</dt><dd th:text="${rsvpSummary.plannedPeople}">0</dd>
+                        <dt>Pending greetings</dt><dd th:text="${rsvpSummary.pendingGreetings}">0</dd>
+                    </dl>
+                    <p><a th:href="@{/admin/greetings}">Moderate greetings</a></p>
+                </article>
+                <article id="check-in-summary" class="card">
+                    <h2>Check-in summary</h2>
+                    <dl>
+                        <dt>Checked-in invitations</dt><dd th:text="${checkInSummary.checkedInInvitations}">0</dd>
+                        <dt>Actual people</dt><dd th:text="${checkInSummary.actualPeople}">0</dd>
+                    </dl>
+                </article>
+                <article id="settings" class="card">
+                    <h2>Wedding settings</h2>
+                    <p><a th:href="@{/admin/wedding}">Manage wedding content</a></p>
+                    <p><a th:href="@{/admin/wedding/event-status}">Event status: <span th:text="${eventStatus.closed} ? 'Closed' : 'Open'">Open</span></a></p>
+                    <p><a th:href="@{/admin/system-status}">System status</a></p>
+                    <p><a th:href="@{/admin/message-templates}">Manage message templates</a></p>
+                </article>
+            </section>
+        </main>
+    </div>
+</div>
 </body>
 </html>
