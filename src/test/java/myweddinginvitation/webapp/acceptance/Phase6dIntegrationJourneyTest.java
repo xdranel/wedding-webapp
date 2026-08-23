@@ -48,7 +48,6 @@ import myweddinginvitation.webapp.reporting.ReportMetrics;
 import myweddinginvitation.webapp.reporting.ReportService;
 import myweddinginvitation.webapp.reporting.ReportView;
 import myweddinginvitation.webapp.rsvp.AttendanceResponse;
-import myweddinginvitation.webapp.rsvp.CheckInQrSigner;
 import myweddinginvitation.webapp.rsvp.RsvpService;
 import myweddinginvitation.webapp.rsvp.RsvpView;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
@@ -97,7 +96,6 @@ class Phase6dIntegrationJourneyTest {
 	@Autowired InvitationLinkSigner invitationLinks;
 	@Autowired GuestDeliveryService deliveries;
 	@Autowired RsvpService rsvps;
-	@Autowired CheckInQrSigner qrSigner;
 	@Autowired CheckInService checkIns;
 	@Autowired ReminderService reminders;
 	@Autowired ReportService reports;

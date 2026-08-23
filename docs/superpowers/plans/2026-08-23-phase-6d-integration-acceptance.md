@@ -6,7 +6,7 @@
 
 **Architecture:** Reuse the server-rendered Spring Boot monolith, existing domain services/routes, MySQL Testcontainers support, and focused phase journeys. Add one cross-feature journey, one bounded-scale regression, and three concise operational documents; production code changes only when a deterministic acceptance failure proves a shared root defect.
 
-**Tech Stack:** Java 25, Spring Boot 4.1, Spring MVC, Spring Security, Thymeleaf, Spring Data JPA, Flyway, MySQL 8.4 Testcontainers, JUnit 5, MockMvc, AssertJ
+**Tech Stack:** Java 21, Spring Boot 4.1, Spring MVC, Spring Security, Thymeleaf, Spring Data JPA, Flyway, MySQL 8.4 Testcontainers, JUnit 5, MockMvc, AssertJ
 
 **Spec:** `docs/superpowers/specs/2026-08-23-phase-6d-integration-acceptance-design.md`
 
@@ -66,7 +66,7 @@ git commit -m "test: prove integrated wedding lifecycle"
 ### Task 2: Two-Thousand-Guest Bounded-Scale Regression
 
 **Files:**
-- Create: `src/test/java/myweddinginvitation/webapp/acceptance/Phase6dScaleTest.java`
+- Create: `src/test/java/myweddinginvitation/webapp/guest/Phase6dScaleTest.java`
 
 **Interfaces:**
 - Consumes: `GuestRepository.saveAll`, existing category/RSVP/delivery/reminder/check-in repositories, `GuestService.search`, `ReportService.report`, and `GuestCsvService.export`

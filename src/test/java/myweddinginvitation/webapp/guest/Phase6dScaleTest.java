@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.EntityManagerFactory;
 import myweddinginvitation.webapp.checkin.CheckInRepository;
 import myweddinginvitation.webapp.reporting.ReportMetrics;
 import myweddinginvitation.webapp.reporting.ReportService;
@@ -18,6 +19,7 @@ import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest(properties = {
 		"app.bootstrap-admin.username=test-admin",
-		"app.bootstrap-admin.password=Test-Only-Password-2026"
+		"app.bootstrap-admin.password=Test-Only-Password-2026",
+		"spring.jpa.properties.hibernate.generate_statistics=true"
 })
 @Import(MySqlTestConfiguration.class)
 class Phase6dScaleTest {
@@ -58,6 +61,7 @@ class Phase6dScaleTest {
 	@Autowired CheckInRepository checkIns;
 	@Autowired ReportService reports;
 	@Autowired GuestCsvService csvs;
+	@Autowired EntityManagerFactory entityManagerFactory;
 	@Autowired JdbcTemplate jdbc;
 
 	@BeforeEach
@@ -94,8 +98,14 @@ class Phase6dScaleTest {
 				.extracting(GuestCategory::getId).containsOnly(firstCategoryId);
 		assertThat(rsvps.count()).isEqualTo(1_334);
 		assertThat(checkIns.count()).isEqualTo(500);
+		var statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
+		statistics.setStatisticsEnabled(true);
+		statistics.clear();
 		assertThat(reports.snapshot(null).totals()).isEqualTo(ALL_GUESTS);
+		assertThat(statistics.getPrepareStatementCount()).isLessThanOrEqualTo(4);
+		statistics.clear();
 		assertThat(reports.snapshot(firstCategoryId).totals()).isEqualTo(FIRST_CATEGORY);
+		assertThat(statistics.getPrepareStatementCount()).isLessThanOrEqualTo(4);
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		csvs.exportAll(output);
