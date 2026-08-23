@@ -58,7 +58,7 @@
 - Produces `EventStatusMessageForm` with `Long version` and four trimmed `@Size`-limited properties.
 - Removes `eventClosed` from general `WeddingSettingsForm`; Task 2 becomes its only application writer.
 
-- [ ] **Step 1: Write migration/domain RED tests.** Assert V1-V13 migrate a V12 database, V9 `event_closed` survives unchanged, six V13 columns are nullable, messages round-trip, close/reopen set actor/time, and general settings updates cannot change closure.
+- [x] **Step 1: Write migration/domain RED tests.** Assert V1-V13 migrate a V12 database, V9 `event_closed` survives unchanged, six V13 columns are nullable, messages round-trip, close/reopen set actor/time, and general settings updates cannot change closure.
 
 ```java
 WeddingSettings wedding = settings.findSingletonForUpdate().orElseThrow();
@@ -68,13 +68,13 @@ assertThat(wedding.getEventStatusChangedAt()).isEqualTo(now);
 assertThat(wedding.getEventStatusChangedBy()).isEqualTo("owner");
 ```
 
-- [ ] **Step 2: Run RED.**
+- [x] **Step 2: Run RED.**
 
 Run: `./mvnw -q -Dtest=ReportingEventStatusMigrationTest,WeddingContentServiceTest test`
 
 Expected: compilation/schema assertions fail because V13 metadata, copy, and domain methods do not exist.
 
-- [ ] **Step 3: Implement the migration and mapping.**
+- [x] **Step 3: Implement the migration and mapping.**
 
 ```sql
 alter table wedding_settings
@@ -88,13 +88,13 @@ alter table wedding_settings
 
 Strip nullable copy before storing and reject post-strip overlength values. Remove the old `eventClosed` form property, mapping, template binding, and `WeddingSettings.update(...)` assignment so ordinary settings save cannot bypass confirmation.
 
-- [ ] **Step 4: Run GREEN and adjacent settings tests.**
+- [x] **Step 4: Run GREEN and adjacent settings tests.**
 
 Run: `./mvnw -q -Dtest=ReportingEventStatusMigrationTest,WeddingContentMigrationTest,WeddingContentServiceTest,WeddingContentControllerTest test`
 
 Expected: all selected tests pass against MySQL; V1-V13 validates.
 
-- [ ] **Step 5: Refresh and commit.**
+- [x] **Step 5: Refresh and commit.**
 
 ```bash
 graphify update .
@@ -130,7 +130,7 @@ GET  /admin/wedding/event-status/reopen
 POST /admin/wedding/event-status/reopen
 ```
 
-- [ ] **Step 1: Write service RED tests.** Cover trimmed message storage, blank-to-null values, singleton locking, required confirmation, version conflict, enabled-admin attribution, close/reopen, already-in-target-state rejection, and rollback.
+- [x] **Step 1: Write service RED tests.** Cover trimmed message storage, blank-to-null values, singleton locking, required confirmation, version conflict, enabled-admin attribution, close/reopen, already-in-target-state rejection, and rollback.
 
 ```java
 assertThatThrownBy(() -> service.change(true, version, false, "owner"))
@@ -139,13 +139,13 @@ service.change(true, version, true, "owner");
 assertThat(service.view().closed()).isTrue();
 ```
 
-- [ ] **Step 2: Run service RED.**
+- [x] **Step 2: Run service RED.**
 
 Run: `./mvnw -q -Dtest=EventStatusServiceTest test`
 
 Expected: compilation fails because event-status service/forms do not exist.
 
-- [ ] **Step 3: Implement the service transaction.** Lock the singleton, compare version, require confirmation, resolve an enabled ADMIN by username, apply close/reopen with `clock.instant().truncatedTo(MICROS)`, and flush. Save message copy under the same lock/version rule.
+- [x] **Step 3: Implement the service transaction.** Lock the singleton, compare version, require confirmation, resolve an enabled ADMIN by username, apply close/reopen with `clock.instant().truncatedTo(MICROS)`, and flush. Save message copy under the same lock/version rule.
 
 ```java
 @Transactional
@@ -160,17 +160,17 @@ public void change(boolean closed, long version, boolean confirmed, String usern
 }
 ```
 
-- [ ] **Step 4: Write controller/security RED tests.** Assert admin GET/POST, confirmation checkbox, CSRF, stale-state redisplay with current version, safe message validation, staff/anonymous denial, and home navigation/status label.
+- [x] **Step 4: Write controller/security RED tests.** Assert admin GET/POST, confirmation checkbox, CSRF, stale-state redisplay with current version, safe message validation, staff/anonymous denial, and home navigation/status label.
 
-- [ ] **Step 5: Implement the pages/controller.** Use a dedicated confirmation page describing blocked/restored operations. Validation/conflict returns HTTP 200; success PRG redirects with a neutral flag. Do not use JavaScript confirmation.
+- [x] **Step 5: Implement the pages/controller.** Use a dedicated confirmation page describing blocked/restored operations. Validation/conflict returns HTTP 200; success PRG redirects with a neutral flag. Do not use JavaScript confirmation.
 
-- [ ] **Step 6: Run GREEN.**
+- [x] **Step 6: Run GREEN.**
 
 Run: `./mvnw -q -Dtest=EventStatusServiceTest,EventStatusAdminControllerTest,SecurityRoutesTest,WeddingContentControllerTest test`
 
 Expected: all selected tests pass; general settings cannot change closure.
 
-- [ ] **Step 7: Refresh and commit.**
+- [x] **Step 7: Refresh and commit.**
 
 ```bash
 graphify update .
@@ -200,7 +200,7 @@ git commit -m "feat: manage event closure safely"
 - Keeps `InvitationAccessService.resolve(...)` for signed personalized/file access.
 - Adds event-open checks to both `GuestDeliveryService.whatsappUri(...)` and `confirmSent(...)`.
 
-- [ ] **Step 1: Write public-page RED tests.** Close the wedding, request valid and malformed personalized paths in ID/EN, and assert HTTP 200 completed copy, EN → ID → default fallback, no guest name/RSVP/media/calendar data, and `Cache-Control: no-store`.
+- [x] **Step 1: Write public-page RED tests.** Close the wedding, request valid and malformed personalized paths in ID/EN, and assert HTTP 200 completed copy, EN → ID → default fallback, no guest name/RSVP/media/calendar data, and `Cache-Control: no-store`.
 
 ```java
 mockMvc.perform(get(validInvitation + "?language=EN"))
@@ -209,21 +209,21 @@ mockMvc.perform(get(validInvitation + "?language=EN"))
         .andExpect(content().string(not(containsString(guest.getDisplayName()))));
 ```
 
-- [ ] **Step 2: Implement closure before personalization.** Ask `EventStatusService.publicClosure(language)` before signed guest resolution in invitation GET and RSVP/QR-verification POST. Populate only language/title/message. QR image and calendar file routes retain signed resolution plus neutral 404.
+- [x] **Step 2: Implement closure before personalization.** Ask `EventStatusService.publicClosure(language)` before signed guest resolution in invitation GET and RSVP/QR-verification POST. Populate only language/title/message. QR image and calendar file routes retain signed resolution plus neutral 404.
 
-- [ ] **Step 3: Write initial-delivery RED tests.** Closed wedding rejects WhatsApp URI generation and confirmation without changing first/latest sent timestamps.
+- [x] **Step 3: Write initial-delivery RED tests.** Closed wedding rejects WhatsApp URI generation and confirmation without changing first/latest sent timestamps.
 
-- [ ] **Step 4: Add the initial-delivery service guard.** Require Published and Open before message generation and again before confirmed mutation. UI disabled state is not sufficient.
+- [x] **Step 4: Add the initial-delivery service guard.** Require Published and Open before message generation and again before confirmed mutation. UI disabled state is not sufficient.
 
-- [ ] **Step 5: Strengthen the cross-feature matrix.** Prove RSVP POST and QR verification render completed output; QR images/calendar return neutral 404; check-in preview/confirm return `CHECK_IN_CLOSED`; reminder queue/open/confirm reject; no rejected operation mutates guest state.
+- [x] **Step 5: Strengthen the cross-feature matrix.** Prove RSVP POST and QR verification render completed output; QR images/calendar return neutral 404; check-in preview/confirm return `CHECK_IN_CLOSED`; reminder queue/open/confirm reject; no rejected operation mutates guest state.
 
-- [ ] **Step 6: Run GREEN.**
+- [x] **Step 6: Run GREEN.**
 
 Run: `./mvnw -q -Dtest=PublicInvitationControllerTest,GuestDeliveryServiceTest,ReminderServiceTest,PublicRsvpControllerTest,PublicQrControllerTest,CalendarControllerTest,CheckInServiceTest test`
 
 Expected: all selected tests pass.
 
-- [ ] **Step 7: Refresh and commit.**
+- [x] **Step 7: Refresh and commit.**
 
 ```bash
 graphify update .
@@ -248,7 +248,7 @@ git commit -m "fix: enforce event closure across guest flows"
 - `ReportMetrics` contains: invitations, potentialPeople, rsvpAttending, rsvpDeclined, rsvpMissing, plannedPeople, checkedInInvitations, actualPeople, attendingNotCheckedIn, remainingPlannedPeople, initialSent, initialUnsent, rsvpReminderSent, rsvpReminderUnsent, eventReminderSent, eventReminderUnsent, pendingGreetings.
 - Consumes one `GuestRepository.findAllActiveForReport(Pageable)` fetch with category, one `RsvpRepository.findByGuestIdIn(...)`, and one `CheckInRepository.findByGuestIdIn(...)`.
 
-- [ ] **Step 1: Write calculation RED tests.** Seed active/archived and categorized/uncategorized guests covering `+1`, all RSVP states, pending greetings, three delivery types, corrected active check-in, and cancelled check-in. Assert invitation-vs-people semantics, `max(planned-actual, 0)`, category filtering, sorted breakdown, archive exclusion, and print fields.
+- [x] **Step 1: Write calculation RED tests.** Seed active/archived and categorized/uncategorized guests covering `+1`, all RSVP states, pending greetings, three delivery types, corrected active check-in, and cancelled check-in. Assert invitation-vs-people semantics, `max(planned-actual, 0)`, category filtering, sorted breakdown, archive exclusion, and print fields.
 
 ```java
 ReportMetrics metrics = reports.snapshot(null).totals();
@@ -257,15 +257,15 @@ assertThat(metrics.potentialPeople()).isEqualTo(knownPotentialPeople);
 assertThat(metrics.actualPeople()).isEqualTo(currentActualPeople);
 ```
 
-- [ ] **Step 2: Write query-count RED test.** Clear Hibernate statistics, call `snapshot(null)` across multiple records, and assert four prepared statements or fewer; adding guests must not increase that count.
+- [x] **Step 2: Write query-count RED test.** Clear Hibernate statistics, call `snapshot(null)` across multiple records, and assert four prepared statements or fewer; adding guests must not increase that count.
 
-- [ ] **Step 3: Run RED.**
+- [x] **Step 3: Run RED.**
 
 Run: `./mvnw -q -Dtest=ReportServiceTest test`
 
 Expected: compilation fails because reporting types/fetch do not exist.
 
-- [ ] **Step 4: Implement the bounded scan.** Fetch at most 2,001 active guests, reject more than 2,000, validate non-null category ID, bulk-map RSVP/check-in by guest ID, and fold immutable totals/category metrics/print rows.
+- [x] **Step 4: Implement the bounded scan.** Fetch at most 2,001 active guests, reject more than 2,000, validate non-null category ID, bulk-map RSVP/check-in by guest ID, and fold immutable totals/category metrics/print rows.
 
 ```java
 // ponytail: bounded single-wedding scan; replace with aggregate SQL only if the documented 2,000-guest ceiling changes.
@@ -274,13 +274,13 @@ List<Guest> guests = repository.findAllActiveForReport(PageRequest.of(0, 2_001))
 
 Initial sent uses confirmed delivery state; reminders use non-null confirmed timestamps. Pending greetings require active guest, consent, non-null greeting, and `PENDING`.
 
-- [ ] **Step 5: Run GREEN and adjacent summary/export tests.**
+- [x] **Step 5: Run GREEN and adjacent summary/export tests.**
 
 Run: `./mvnw -q -Dtest=ReportServiceTest,AdminRsvpSummaryTest,CheckInServiceTest,GuestCsvServiceTest test`
 
 Expected: all selected tests pass; query count is constant.
 
-- [ ] **Step 6: Refresh and commit.**
+- [x] **Step 6: Refresh and commit.**
 
 ```bash
 graphify update .
@@ -304,9 +304,9 @@ git commit -m "feat: calculate operational reports"
 - Consumes Task 4 service and `GuestCategoryService.findAll()`.
 - Produces `GET /admin/reports?categoryId=` and `GET /admin/reports/print?categoryId=`.
 
-- [ ] **Step 1: Write MVC RED tests.** Assert summary cards, distinct invitations/people labels, sorted category table, filter preservation, invalid-category safe response, all print rows without pagination, moderation/CSV links, and admin-home navigation.
+- [x] **Step 1: Write MVC RED tests.** Assert summary cards, distinct invitations/people labels, sorted category table, filter preservation, invalid-category safe response, all print rows without pagination, moderation/CSV links, and admin-home navigation.
 
-- [ ] **Step 2: Write privacy RED tests.** Seed phone, internal note, greeting, PIN state, and correction reason. Assert print contains only display name, category, RSVP, planned count, check-in status/count/time and none of those sensitive values.
+- [x] **Step 2: Write privacy RED tests.** Seed phone, internal note, greeting, PIN state, and correction reason. Assert print contains only display name, category, RSVP, planned count, check-in status/count/time and none of those sensitive values.
 
 ```java
 mockMvc.perform(get("/admin/reports/print").session(admin))
@@ -316,17 +316,17 @@ mockMvc.perform(get("/admin/reports/print").session(admin))
         .andExpect(content().string(not(containsString("private note"))));
 ```
 
-- [ ] **Step 3: Implement semantic server-rendered pages.** Use cards and plain tables, no chart. The print stylesheet hides navigation/actions under `@media print`; browser Print supplies paper/PDF. Link existing `/admin/guests/export.csv` unchanged.
+- [x] **Step 3: Implement semantic server-rendered pages.** Use cards and plain tables, no chart. The print stylesheet hides navigation/actions under `@media print`; browser Print supplies paper/PDF. Link existing `/admin/guests/export.csv` unchanged.
 
-- [ ] **Step 4: Extend security tests.** Anonymous redirects, STAFF forbidden, ADMIN 200 for report/print, and CSV remains ADMIN-only while Closed.
+- [x] **Step 4: Extend security tests.** Anonymous redirects, STAFF forbidden, ADMIN 200 for report/print, and CSV remains ADMIN-only while Closed.
 
-- [ ] **Step 5: Run GREEN.**
+- [x] **Step 5: Run GREEN.**
 
 Run: `./mvnw -q -Dtest=ReportAdminControllerTest,SecurityRoutesTest,GuestCsvControllerTest,GreetingModerationControllerTest test`
 
 Expected: all selected tests pass; sensitive seeded values are absent from print.
 
-- [ ] **Step 6: Refresh and commit.**
+- [x] **Step 6: Refresh and commit.**
 
 ```bash
 graphify update .
@@ -353,7 +353,7 @@ git commit -m "feat: add reports and print view"
 - Produces `SystemStatusView check()` using `JdbcTemplate`, `AppProperties.mediaDirectory()`, `WeddingSettingsRepository`, and `Clock`.
 - Produces `GET /admin/system-status`; Refresh loads the same GET.
 
-- [ ] **Step 1: Write service RED tests.** With real DB and temporary filesystem assert application/database/media checks, readable+writable directory, usable-space display, `Asia/Jakarta`, Draft/Published, Open/Closed, and mutable-clock time. A missing/non-directory media path must yield `Problem` without throwing.
+- [x] **Step 1: Write service RED tests.** With real DB and temporary filesystem assert application/database/media checks, readable+writable directory, usable-space display, `Asia/Jakarta`, Draft/Published, Open/Closed, and mutable-clock time. A missing/non-directory media path must yield `Problem` without throwing.
 
 ```java
 SystemStatusView view = service.check();
@@ -364,23 +364,23 @@ assertThat(view.checks()).anySatisfy(check -> {
 assertThat(view.checkedAt()).isEqualTo(clock.instant());
 ```
 
-- [ ] **Step 2: Run service RED.**
+- [x] **Step 2: Run service RED.**
 
 Run: `./mvnw -q -Dtest=SystemStatusServiceTest test`
 
 Expected: compilation fails because status types/service do not exist.
 
-- [ ] **Step 3: Implement on-demand checks.** Run `select 1` through `JdbcTemplate`; use `Files.isDirectory/isReadable/isWritable` and `Files.getFileStore(path).getUsableSpace()` only for an existing directory; read timezone/publication/closure from singleton settings. Catch media inspection exceptions locally and never return configured path or exception text.
+- [x] **Step 3: Implement on-demand checks.** Run `select 1` through `JdbcTemplate`; use `Files.isDirectory/isReadable/isWritable` and `Files.getFileStore(path).getUsableSpace()` only for an existing directory; read timezone/publication/closure from singleton settings. Catch media inspection exceptions locally and never return configured path or exception text.
 
-- [ ] **Step 4: Write MVC/security RED tests and implement page.** Assert ADMIN 200, STAFF forbidden, anonymous redirect, Refresh link, semantic status, checked time, and absence of media path/JDBC URL/credentials/stack trace. Add no polling or JavaScript.
+- [x] **Step 4: Write MVC/security RED tests and implement page.** Assert ADMIN 200, STAFF forbidden, anonymous redirect, Refresh link, semantic status, checked time, and absence of media path/JDBC URL/credentials/stack trace. Add no polling or JavaScript.
 
-- [ ] **Step 5: Run GREEN.**
+- [x] **Step 5: Run GREEN.**
 
 Run: `./mvnw -q -Dtest=SystemStatusServiceTest,SystemStatusAdminControllerTest,SecurityRoutesTest test`
 
 Expected: all selected tests pass for healthy and failing media fixtures.
 
-- [ ] **Step 6: Refresh and commit.**
+- [x] **Step 6: Refresh and commit.**
 
 ```bash
 graphify update .
