@@ -1,8 +1,8 @@
 # Product Design
 
-Status: implemented and accepted through Phase 6B; Phase 6C functionality is
-focused-verified while its clean full-suite gate and manual acceptance remain
-pending; the Phase 5 physical USB scanner check remains deferred
+Status: implemented and accepted through Phase 6B; Phase 6C implementation and
+automated verification are complete while manual acceptance remains pending;
+the Phase 5 physical USB scanner check remains deferred
 
 ## Selected product approach
 
@@ -206,6 +206,7 @@ alternative image text, visible audio controls, and reduced-motion behavior.
   and unchanged RSVP/token/delivery/QR/history state against real MySQL.
 
 Phase 6A and Phase 6B manual acceptance are complete. Phase 6C functionality
-and focused automated verification are complete; its clean full-suite gate and
-phone/laptop checklist are pending. The Phase 5 physical USB scanner check
-remains separately deferred. Phase 6D and Phase 7 remain pending.
+and automated verification are complete, including a 429-test clean suite
+against Flyway V1-V13. Its phone/laptop checklist is pending. The Phase 5
+physical USB scanner check remains separately deferred. Phase 6D and Phase 7
+remain pending.

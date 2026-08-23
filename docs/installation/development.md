@@ -137,8 +137,8 @@ checks. Filesystem failures show `Problem` without a configured path.
 
 ### Phase 6C manual phone/laptop acceptance
 
-Status: implementation journey and the 118-test focused MySQL/Flyway V1-V13
-suite pass. The clean full-suite gate and user acceptance are pending.
+Status: implementation journey, the 118-test focused suite, and the 429-test
+clean MySQL/Flyway V1-V13 suite pass. User acceptance is pending.
 
 - [ ] Compare known guest data with report totals and category breakdown.
 - [ ] Filter by category and print/save the operational view as PDF.
@@ -342,13 +342,10 @@ WhatsApp application behavior and calendar-client imports remain in the Phase
 copy, close/reopen, every blocked and retained boundary, local status, and
 unchanged RSVP/token/delivery/QR/history state. Its single-test mutation RED and
 GREEN pass, and the focused Phase 6C suite passed 118 tests with zero failures,
-errors, or skips against MySQL 8.4/Flyway V1-V13 on 2026-08-19. The one
-permitted `./mvnw -q clean test` run reached 429 tests but failed with three
-failures and two errors from stale V12 migration and draft-event delivery-test
-fixtures. After those fixtures were corrected,
-`./mvnw -q -Dtest='GuestDeliveryControllerTest,ReminderCalendarMigrationTest' test`
-passed all seven affected tests with zero failures, errors, or skips. The clean
-full-suite gate was not repeated, and the Phase 6C device checklist remains
+errors, or skips against MySQL 8.4/Flyway V1-V13 on 2026-08-19. After the stale
+V12 migration and draft-event delivery fixtures exposed by the first clean run
+were corrected, the final `./mvnw -q clean test` passed all 429 tests with zero
+failures, errors, or skips on 2026-08-23. The Phase 6C device checklist remains
 manual.
 
 For rootless Podman, use the socket setup above and run the same command:

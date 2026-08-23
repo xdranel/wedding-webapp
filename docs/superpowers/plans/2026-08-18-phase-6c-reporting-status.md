@@ -456,7 +456,7 @@ MySQL 8.4 and Flyway V1-V13.
 
 Keep the physical USB scanner as a separate Phase 5 reminder. Mark Phase 6D/7 pending; do not claim Phase 6C manual acceptance before the user completes it.
 
-- [ ] **Step 5: Run final gates.**
+- [x] **Step 5: Run final gates.**
 
 ```bash
 git diff --check
@@ -465,14 +465,12 @@ git diff --check
 
 Expected: all tests pass with zero failures/errors/skips and Flyway V1-V13 validates.
 
-Evidence (2026-08-19): `git diff --check` passed. The one permitted clean full
-suite validated Flyway V1-V13 and ran 429 tests, then failed with three failures
-and two errors: four stale draft-event assumptions in
-`GuestDeliveryControllerTest` and the old V1-V12 list in
-`ReminderCalendarMigrationTest`. After correcting only those fixtures, the
-focused affected-class command passed seven tests with zero
-failures/errors/skips. The clean full suite was not repeated, so this step and
-the implementation-complete gate remain pending.
+Evidence: `git diff --check` passed. The first clean run exposed four stale
+draft-event assumptions in `GuestDeliveryControllerTest` and the old V1-V12
+list in `ReminderCalendarMigrationTest`. After correcting only those fixtures,
+the focused affected-class command passed seven tests. The final permitted
+clean run passed 429 tests with zero failures/errors/skips and validated Flyway
+V1-V13 on 2026-08-23.
 
 - [x] **Step 6: Refresh, self-review, and commit.** Review for personal-data leakage, alternate closure paths, report-unit mistakes, staged generated files, and unsupported completion claims.
 
@@ -486,7 +484,7 @@ git commit -m "docs: complete phase 6c reporting and status"
 Evidence (2026-08-19): `graphify update .` rebuilt 3,534 nodes and 10,111
 edges. Self-review confirmed identity-free completed pages, privacy-limited
 print, active-guest report units, closed/open boundary coverage, unchanged guest
-state, and explicit pending full/manual gates. Generated `graphify-out/` files
+state, and explicit pending manual acceptance. Generated `graphify-out/` files
 remain unstaged.
 
 ## Final Acceptance Gate

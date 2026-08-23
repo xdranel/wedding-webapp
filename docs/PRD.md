@@ -1,11 +1,10 @@
 # Product Requirements
 
-Status: implemented and accepted through Phase 6B; Phase 6C functionality and
-focused automated verification are complete, but the clean full-suite gate and
-manual acceptance remain pending; the Phase 5 physical USB scanner check
-remains deferred
+Status: implemented and accepted through Phase 6B; Phase 6C implementation and
+automated verification are complete, but manual acceptance remains pending;
+the Phase 5 physical USB scanner check remains deferred
 
-## Implementation status — 2026-08-17
+## Implementation status — 2026-08-23
 
 Phase 5 server implementation and automated MySQL verification are complete:
 restricted staff lifecycle, USB/camera/manual preview and confirmation routes,
@@ -27,12 +26,11 @@ import, and laptop calendar import passed on 2026-08-17. Phase 6C current-state
 reports, privacy-limited print, existing complete CSV reuse, reversible closure,
 neutral completed pages, and local System Status are implemented. The Phase 6C
 real-MySQL journey passes, and its focused suite passed 118 tests with zero
-failures, errors, or skips on 2026-08-19. The one permitted clean full-suite run
-then exposed five stale test expectations (429 tests: three failures and two
-errors); both affected classes were corrected and their seven tests pass, but
-the clean full-suite gate was not repeated. Manual phone/laptop acceptance,
-Phase 6D integration/acceptance, and Phase 7 deployment/operations remain
-pending.
+failures, errors, or skips on 2026-08-19. After correcting the five stale test
+expectations exposed by the first clean run, the final clean suite passed all
+429 tests with zero failures, errors, or skips against Flyway V1-V13 on
+2026-08-23. Manual phone/laptop acceptance, Phase 6D integration/acceptance,
+and Phase 7 deployment/operations remain pending.
 
 ## Change management
 

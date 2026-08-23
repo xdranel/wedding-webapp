@@ -149,7 +149,7 @@ Phase 6B reminder/calendar implementation and automated MySQL verification are
 complete. Manual ID/EN WhatsApp, Confirm/Next, and phone/laptop calendar-import
 acceptance passed on 2026-08-17. The separate Phase 5 physical USB scanner
 check is still pending. Phase 6C functionality has real-MySQL journey and
-focused verification coverage. Its one permitted clean full-suite run exposed
-stale test fixtures that now pass a focused recheck, so the clean full-suite
-gate and phone/laptop checklist remain pending. Phase 6D and Phase 7 remain
+focused verification coverage. After correcting stale fixtures exposed by the
+first clean run, its final clean suite passed all 429 tests against Flyway
+V1-V13. The phone/laptop checklist remains pending. Phase 6D and Phase 7 remain
 pending.
