@@ -274,3 +274,8 @@ the Phase 5 physical USB scanner check remains deferred
 151. System Status is computed only on request, stores no result, exposes no
      filesystem path or exception detail, and provides no alerting or remote
      client/network guarantee.
+152. Generated initial-invitation and reminder links carry the manually selected
+     `ID` or `EN` language so completed-event copy does not require guest
+     identity resolution.
+153. Event closure blocks guest RSVP writes but does not block administrator
+     RSVP corrections.

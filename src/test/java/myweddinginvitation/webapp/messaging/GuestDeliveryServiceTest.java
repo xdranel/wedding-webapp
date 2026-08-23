@@ -90,7 +90,7 @@ class GuestDeliveryServiceTest {
 		assertThat(uri.getHost()).isEqualTo("wa.me");
 		assertThat(uri.getPath()).isEqualTo("/6281234567890");
 		assertThat(URLDecoder.decode(uri.getRawQuery().substring("text=".length()), UTF_8))
-				.contains("Dear Ibu Sari", "Rama & Shinta", "https://invite.example/i/");
+				.contains("Dear Ibu Sari", "Rama & Shinta", "https://invite.example/i/", "?language=EN");
 		assertThat(guests.findById(guest.getId())).get()
 				.extracting(Guest::getDeliveryState, Guest::getPreferredLanguage)
 				.containsExactly(DeliveryState.UNSENT, MessageLanguage.ID);

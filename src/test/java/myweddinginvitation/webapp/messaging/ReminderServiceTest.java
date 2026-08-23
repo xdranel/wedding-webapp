@@ -196,11 +196,11 @@ class ReminderServiceTest {
 
 		assertThat(uri).hasScheme("https").hasHost("wa.me").hasPath("/6281200000001");
 		String message = URLDecoder.decode(uri.getRawQuery().substring("text=".length()), UTF_8);
-		assertThat(message).contains("EN Sari", "2030-08-12T12:00", "https://invite.example/i/")
-				.doesNotContain("QR");
+		assertThat(message).contains("EN Sari", "2030-08-12T12:00", "https://invite.example/i/", "?language=EN")
+				.doesNotContain("/qr.png", "/qr-download.png", "data:image");
 		String indonesian = URLDecoder.decode(reminders.whatsappUri(guest.getId(), ReminderKind.RSVP, MessageLanguage.ID)
 				.getRawQuery().substring("text=".length()), UTF_8);
-		assertThat(indonesian).contains("ID Sari");
+		assertThat(indonesian).contains("ID Sari", "?language=ID");
 		assertThat(reload(guest.getId()))
 				.extracting(Guest::getPreferredLanguage, Guest::getLastRsvpReminderSentAt, Guest::getLastEventReminderSentAt)
 				.containsExactly(MessageLanguage.ID, null, null);

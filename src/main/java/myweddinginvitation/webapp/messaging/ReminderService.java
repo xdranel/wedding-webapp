@@ -82,7 +82,7 @@ public class ReminderService {
 		requireEligible(guest, rsvp, kind, wedding, language);
 		WeddingPreview preview = weddingContent.preview(guest.getSalutation(), guest.getDisplayName(), language.name());
 		String message = templates.render(type(kind), language, new MessageTemplateValues(
-				guest.getSalutation(), guest.getDisplayName(), preview.coupleTitle(), signer.urlFor(guest),
+				guest.getSalutation(), guest.getDisplayName(), preview.coupleTitle(), signer.urlFor(guest, language),
 				value(wedding.getRsvpDeadline()), date(event(preview, EventType.CEREMONY)),
 				location(event(preview, EventType.CEREMONY)), date(event(preview, EventType.RECEPTION)),
 				location(event(preview, EventType.RECEPTION))));

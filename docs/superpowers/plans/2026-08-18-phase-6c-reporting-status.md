@@ -448,7 +448,7 @@ MySQL 8.4 and Flyway V1-V13.
 - [ ] Compare known guest data with report totals and category breakdown.
 - [ ] Filter by category and print/save the operational view as PDF.
 - [ ] Close the event and verify neutral ID/EN completed pages without guest data.
-- [ ] Verify RSVP, QR, calendar, initial delivery, reminders, and check-in are blocked.
+- [ ] Verify guest RSVP, QR, calendar, initial delivery, reminders, and check-in are blocked; administrator RSVP correction remains available.
 - [ ] Verify reports, CSV, moderation, history, content, and media admin remain available.
 - [ ] Reopen the event and verify normal rules resume without data changes.
 - [ ] Refresh System Status on the available laptop and phone.

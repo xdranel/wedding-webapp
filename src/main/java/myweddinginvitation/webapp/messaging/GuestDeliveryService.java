@@ -44,7 +44,7 @@ public class GuestDeliveryService {
 		WeddingPreview.EventView ceremony = event(preview, EventType.CEREMONY);
 		WeddingPreview.EventView reception = event(preview, EventType.RECEPTION);
 		String message = templates.render(MessageType.INVITATION, language, new MessageTemplateValues(
-				guest.getSalutation(), guest.getDisplayName(), preview.coupleTitle(), signer.urlFor(guest),
+				guest.getSalutation(), guest.getDisplayName(), preview.coupleTitle(), signer.urlFor(guest, language),
 				value(weddingContent.settingsForm().getRsvpDeadline()),
 				date(ceremony), location(ceremony), date(reception), location(reception)));
 		return UriComponentsBuilder.fromUriString("https://wa.me")

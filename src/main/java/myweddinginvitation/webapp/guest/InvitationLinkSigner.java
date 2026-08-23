@@ -35,6 +35,12 @@ public class InvitationLinkSigner {
 		return url(guest.getPublicId(), guest.getInvitationTokenVersion());
 	}
 
+	public String urlFor(Guest guest, MessageLanguage language) {
+		return UriComponentsBuilder.fromUriString(urlFor(guest))
+				.queryParam("language", language.name())
+				.build().encode().toUriString();
+	}
+
 	String url(UUID publicId, long version) {
 		return UriComponentsBuilder.fromUri(baseUri)
 				.pathSegment(publicId.toString(), Long.toString(version), sign(publicId, version))
