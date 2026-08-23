@@ -110,7 +110,8 @@ Status: implementation and automated MySQL verification complete on
 - [x] Automated journey coverage proves that regenerating the invitation token makes old calendar links unavailable.
 
 The Phase 5 physical USB scanner check remains a separate non-blocking
-deferral. Phase 6C manual acceptance, Phase 6D, and Phase 7 remain pending.
+deferral. Phase 6C manual acceptance is complete; Phase 6D and Phase 7 remain
+pending.
 
 ### Phase 6C reports, closure, and System Status
 
@@ -138,15 +139,15 @@ checks. Filesystem failures show `Problem` without a configured path.
 ### Phase 6C manual phone/laptop acceptance
 
 Status: implementation journey, the 118-test focused suite, and the 429-test
-clean MySQL/Flyway V1-V13 suite pass. User acceptance is pending.
+clean MySQL/Flyway V1-V13 suite pass. User acceptance passed on 2026-08-23.
 
-- [ ] Compare known guest data with report totals and category breakdown.
-- [ ] Filter by category and print/save the operational view as PDF.
-- [ ] Close the event and verify neutral ID/EN completed pages without guest data.
-- [ ] Verify guest RSVP, QR, calendar, initial delivery, reminders, and check-in are blocked; administrator RSVP correction remains available.
-- [ ] Verify reports, CSV, moderation, history, content, and media admin remain available.
-- [ ] Reopen the event and verify normal rules resume without data changes.
-- [ ] Refresh System Status on the available laptop and phone.
+- [x] Compare known guest data with report totals and category breakdown.
+- [x] Filter by category and print/save the operational view as PDF.
+- [x] Close the event and verify neutral ID/EN completed pages without guest data.
+- [x] Verify guest RSVP, QR, calendar, initial delivery, reminders, and check-in are blocked; administrator RSVP correction remains available.
+- [x] Verify reports, CSV, moderation, history, content, and media admin remain available.
+- [x] Reopen the event and verify normal rules resume without data changes.
+- [x] Refresh System Status on the available laptop and phone.
 
 The physical USB scanner remains a separate Phase 5 hardware check. Phase 6D
 and Phase 7 remain pending.

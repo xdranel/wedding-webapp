@@ -489,4 +489,7 @@ remain unstaged.
 
 ## Final Acceptance Gate
 
-Phase 6C becomes implementation-complete only after Tasks 1-7, the focused suite, clean full suite, V1-V13 migration, graph refresh, and review pass. It becomes user-accepted only after the available laptop/phone manual checklist passes. The physical USB scanner remains a separate non-blocking Phase 5 deferral; Phase 6D and Phase 7 remain pending.
+Phase 6C is implementation-complete and user-accepted as of 2026-08-23: Tasks
+1-7, focused and clean suites, Flyway V1-V13, graph refresh, review, and the
+available laptop/phone checklist all passed. The physical USB scanner remains
+a separate non-blocking Phase 5 deferral; Phase 6D and Phase 7 remain pending.

@@ -1,8 +1,7 @@
 # Product Requirements
 
-Status: implemented and accepted through Phase 6B; Phase 6C implementation and
-automated verification are complete, but manual acceptance remains pending;
-the Phase 5 physical USB scanner check remains deferred
+Status: implemented and accepted through Phase 6C; the Phase 5 physical USB
+scanner check remains deferred
 
 ## Implementation status — 2026-08-23
 
@@ -29,8 +28,8 @@ real-MySQL journey passes, and its focused suite passed 118 tests with zero
 failures, errors, or skips on 2026-08-19. After correcting the five stale test
 expectations exposed by the first clean run, the final clean suite passed all
 429 tests with zero failures, errors, or skips against Flyway V1-V13 on
-2026-08-23. Manual phone/laptop acceptance, Phase 6D integration/acceptance,
-and Phase 7 deployment/operations remain pending.
+2026-08-23. Manual phone/laptop acceptance also passed on 2026-08-23. Phase 6D
+integration/acceptance and Phase 7 deployment/operations remain pending.
 
 ## Change management
 

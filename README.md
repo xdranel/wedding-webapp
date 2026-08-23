@@ -151,5 +151,5 @@ acceptance passed on 2026-08-17. The separate Phase 5 physical USB scanner
 check is still pending. Phase 6C functionality has real-MySQL journey and
 focused verification coverage. After correcting stale fixtures exposed by the
 first clean run, its final clean suite passed all 429 tests against Flyway
-V1-V13. The phone/laptop checklist remains pending. Phase 6D and Phase 7 remain
-pending.
+V1-V13. The phone/laptop checklist passed on 2026-08-23. Phase 6D and Phase 7
+remain pending.

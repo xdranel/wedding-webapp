@@ -1,7 +1,6 @@
 # Business Rules
 
-Status: implemented and accepted through Phase 6B; Phase 6C implementation and
-automated verification are complete while manual acceptance remains pending;
+Status: implemented and accepted through Phase 6C;
 the Phase 5 physical USB scanner check remains deferred
 
 1. An invitation belongs to one named primary guest.
