@@ -13,7 +13,6 @@ import java.util.List;
 import myweddinginvitation.webapp.checkin.CheckInRepository;
 import myweddinginvitation.webapp.reporting.ReportMetrics;
 import myweddinginvitation.webapp.reporting.ReportService;
-import myweddinginvitation.webapp.rsvp.AttendanceResponse;
 import myweddinginvitation.webapp.rsvp.RsvpRepository;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
 import org.apache.commons.csv.CSVFormat;
@@ -45,6 +44,12 @@ class Phase6dScaleTest {
 	private static final ReportMetrics FIRST_CATEGORY = new ReportMetrics(
 			400, 600, 134, 133, 133, 201, 100, 200, 100, 1,
 			200, 200, 100, 300, 400, 0, 0);
+	private static final List<String> CSV_HEADER = List.of(
+			"display_name", "whatsapp_number", "salutation", "category", "plus_one_allowed", "preferred_language",
+			"internal_note", "archive_state", "archived_at", "delivery_state", "first_sent_at", "last_sent_at",
+			"created_at", "updated_at", "rsvp_status", "planned_attendee_count", "greeting",
+			"greeting_public_consent", "greeting_moderation_status", "private_organizer_note", "rsvp_updated_by",
+			"rsvp_updated_at");
 
 	@Autowired GuestRepository guests;
 	@Autowired GuestCategoryRepository categories;
@@ -80,15 +85,23 @@ class Phase6dScaleTest {
 				PageRequest.of(0, PAGE_SIZE, Sort.by("displayName").ascending()));
 		assertThat(page.getTotalElements()).isEqualTo(2_000);
 		assertThat(page.getContent()).hasSize(PAGE_SIZE);
+		long firstCategoryId = seededCategories.getFirst().getId();
+		var categoryPage = guestService.search(new GuestListQuery("Scale Guest", null, false, firstCategoryId, null,
+				false, null), PageRequest.of(0, PAGE_SIZE, Sort.by("displayName").ascending()));
+		assertThat(categoryPage.getTotalElements()).isEqualTo(400);
+		assertThat(categoryPage.getContent()).hasSize(PAGE_SIZE);
+		assertThat(categoryPage.getContent()).extracting(Guest::getCategory)
+				.extracting(GuestCategory::getId).containsOnly(firstCategoryId);
 		assertThat(rsvps.count()).isEqualTo(1_334);
 		assertThat(checkIns.count()).isEqualTo(500);
 		assertThat(reports.snapshot(null).totals()).isEqualTo(ALL_GUESTS);
-		assertThat(reports.snapshot(seededCategories.getFirst().getId()).totals()).isEqualTo(FIRST_CATEGORY);
+		assertThat(reports.snapshot(firstCategoryId).totals()).isEqualTo(FIRST_CATEGORY);
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		csvs.exportAll(output);
 		try (CSVParser parser = CSVFormat.RFC4180.builder().setHeader().setSkipHeaderRecord(true).get()
 				.parse(new StringReader(output.toString(UTF_8).substring(1)))) {
+			assertThat(parser.getHeaderNames()).containsExactlyElementsOf(CSV_HEADER);
 			List<CSVRecord> rows = parser.getRecords();
 			assertThat(rows).hasSize(GUESTS);
 			assertThat(rows).anySatisfy(row -> assertThat(row.get("display_name"))
