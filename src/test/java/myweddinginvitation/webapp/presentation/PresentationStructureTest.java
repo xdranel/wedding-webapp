@@ -56,6 +56,19 @@ class PresentationStructureTest {
 	}
 
 	@Test
+	void searchTabStopsCameraThroughSharedLifecycle() throws IOException {
+		String home = resource("templates/checkin/home.html");
+		assertThat(home).contains("id=\"scan-tab\"", "id=\"search-tab\"", "aria-controls=\"scan-panel\"",
+				"aria-controls=\"search-panel\"", "id=\"scanner-start\"", "id=\"scanner-stop\"",
+				"id=\"scanner-video\"", "id=\"scanner-input\"");
+
+		String scanner = resource("static/js/check-in-scanner.js");
+		assertThat(scanner).containsSubsequence("function activateTab(",
+				"if (activeTab.id !== 'scan-tab') stop();",
+				"tab.setAttribute('aria-selected'", ".hidden = !selected");
+	}
+
+	@Test
 	void taskFivePagesUseExactActivePageKeys() throws IOException {
 		String navigation = resource("templates/fragments/admin-navigation.html");
 		for (String[] page : new String[][] {

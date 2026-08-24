@@ -11,6 +11,7 @@ let scanner;
 let scanning = false;
 
 function activateTab(activeTab, moveFocus = false) {
+  if (activeTab.id !== 'scan-tab') stop();
   tabs.forEach((tab) => {
     const selected = tab === activeTab;
     tab.setAttribute('aria-selected', selected.toString());
@@ -45,6 +46,7 @@ if (!window.isSecureContext) {
 }
 
 function stop() {
+  const wasScanning = scanning;
   scanning = false;
   scanner?.stop();
   video.srcObject?.getTracks().forEach((track) => track.stop());
@@ -52,6 +54,10 @@ function stop() {
   video.hidden = true;
   startButton.disabled = false;
   stopButton.disabled = true;
+  if (wasScanning) {
+    status.classList.remove('status-error');
+    status.textContent = 'Camera stopped. Use a USB scanner or manual search.';
+  }
 }
 
 function fallback(message) {
@@ -91,9 +97,5 @@ async function start() {
 }
 
 startButton.addEventListener('click', start);
-stopButton.addEventListener('click', () => {
-  stop();
-  status.classList.remove('status-error');
-  status.textContent = 'Camera stopped. Use a USB scanner or manual search.';
-});
+stopButton.addEventListener('click', stop);
 window.addEventListener('pagehide', stop);
