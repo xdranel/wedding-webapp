@@ -114,7 +114,7 @@ class CheckInJourneyTest {
 				.andExpect(model().attribute("checkInSummary", is(new CheckInService.CheckInSummary(1, 2))));
 		mockMvc.perform(get("/admin/guests").session(adminSession).param("checkedIn", "true"))
 				.andExpect(content().string(containsString("Journey Guest")))
-				.andExpect(content().string(containsString("<td>2</td>")));
+				.andExpect(content().string(containsString("<td data-label=\"Actual attendees\">2</td>")));
 		mockMvc.perform(get("/admin/guests/{id}", guest.getId()).session(adminSession))
 				.andExpect(content().string(containsString("Current check-in")))
 				.andExpect(content().string(containsString("door-staff")))

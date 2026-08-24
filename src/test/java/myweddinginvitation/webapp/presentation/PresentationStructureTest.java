@@ -48,6 +48,14 @@ class PresentationStructureTest {
 	}
 
 	@Test
+	void staffPagesUseFocusedCheckInShell() throws IOException {
+		for (String page : new String[] {"home", "preview", "result"}) {
+			String html = resource("templates/checkin/" + page + ".html");
+			assertThat(html).contains("/css/app.css", "fragments/staff-header", "staff-shell");
+		}
+	}
+
+	@Test
 	void taskFivePagesUseExactActivePageKeys() throws IOException {
 		String navigation = resource("templates/fragments/admin-navigation.html");
 		for (String[] page : new String[][] {

@@ -1,11 +1,20 @@
 <!doctype html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Confirm check-in</title></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Confirm check-in</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
 <body>
-<main>
+<a class="skip-link" href="#main-content">Skip to confirmation</a>
+<div class="staff-shell">
+<div th:replace="~{fragments/staff-header :: header()}"></div>
+<main id="main-content" class="staff-main">
   <h1>Confirm check-in</h1>
-  <p><a th:href="@{/check-in}">Back to check-in</a></p>
-  <dl>
+  <article class="checkin-result card" th:classappend="${preview.currentCheckIn == null} ? ' status-valid' : ' status-duplicate'">
+  <p class="status" th:text="${preview.currentCheckIn == null} ? 'Ready to check in' : 'Already checked in'">Ready to check in</p>
+  <dl class="guest-summary">
     <dt>Guest</dt><dd th:text="${preview.displayName}">Guest</dd>
     <dt>Category</dt><dd th:text="${preview.categoryName == null ? 'Uncategorized' : preview.categoryName}">Category</dd>
     <dt>Phone</dt><dd th:text="${preview.maskedWhatsappNumber}">•••• 0000</dd>
@@ -17,8 +26,8 @@
     <h2 id="current-heading">Current check-in</h2>
     <p>Checked in at <time th:text="${preview.currentCheckIn.checkedInAt}">Time</time> by <span th:text="${preview.currentCheckIn.checkedInByUsername}">Staff</span>; count <span th:text="${preview.currentCheckIn.actualAttendeeCount}">1</span>.</p>
   </section>
-  <p th:if="${preview.rsvpChangeRequired}" role="alert">This guest's RSVP will be changed to attending when you confirm.</p>
-  <form th:if="${preview.currentCheckIn == null}" method="post" th:action="${qr} ? @{/check-in/confirm/qr} : @{/check-in/confirm/guest/{id}(id=${preview.guestId})}" th:object="${form}">
+  <p class="status status-error" th:if="${preview.rsvpChangeRequired}" role="alert">This guest's RSVP will be changed to attending when you confirm.</p>
+  <form class="form-grid" th:if="${preview.currentCheckIn == null}" method="post" th:action="${qr} ? @{/check-in/confirm/qr} : @{/check-in/confirm/guest/{id}(id=${preview.guestId})}" th:object="${form}">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
     <input th:if="${qr}" type="hidden" th:field="*{payload}">
     <input th:unless="${qr}" type="hidden" th:field="*{guestVersion}">
@@ -29,8 +38,12 @@
       <label th:if="${preview.plusOneAllowed}"><input type="radio" th:field="*{actualCount}" value="2"> 2</label>
     </fieldset>
     <label th:if="${preview.rsvpChangeRequired}"><input type="checkbox" th:field="*{acceptRsvpChange}"> I accept the RSVP change</label>
-    <button type="submit">Confirm check-in</button>
+    <button class="button button-primary" type="submit">Confirm check-in</button>
   </form>
+  <a th:if="${preview.currentCheckIn != null}" class="button" th:href="@{/check-in}">Check in another guest</a>
+  </article>
+  <p th:if="${preview.currentCheckIn == null}"><a th:href="@{/check-in}">Back to check-in</a></p>
 </main>
+</div>
 </body>
 </html>

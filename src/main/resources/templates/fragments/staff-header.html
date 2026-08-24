@@ -1,0 +1,11 @@
+<header th:fragment="header()" class="staff-header">
+    <div>
+        <strong class="staff-event">Wedding Check-in</strong>
+        <span class="staff-identity" th:if="${staffIdentity != null}" th:text="${staffIdentity}">Staff</span>
+    </div>
+    <p id="connection-status" class="status status-valid" role="status">Connected to the check-in server.</p>
+    <form method="post" th:action="@{/logout}">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button type="submit" class="button button-secondary">Sign out</button>
+    </form>
+</header>

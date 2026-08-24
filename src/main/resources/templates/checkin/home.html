@@ -1,39 +1,51 @@
 <!doctype html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Guest Check-in</title></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guest Check-in</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
 <body>
-<header>
+<a class="skip-link" href="#main-content">Skip to check-in</a>
+<div class="staff-shell">
+<div th:replace="~{fragments/staff-header :: header()}"></div>
+<main id="main-content" class="staff-main">
   <h1>Guest Check-in</h1>
-  <p id="connection-status">Connected to the check-in server.</p>
-  <form method="post" th:action="@{/logout}"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit">Sign out</button></form>
-</header>
-<main>
-  <p th:if="${checkInError}" th:text="${checkInError}" role="alert">Check-in error</p>
-  <section aria-labelledby="scan-heading">
+  <p class="status status-error" th:if="${checkInError}" th:text="${checkInError}" role="alert">Check-in error</p>
+  <div class="staff-tabs" role="tablist" aria-label="Check-in method">
+    <button id="scan-tab" class="button" type="button" role="tab" aria-controls="scan-panel"
+            th:aria-selected="${(search.q == null or search.q.isBlank()) and searchError == null ? 'true' : 'false'}">Scan QR</button>
+    <button id="search-tab" class="button button-secondary" type="button" role="tab" aria-controls="search-panel"
+            th:aria-selected="${(search.q != null and !search.q.isBlank()) or searchError != null ? 'true' : 'false'}">Search Guest</button>
+  </div>
+  <section id="scan-panel" class="card staff-panel" role="tabpanel" aria-labelledby="scan-tab">
     <h2 id="scan-heading">Scan invitation</h2>
-    <p id="scanner-status" role="status" aria-live="polite">Use a USB scanner or enter the invitation code manually.</p>
-    <button id="scanner-start" type="button">Start camera</button>
-    <button id="scanner-stop" type="button" disabled>Stop camera</button>
+    <p id="scanner-status" class="status" role="status" aria-live="polite">Use a USB scanner or enter the invitation code manually.</p>
+    <div class="action-cluster">
+      <button id="scanner-start" class="button" type="button">Start camera</button>
+      <button id="scanner-stop" class="button button-secondary" type="button" disabled>Stop camera</button>
+    </div>
     <video id="scanner-video" hidden muted playsinline></video>
-    <form id="qr-preview-form" method="post" th:action="@{/check-in/preview/qr}">
+    <form id="qr-preview-form" class="form-grid" method="post" th:action="@{/check-in/preview/qr}">
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
       <label for="scanner-input">Scanner input</label>
       <input id="scanner-input" name="payload" type="text" inputmode="text" autocomplete="off" maxlength="128" autofocus required>
-      <button type="submit">Preview check-in</button>
+      <button class="button" type="submit">Preview check-in</button>
     </form>
   </section>
-  <section aria-labelledby="find-heading">
+  <section id="search-panel" class="card staff-panel" role="tabpanel" aria-labelledby="search-tab">
     <h2 id="find-heading">Find a guest</h2>
-    <form method="get" th:action="@{/check-in/search}">
+    <form class="form-grid" method="get" th:action="@{/check-in/search}">
       <label for="guest-search">Name or last four phone digits</label>
       <input id="guest-search" name="q" type="search" th:value="${search.q}" autocomplete="off" maxlength="160">
-      <button type="submit">Search</button>
+      <button class="button" type="submit">Search</button>
     </form>
-    <p th:if="${searchError}" th:text="${searchError}" role="alert">Search error</p>
+    <p class="status status-error" th:if="${searchError}" th:text="${searchError}" role="alert">Search error</p>
     <p th:if="${search.q != null and !search.q.isBlank() and searchResults.isEmpty() and searchError == null}">No active guests found.</p>
-    <ul th:if="${!searchResults.isEmpty()}">
-      <li th:each="guest : ${searchResults}">
-        <a th:href="@{/check-in/preview/guest/{id}(id=${guest.id})}" th:text="${guest.displayName}">Guest</a>
+    <ul class="search-results" th:if="${!searchResults.isEmpty()}">
+      <li class="card" th:each="guest : ${searchResults}">
+        <a class="result-name" th:href="@{/check-in/preview/guest/{id}(id=${guest.id})}" th:text="${guest.displayName}">Guest</a>
         <span th:text="${guest.categoryName == null ? 'Uncategorized' : guest.categoryName}">Category</span>
         <span th:text="${guest.maskedWhatsappNumber}">•••• 0000</span>
         <span th:text="${'Plus one: ' + (guest.plusOneAllowed ? 'Allowed' : 'Not allowed')}">Plus one</span>
@@ -44,6 +56,7 @@
     </ul>
   </section>
 </main>
+</div>
 <script type="module" src="/js/check-in-scanner.js"></script>
 </body>
 </html>

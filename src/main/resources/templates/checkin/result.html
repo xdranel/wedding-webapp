@@ -1,12 +1,24 @@
 <!doctype html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Check-in result</title></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Check-in result</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
 <body>
-<main>
+<a class="skip-link" href="#main-content">Skip to result</a>
+<div class="staff-shell">
+<div th:replace="~{fragments/staff-header :: header()}"></div>
+<main id="main-content" class="staff-main">
+  <article class="checkin-result card" th:classappend="${outcome.duplicate} ? ' status-duplicate' : ' status-valid'">
   <h1 th:text="${outcome.duplicate ? 'Already checked in' : 'Check-in complete'}">Check-in complete</h1>
+  <p class="status" th:text="${outcome.duplicate} ? 'Duplicate scan — the first check-in remains authoritative.' : 'Valid check-in recorded.'">Valid check-in recorded.</p>
   <p th:if="${outcome.duplicate}">The original check-in remains unchanged.</p>
   <p>Checked in at <time th:text="${outcome.checkIn.checkedInAt}">Time</time> by <span th:text="${outcome.checkIn.checkedInByUsername}">Staff</span>; count <span th:text="${outcome.checkIn.actualAttendeeCount}">1</span>.</p>
-  <p><a th:href="@{/check-in}">Check in another guest</a></p>
+  <a class="button" th:href="@{/check-in}">Check in another guest</a>
+  </article>
 </main>
+</div>
 </body>
 </html>

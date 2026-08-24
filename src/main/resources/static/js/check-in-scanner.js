@@ -6,12 +6,42 @@ const startButton = document.querySelector('#scanner-start');
 const stopButton = document.querySelector('#scanner-stop');
 const status = document.querySelector('#scanner-status');
 const video = document.querySelector('#scanner-video');
+const tabs = [...document.querySelectorAll('[role="tab"][aria-controls]')];
 let scanner;
 let scanning = false;
+
+function activateTab(activeTab, moveFocus = false) {
+  tabs.forEach((tab) => {
+    const selected = tab === activeTab;
+    tab.setAttribute('aria-selected', selected.toString());
+    tab.tabIndex = selected ? 0 : -1;
+    document.querySelector(`#${tab.getAttribute('aria-controls')}`).hidden = !selected;
+  });
+  if (moveFocus) activeTab.focus();
+}
+
+const selectedTab = tabs.find((tab) => tab.getAttribute('aria-selected') === 'true') ?? tabs[0];
+if (selectedTab) {
+  activateTab(selectedTab);
+  tabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => activateTab(tab));
+    tab.addEventListener('keydown', (event) => {
+      let nextIndex;
+      if (event.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length;
+      if (event.key === 'ArrowLeft') nextIndex = (index - 1 + tabs.length) % tabs.length;
+      if (event.key === 'Home') nextIndex = 0;
+      if (event.key === 'End') nextIndex = tabs.length - 1;
+      if (nextIndex === undefined) return;
+      event.preventDefault();
+      activateTab(tabs[nextIndex], true);
+    });
+  });
+}
 
 if (!window.isSecureContext) {
   startButton.disabled = true;
   status.textContent = 'Camera scanning needs HTTPS. Use a USB scanner or manual search.';
+  status.classList.add('status-error');
 }
 
 function stop() {
@@ -27,6 +57,8 @@ function stop() {
 function fallback(message) {
   stop();
   status.textContent = `${message} Use a USB scanner or manual search.`;
+  status.classList.add('status-error');
+  input.focus();
 }
 
 async function start() {
@@ -49,7 +81,10 @@ async function start() {
       form.requestSubmit();
     }, { preferredCamera: 'environment' });
     await scanner.start();
-    if (scanning) status.textContent = 'Camera scanning is active.';
+    if (scanning) {
+      status.classList.remove('status-error');
+      status.textContent = 'Camera scanning is active.';
+    }
   } catch (error) {
     fallback('Camera access is unavailable.');
   }
@@ -58,6 +93,7 @@ async function start() {
 startButton.addEventListener('click', start);
 stopButton.addEventListener('click', () => {
   stop();
+  status.classList.remove('status-error');
   status.textContent = 'Camera stopped. Use a USB scanner or manual search.';
 });
 window.addEventListener('pagehide', stop);
