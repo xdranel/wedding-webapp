@@ -247,6 +247,13 @@ class PresentationStructureTest {
 		}
 	}
 
+	@Test
+	void passwordSignOutUsesPrimaryButton() throws IOException {
+		assertThat(resource("templates/account/password.html"))
+				.contains("<button class=\"button\" type=\"submit\">Sign out</button>")
+				.doesNotContain("<button class=\"button button-secondary\" type=\"submit\">Sign out</button>");
+	}
+
 	private String resource(String path) throws IOException {
 		try (var input = getClass().getClassLoader().getResourceAsStream(path)) {
 			assertThat(input).as(path).isNotNull();
