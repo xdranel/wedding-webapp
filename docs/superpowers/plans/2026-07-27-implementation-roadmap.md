@@ -11,7 +11,11 @@ Phase 6C implementation, automated verification, and manual phone/laptop
 acceptance are complete. Phase 6D is accepted on 2026-08-23: 2 tracked
 JavaScript syntax checks and the final clean MySQL/Flyway V1-V13 suite (78
 suites, 431 tests, 0 failures, errors, or skips) passed with the available
-manual checklist. Phase 7 remains separate and pending.
+manual checklist. The approved default presentation redesign is implemented;
+its resource-safe serial regression passed on 2026-08-24 with 79 suites / 449
+tests and 0 failures, errors, or skips. Owner browser/device/Lighthouse
+acceptance remains PENDING. Phase 7 remains separate and may begin only after
+that owner visual gate passes.
 
 Detailed plans are written and executed one phase at a time. A phase must pass
 its tests and review before the next phase begins.
@@ -24,7 +28,8 @@ its tests and review before the next phase begins.
 | 4 | RSVP, PIN protection/rate limits, greetings, private notes, and QR display/save | Plan: `2026-08-01-phase-4-rsvp-pin-qr.md` |
 | 5 | Restricted staff scan/search, atomic check-in, duplicate handling, and administrator corrections — implementation/automated tests complete; manual acceptance pending | Plan: `2026-08-02-phase-5-event-check-in.md`; design: `../specs/2026-08-02-phase-5-check-in-design.md` |
 | 6 | 6A gallery/audio/media accepted; 6B reminders/calendars accepted; 6C reports/print/CSV reuse/closure/status accepted; 6D accepted on 2026-08-23 after integration tests, 2,000-guest regression, selected gate, manual checklist, 2 tracked JavaScript syntax checks, and final MySQL/Flyway V1-V13 suite (78 suites, 431 tests, 0 failures/errors/skips); no Phase 6D production feature, dependency, or migration | Plans: `2026-08-11-phase-6a-wedding-media.md`, `2026-08-12-phase-6b-reminders-calendar.md`, `2026-08-18-phase-6c-reporting-status.md`, `2026-08-23-phase-6d-integration-acceptance.md`; designs: `../specs/2026-08-11-phase-6a-media-design.md`, `../specs/2026-08-11-phase-6b-reminders-calendar-design.md`, `../specs/2026-08-18-phase-6c-reporting-status-design.md`, `../specs/2026-08-23-phase-6d-integration-acceptance-design.md` |
-| 7 | Docker/Cloudflare production packaging, backup/restore/erasure scripts, installation docs, accessibility/performance/security verification — pending | Written after Phase 6 |
+| Presentation redesign gate | Default Cinematic Photo guest, Balanced Workspace administrator, and Focused Confirmation staff presentations implemented; resource-safe serial regression passed (79 suites / 449 tests, 0 failures/errors/skips); owner manual visual acceptance PENDING; physical USB scanner still deferred | [Design](../specs/2026-08-23-presentation-redesign-design.md); [plan](2026-08-23-presentation-redesign.md); [manual checklist](../../testing/phase-6d-manual-acceptance.md) |
+| 7 | Docker/Cloudflare production packaging, backup/restore/erasure scripts, installation docs, accessibility/performance/security verification — blocked on owner presentation acceptance | Written after presentation acceptance |
 
 ## Progress rules
 

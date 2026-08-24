@@ -1,10 +1,15 @@
 # Penerimaan Manual Phase 6D
 
-Status: **diterima pada 2026-08-23**. Pemilik telah mengonfirmasi seluruh
-pemeriksaan yang tersedia; kotak di bawah mencatat hasil nyata, bukan inferensi
-dari pengujian otomatis. Bukti otomatis final: 2 pemeriksaan sintaks JavaScript
-terlacak dan 78 suite / 431 test dengan 0 kegagalan, error, atau skip pada
-MySQL/Flyway V1-V13.
+Status fungsional Phase 6D: **diterima pada 2026-08-23**. Pemilik telah
+mengonfirmasi seluruh pemeriksaan Phase 6D yang tersedia; kotak di bawah
+mencatat hasil nyata, bukan inferensi dari pengujian otomatis. Bukti otomatis
+final saat itu: 2 pemeriksaan sintaks JavaScript terlacak dan 78 suite / 431
+test dengan 0 kegagalan, error, atau skip pada MySQL/Flyway V1-V13.
+
+Status penerimaan visual redesign presentasi: **PENDING — menunggu pemeriksaan
+manual dan persetujuan pemilik**. Hasil otomatis tidak menandai pemeriksaan
+browser, perangkat, Lighthouse, atau kontras sebagai lulus. Phase 7 tidak
+dimulai sebelum matriks redesign di bawah diterima pemilik.
 
 ## Persiapan
 
@@ -92,3 +97,140 @@ MySQL/Flyway V1-V13.
   **Hasil yang diharapkan:** perangkat bertindak sebagai input keyboard,
   menghasilkan pratinjau, dan tetap memerlukan konfirmasi. Ini tetap pengingat
   Phase 5 yang ditunda dan tidak memblokir penerimaan Phase 6D.
+
+## Matriks penerimaan manual redesign presentasi
+
+Semua item berikut tetap **PENDING** sampai pemilik menjalankannya pada data uji
+tanpa rahasia atau data pribadi dan mencatat hasil nyata.
+
+### Guest
+
+- [ ] **PENDING — ID/EN:** jalankan perjalanan undangan dalam bahasa Indonesia
+  dan Inggris, termasuk pergantian bahasa dan fallback teks.
+- [ ] **PENDING — photo/no-photo:** bandingkan cover dengan foto dan fallback
+  tanpa foto; pastikan teks, kontras, dan aksi buka tetap jelas.
+- [ ] **PENDING — full/sparse sections:** periksa konten lengkap dan konfigurasi
+  bagian opsional yang jarang; tidak boleh ada celah atau navigasi kosong.
+- [ ] **PENDING — JavaScript disabled:** seluruh isi dan formulir tetap dapat
+  dipahami dan digunakan; pesan `noscript` terlihat.
+- [ ] **PENDING — reduced motion:** aktifkan preferensi reduced motion dan
+  pastikan transisi/scroll non-esensial dinonaktifkan.
+- [ ] **PENDING — RSVP pending/Hadir/Tidak Hadir:** periksa keadaan belum
+  merespons, hadir, dan tidak hadir beserta validasi dan jumlah tamu.
+- [ ] **PENDING — QR:** verifikasi QR hanya tersedia sesuai aturan `Hadir` dan
+  alur PIN tetap dapat digunakan.
+- [ ] **PENDING — Closed/unavailable:** periksa halaman Closed dan unavailable
+  dalam ID/EN tanpa kebocoran identitas atau detail undangan.
+- [ ] **PENDING — iPhone Safari:** jalankan smoke undangan, bahasa, RSVP, QR,
+  galeri/audio bila tersedia, dan kontrol sentuh pada Safari iPhone.
+
+### Administrator
+
+- [ ] **PENDING — desktop/sidebar:** periksa seluruh grup navigasi, status aktif,
+  tindakan utama, dan logout pada viewport desktop.
+- [ ] **PENDING — mobile/drawer:** periksa drawer, urutan fokus, penutupan, dan
+  akses ke seluruh tujuan pada viewport ponsel.
+- [ ] **PENDING — keyboard focus:** gunakan keyboard saja dan pastikan urutan
+  fokus logis serta indikator fokus selalu terlihat.
+- [ ] **PENDING — tables/cards:** bandingkan tabel desktop dan kartu responsif
+  tanpa kehilangan label, nilai, atau tindakan.
+- [ ] **PENDING — filters:** terapkan, gabungkan, pertahankan, dan hapus filter
+  pada Guests, Reminders, Greetings, dan Reports.
+- [ ] **PENDING — destructive confirmations:** uji konfirmasi delete, regenerasi
+  token, close/reopen, serta pengurangan allowance/count tanpa melakukan aksi
+  pada data pemilik.
+- [ ] **PENDING — preview:** pastikan preview memakai presentasi guest yang sama
+  dan kontrol admin tetap terpisah.
+- [ ] **PENDING — report print:** periksa Print/Save as PDF, tabel cetak, filter,
+  dan tidak adanya navigasi atau data privat yang tidak disetujui.
+
+### Staff
+
+- [ ] **PENDING — camera:** mulai/hentikan kamera, pindah ke Search, dan pastikan
+  track kamera berhenti serta fallback manual tetap tersedia.
+- [ ] **PENDING — pasted payload:** tempel payload scanner ke input native dan
+  pastikan alurnya menuju preview yang sama.
+- [ ] **PENDING — search:** cari nama/empat digit terakhir, pilih tamu, dan
+  periksa preview sebelum konfirmasi.
+- [ ] **PENDING — valid/duplicate/error:** periksa hasil valid, duplikat beserta
+  waktu/staf pertama, dan error/fallback yang jelas secara tekstual.
+- [ ] **PENDING — two accounts:** dua akun staf mencoba tamu yang sama; hanya satu
+  check-in pusat tercatat dan hasil lain menunjukkan duplikat.
+- [ ] **PENDING — WAN off with LAN available:** putus WAN tetapi pertahankan LAN
+  ke server, lalu scan/search dan konfirmasi tanpa antrean offline palsu.
+- [ ] **DEFERRED — physical USB scanner:** uji perangkat fisik saat tersedia;
+  scanner harus bertindak sebagai keyboard, membuka preview, dan tetap meminta
+  konfirmasi. Penundaan Phase 5 ini tetap eksplisit dan tidak dianggap lulus.
+
+### Tools
+
+- [ ] **PENDING — Chromium Lighthouse accessibility/performance:** jalankan pada
+  halaman guest default serta permukaan admin/staff representatif; simpan hanya
+  ringkasan bebas data pribadi.
+- [ ] **PENDING — default contrast:** periksa kontras teks, kontrol, status,
+  focus ring, dan overlay foto dengan warna aksen default.
+- [ ] **PENDING — configurable accent contrast:** ulangi pemeriksaan kontras
+  dengan sedikitnya satu warna aksen yang dapat dikonfigurasi dan pastikan
+  foreground terang/gelap tetap aman.
+
+## Regresi otomatis redesign presentasi
+
+Selesai pada 2026-08-24 dengan hanya satu proses Maven pada satu waktu. Semua
+perintah Maven memakai lingkungan berikut agar Testcontainers menggunakan
+Podman rootless dan tidak memulai Ryuk:
+
+```bash
+DOCKER_HOST=unix:///run/user/1000/podman/podman.sock \
+TESTCONTAINERS_RYUK_DISABLED=true ./mvnw ... test
+```
+
+`git diff --check` lulus sebelum regresi. Pemeriksaan fokus berikut juga lulus:
+
+```bash
+DOCKER_HOST=unix:///run/user/1000/podman/podman.sock \
+TESTCONTAINERS_RYUK_DISABLED=true \
+./mvnw -Dtest=PresentationStructureTest test
+```
+
+Hasil fokus: 1 suite / 15 test, 0 kegagalan, error, atau skip. Setelah cleanup
+fokus, suite final dijalankan dalam tujuh batch serial berikut. Daftar di kolom
+perintah adalah seluruh keanggotaan batch; setiap kelas test tercakup tepat
+satu kali.
+
+| Batch | Perintah `./mvnw` setelah dua environment variable di atas | Hasil |
+|---|---|---|
+| Root + acceptance + presentation | `-Dtest=DatabaseMigrationTest,MyweddinginvitationWebappApplicationTests,Phase6dIntegrationJourneyTest,PresentationStructureTest test` | 4 suite / 19 test |
+| Account + config | `-Dtest=AccountSessionFilterTest,AdminBootstrapTest,SecurityRoutesTest,StaffAccountControllerTest,StaffAccountServiceTest,SystemStatusAdminControllerTest,SystemStatusServiceTest,UserAccountSecurityTest,WebErrorHandlerTest test` | 9 suite / 43 test |
+| Check-in | `-Dtest=AdminCheckInControllerTest,AdminCheckInServiceTest,CheckInConcurrencyTest,CheckInControllerTest,CheckInJourneyTest,CheckInMigrationTest,CheckInSearchTest,CheckInServiceTest test` | 8 suite / 44 test |
+| Guest | `-Dtest=GuestCategoryControllerTest,GuestControllerTest,GuestCsvControllerTest,GuestCsvServiceTest,GuestDeliveryJourneyTest,GuestDeliveryMigrationTest,GuestServiceTest,InvitationLinkSignerTest,Phase6dScaleTest,PublicInvitationControllerTest,WhatsappNumberServiceTest test` | 11 suite / 86 test |
+| Messaging + reporting | `-Dtest=GuestDeliveryControllerTest,GuestDeliveryServiceTest,MessageTemplateControllerTest,MessageTemplateServiceTest,ReminderAdminControllerTest,ReminderCalendarJourneyTest,ReminderServiceTest,ReportAdminControllerTest,ReportServiceTest,ReportingStatusJourneyTest test` | 10 suite / 48 test |
+| RSVP | `-Dtest=AdminRsvpControllerTest,AdminRsvpSummaryTest,CheckInQrSignerTest,GreetingModerationControllerTest,GuestPinServiceTest,GuestVerificationSessionTest,PublicQrControllerTest,PublicRsvpControllerTest,QrImageServiceTest,RsvpMigrationTest,RsvpQrJourneyTest,RsvpServiceTest test` | 12 suite / 65 test |
+| Wedding | `-Dtest=AdminHomeControllerTest,CalendarControllerTest,CalendarServiceTest,EventPartControllerTest,EventStatusAdminControllerTest,EventStatusServiceTest,GalleryImageStorageTest,PartnerControllerTest,PartnerPhotoStorageTest,ReminderCalendarMigrationTest,ReportingEventStatusMigrationTest,StoryControllerTest,WebpImageIoSmokeTest,WeddingAudioStorageTest,WeddingContentControllerTest,WeddingContentJourneyTest,WeddingContentMigrationTest,WeddingContentServiceTest,WeddingMediaAdminControllerTest,WeddingMediaControllerTest,WeddingMediaJourneyTest,WeddingMediaMigrationTest,WeddingMediaRenderingTest,WeddingMediaServiceTest,WeddingPreviewTest test` | 25 suite / 144 test |
+
+Setelah **setiap** batch, termasuk pemeriksaan fokus, cleanup dan audit berikut
+dijalankan sebelum memulai Maven berikutnya:
+
+```bash
+DOCKER_HOST=unix:///run/user/1000/podman/podman.sock \
+podman rm -f --filter label=org.testcontainers=true
+ps -eo pid=,comm=,args= | \
+awk '$2 == "java" && ($0 ~ /surefire|maven|Maven/) {print}; \
+     $2 == "mysqld" {print}'
+DOCKER_HOST=unix:///run/user/1000/podman/podman.sock \
+podman ps -a --filter label=org.testcontainers=true
+```
+
+Seluruh delapan audit cleanup kosong: tidak ada proses Maven, Surefire,
+Testcontainers, atau `mysqld` yang tertinggal dan tidak ada container berlabel
+Testcontainers. Compose MySQL tidak disentuh.
+
+Agregasi langsung dari 79 XML Surefire final menghasilkan **79 suite / 449
+test, 0 kegagalan, 0 error, dan 0 skip**. Total ini tiga lebih tinggi daripada
+perkiraan 431 + 15 pada brief: selain 15 test baru
+`PresentationStructureTest`, redesign menambahkan masing-masing satu test ke
+`GuestControllerTest`, `AdminRsvpControllerTest`, dan
+`EventStatusAdminControllerTest`. Dengan demikian total terverifikasi adalah
+431 + 15 + 3 = 449, bukan 446.
+
+Bukti otomatis ini melengkapi, tetapi tidak menggantikan, seluruh item manual
+**PENDING** di atas.

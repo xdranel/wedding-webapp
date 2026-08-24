@@ -1,8 +1,29 @@
 # Product Design
 
-Status: implemented and accepted through Phase 6D on 2026-08-23. The Phase 5
-physical USB scanner check remains deferred and non-blocking; Phase 7 is
-pending.
+Status: implemented and accepted through Phase 6D on 2026-08-23. The default
+presentation redesign is implemented; owner browser/device visual acceptance
+is pending. The Phase 5 physical USB scanner check remains deferred and
+non-blocking. Phase 7 must not begin until the owner accepts the presentation
+redesign checklist.
+
+## Presentation redesign
+
+The approved default directions are **Cinematic Photo** for guests, **Balanced
+Workspace** for administrators, and **Focused Confirmation** for staff. The
+implementation keeps `invitation.css` guest-specific, uses one shared `app.css`
+for internal/account/system pages, and separates reusable administrator and
+staff Thymeleaf fragments. JavaScript remains progressive enhancement for the
+invitation, media/gallery, mobile navigation, and scanner behavior; report
+printing remains independent.
+
+The canonical details and acceptance criteria live in the
+[presentation redesign design](superpowers/specs/2026-08-23-presentation-redesign-design.md),
+with the executed sequence in the
+[presentation redesign implementation plan](superpowers/plans/2026-08-23-presentation-redesign.md).
+Implementation is complete through the account/error surfaces. Automated and
+manual acceptance status is recorded in the
+[Phase 6D and presentation manual checklist](testing/phase-6d-manual-acceptance.md);
+manual owner approval remains a gate rather than an inferred automated result.
 
 ## Selected product approach
 
@@ -210,6 +231,11 @@ and automated verification are complete, including a 429-test clean suite
 against Flyway V1-V13. Its phone/laptop checklist passed on 2026-08-23. Phase
 6D acceptance passed on 2026-08-23: 2 tracked JavaScript syntax checks and the
 final clean MySQL/Flyway V1-V13 suite (78 suites, 431 tests, 0 failures, errors,
-or skips). It adds no production feature, dependency, or migration. The Phase 5
-physical USB scanner check remains separately deferred and non-blocking; Phase 7
-deployment, backup, Cloudflare, and hardening are pending and separate.
+or skips). It adds no production feature, dependency, or migration. The
+presentation redesign adds focused structural and controller regressions. Its
+resource-safe serial suite passed on 2026-08-24 with 79 suites / 449 tests and
+0 failures, errors, or skips; commands and cleanup audits are recorded in the
+linked manual checklist. Owner browser/device/Lighthouse acceptance remains
+PENDING. The Phase 5 physical USB scanner check remains separately deferred
+and non-blocking; Phase 7 deployment, backup, Cloudflare, and hardening may
+begin only after that owner visual gate passes.
