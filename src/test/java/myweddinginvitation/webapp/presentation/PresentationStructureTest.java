@@ -27,6 +27,14 @@ class PresentationStructureTest {
 	}
 
 	@Test
+	void guestFallbackPagesUseInvitationDesign() throws IOException {
+		for (String page : new String[] {"closed", "unavailable", "home"}) {
+			assertThat(resource("templates/guest/" + page + ".html"))
+					.contains("/css/invitation.css", "guest-state");
+		}
+	}
+
+	@Test
 	void invitationUsesCorrectHeadingsImagesAndActionTargets() throws IOException {
 		String guest = resource("templates/guest/invitation.html");
 		String preview = resource("templates/admin/wedding/preview.html");

@@ -7,12 +7,14 @@
     <title th:text="${title}">Acara telah selesai</title>
     <link rel="stylesheet" th:href="@{/css/invitation.css}">
 </head>
-<body>
-<main class="neutral-page">
+<body class="guest-state-page">
+<main class="guest-state">
     <h1 th:text="${title}">Acara telah selesai</h1>
     <p th:text="${message}">
         Terima kasih telah menjadi bagian dari perayaan kami.
     </p>
+    <a class="action-link guest-state-action" th:href="@{/i}"
+       th:text="${language == 'EN'} ? 'Return to invitation' : 'Kembali ke undangan'">Kembali ke undangan</a>
 </main>
 </body>
 </html>
