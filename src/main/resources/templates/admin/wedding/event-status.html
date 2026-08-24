@@ -4,21 +4,31 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Event status</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<main>
-    <h1>Event status</h1>
-    <p th:if="${status.closed}">Event is closed</p>
-    <p th:unless="${status.closed}">Event is open</p>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+    <nav th:replace="~{fragments/admin-navigation :: sidebar('wedding')}"></nav>
+    <div>
+        <header class="app-header">
+            <h1>Event status</h1>
+        </header>
+        <main id="main-content" class="page-content">
+    <section class="card">
+    <p class="badge" th:if="${status.closed}">Event is closed</p>
+    <p class="badge" th:unless="${status.closed}">Event is open</p>
     <p th:if="${status.changedAt != null}">Last changed by <span th:text="${status.changedBy}">administrator</span>.</p>
-    <p th:if="${statusChanged}">Event status updated.</p>
-    <p th:if="${messagesSaved}">Completed-event messages saved.</p>
-    <p th:if="${!status.closed}"><a th:href="@{/admin/wedding/event-status/close}">Close event</a></p>
-    <p th:if="${status.closed}"><a th:href="@{/admin/wedding/event-status/reopen}">Reopen event</a></p>
+    <p class="notice" role="status" th:if="${statusChanged}">Event status updated.</p>
+    <p class="notice" role="status" th:if="${messagesSaved}">Completed-event messages saved.</p>
+    <p class="notice" th:if="${!status.closed}"><a class="button" th:href="@{/admin/wedding/event-status/close}">Close event</a></p>
+    <p th:if="${status.closed}"><a class="button" th:href="@{/admin/wedding/event-status/reopen}">Reopen event</a></p>
+    </section>
 
+    <section class="card">
     <h2>Completed-event messages</h2>
-    <form method="post" th:action="@{/admin/wedding/event-status/messages}" th:object="${form}">
-        <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}">Message error</p>
+    <form class="form-grid" method="post" th:action="@{/admin/wedding/event-status/messages}" th:object="${form}">
+        <p class="notice" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Message error</p>
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <input type="hidden" th:field="*{version}">
         <label for="closed-title-id">Title (Indonesian)</label>
@@ -37,8 +47,11 @@
         <textarea id="closed-message-en" th:field="*{messageEn}" maxlength="1000"
                   th:attr="aria-describedby=${#fields.hasErrors('messageEn')} ? 'closed-message-en-error' : null"></textarea>
         <p id="closed-message-en-error" th:if="${#fields.hasErrors('messageEn')}" th:errors="*{messageEn}">Message error</p>
-        <button type="submit">Save messages</button>
+        <button class="button" type="submit">Save messages</button>
     </form>
-</main>
+    </section>
+        </main>
+    </div>
+</div>
 </body>
 </html>

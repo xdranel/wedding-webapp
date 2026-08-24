@@ -1,12 +1,16 @@
 <!doctype html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Guest details</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Guest details</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
 <body>
-<main>
-  <h1 th:text="${guest.displayName}">Guest</h1>
-  <p><a th:href="@{/admin/guests}">Back to guests</a> · <a th:href="@{/admin/guests/{id}/edit(id=${guest.id})}">Edit guest</a></p>
-  <p th:if="${guestError}" th:text="${guestError}" role="alert">Guest error</p>
-  <dl>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+  <nav th:replace="~{fragments/admin-navigation :: sidebar('guests')}"></nav>
+  <div>
+    <header class="app-header"><h1 th:text="${guest.displayName}">Guest</h1><a class="button" th:href="@{/admin/guests/{id}/edit(id=${guest.id})}">Edit guest</a></header>
+    <main id="main-content" class="page-content">
+  <p><a th:href="@{/admin/guests}">Back to guests</a></p>
+  <p class="notice" th:if="${guestError}" th:text="${guestError}" role="alert">Guest error</p>
+  <dl class="card">
     <dt>WhatsApp number</dt><dd th:text="${guest.normalizedWhatsappNumber}">+62</dd>
     <dt>Delivery</dt><dd th:text="${guest.deliveryState}">UNSENT</dd>
     <dt>First sent</dt><dd th:text="${guest.firstSentAt ?: 'Not sent'}">Not sent</dd>
@@ -14,7 +18,7 @@
     <dt>Invitation link regenerated</dt><dd th:text="${guest.tokenRegeneratedAt ?: 'Never'}">Never</dd>
     <dt>Archived</dt><dd th:text="${guest.archived ? 'Yes' : 'No'}">No</dd>
   </dl>
-  <section aria-labelledby="rsvp-heading">
+  <section class="card" aria-labelledby="rsvp-heading">
     <h2 id="rsvp-heading">RSVP</h2>
     <p th:if="${rsvp == null}">No RSVP</p>
     <dl th:if="${rsvp != null}">
@@ -27,10 +31,10 @@
     </dl>
     <p th:if="${!guest.archived}"><a th:href="@{/admin/guests/{id}/rsvp(id=${guest.id})}">Edit RSVP</a></p>
   </section>
-  <section aria-labelledby="check-in-heading">
+  <section class="card" aria-labelledby="check-in-heading">
     <h2 id="check-in-heading">Current check-in</h2>
-    <p th:if="${checkInError}" th:text="${checkInError}" role="alert">Check-in error</p>
-    <p th:if="${checkInWarning}" th:text="${checkInWarning}" role="alert">Check-in warning</p>
+    <p class="notice" th:if="${checkInError}" th:text="${checkInError}" role="alert">Check-in error</p>
+    <p class="notice" th:if="${checkInWarning}" th:text="${checkInWarning}" role="alert">Check-in warning</p>
     <p th:if="${checkIn == null}">Not checked in</p>
     <div th:if="${checkIn != null}">
       <dl>
@@ -39,7 +43,7 @@
         <dt>Checked in by</dt><dd th:text="${checkIn.checkedInByUsername}">staff</dd>
       </dl>
       <h3>Correct check-in</h3>
-      <form method="post" th:action="@{/admin/guests/{id}/check-in/correct(id=${guest.id})}">
+      <form class="form-grid" method="post" th:action="@{/admin/guests/{id}/check-in/correct(id=${guest.id})}">
         <input type="hidden" name="checkInVersion" th:value="${checkIn.version}">
         <fieldset th:if="${guest.plusOneAllowed}">
           <legend>Actual attendees</legend>
@@ -50,17 +54,17 @@
         </fieldset>
         <input th:if="${!guest.plusOneAllowed}" type="hidden" name="actualCount" value="1">
         <label>Reason <textarea name="reason" required maxlength="500"></textarea></label>
-        <button type="submit">Correct check-in</button>
+        <button class="button" type="submit">Correct check-in</button>
       </form>
       <h3>Cancel check-in</h3>
-      <form method="post" th:action="@{/admin/guests/{id}/check-in/cancel(id=${guest.id})}">
+      <form class="notice form-grid" method="post" th:action="@{/admin/guests/{id}/check-in/cancel(id=${guest.id})}">
         <input type="hidden" name="checkInVersion" th:value="${checkIn.version}">
         <label>Reason <textarea name="reason" required maxlength="500"></textarea></label>
-        <button type="submit">Cancel check-in</button>
+        <button class="button" type="submit">Cancel check-in</button>
       </form>
     </div>
   </section>
-  <section aria-labelledby="check-in-history-heading">
+  <section class="card" aria-labelledby="check-in-history-heading">
     <h2 id="check-in-history-heading">Correction history</h2>
     <p th:if="${#lists.isEmpty(checkInHistory)}">No corrections</p>
     <ol th:if="${!#lists.isEmpty(checkInHistory)}">
@@ -76,37 +80,43 @@
       </li>
     </ol>
   </section>
-  <section aria-labelledby="pin-heading">
+  <section class="card" aria-labelledby="pin-heading">
     <h2 id="pin-heading">Invitation PIN</h2>
     <p th:text="${pinLocked ? 'Locked until ' + guest.pinLockedUntil : 'Not locked'}">Not locked</p>
     <form th:if="${pinLocked}" method="post" th:action="@{/admin/guests/{id}/clear-pin-lock(id=${guest.id})}">
-      <button type="submit">Clear PIN lock</button>
+      <button class="button button-secondary" type="submit">Clear PIN lock</button>
     </form>
   </section>
-  <section th:if="${!guest.archived}" aria-labelledby="delivery-heading">
+  <section class="card" th:if="${!guest.archived}" aria-labelledby="delivery-heading">
     <h2 id="delivery-heading">Invitation delivery</h2>
-    <form method="post" th:action="@{/admin/guests/{id}/open-whatsapp(id=${guest.id})}">
+    <div class="action-cluster">
+    <form class="form-grid" method="post" th:action="@{/admin/guests/{id}/open-whatsapp(id=${guest.id})}">
       <label>Message language
         <select name="language">
           <option value="ID" th:selected="${guest.preferredLanguage.name() == 'ID'}">Indonesian</option>
           <option value="EN" th:selected="${guest.preferredLanguage.name() == 'EN'}">English</option>
         </select>
       </label>
-      <button type="submit">Open WhatsApp</button>
+      <button class="button" type="submit">Open WhatsApp</button>
     </form>
     <form method="post" th:action="@{/admin/guests/{id}/confirm-sent(id=${guest.id})}">
       <input type="hidden" name="version" th:value="${guest.version}">
-      <button type="submit">Confirm sent</button>
+      <button class="button button-secondary" type="submit">Confirm sent</button>
     </form>
-    <form method="post" th:action="@{/admin/guests/{id}/regenerate-invitation(id=${guest.id})}"
+    <form class="notice" method="post" th:action="@{/admin/guests/{id}/regenerate-invitation(id=${guest.id})}"
           onsubmit="return confirm('Regenerate the invitation link? The previous link will stop working.');">
       <input type="hidden" name="version" th:value="${guest.version}">
-      <button type="submit">Regenerate invitation link</button>
+      <button class="button" type="submit">Regenerate invitation link</button>
     </form>
+    </div>
   </section>
-  <form th:if="${!guest.archived}" method="post" th:action="@{/admin/guests/{id}/archive(id=${guest.id})}"><input type="hidden" name="version" th:value="${guest.version}"><button type="submit">Archive guest</button></form>
-  <form th:if="${guest.archived}" method="post" th:action="@{/admin/guests/{id}/restore(id=${guest.id})}"><input type="hidden" name="version" th:value="${guest.version}"><button type="submit">Restore guest</button></form>
-  <form method="post" th:action="@{/admin/guests/{id}/delete(id=${guest.id})}" onsubmit="return confirm('Permanently delete this guest?');"><input type="hidden" name="version" th:value="${guest.version}"><button type="submit">Permanently delete</button></form>
-</main>
+  <section class="card notice action-cluster" aria-label="Guest record actions">
+  <form th:if="${!guest.archived}" method="post" th:action="@{/admin/guests/{id}/archive(id=${guest.id})}"><input type="hidden" name="version" th:value="${guest.version}"><button class="button button-secondary" type="submit">Archive guest</button></form>
+  <form th:if="${guest.archived}" method="post" th:action="@{/admin/guests/{id}/restore(id=${guest.id})}"><input type="hidden" name="version" th:value="${guest.version}"><button class="button button-secondary" type="submit">Restore guest</button></form>
+  <form method="post" th:action="@{/admin/guests/{id}/delete(id=${guest.id})}" onsubmit="return confirm('Permanently delete this guest?');"><input type="hidden" name="version" th:value="${guest.version}"><button class="button" type="submit">Permanently delete</button></form>
+  </section>
+    </main>
+  </div>
+</div>
 </body>
 </html>

@@ -1,13 +1,17 @@
 <!doctype html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Guest</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Guest</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
 <body>
-<main>
-  <h1 th:text="${guest == null ? 'Add guest' : 'Edit guest'}">Guest</h1>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+  <nav th:replace="~{fragments/admin-navigation :: sidebar('guests')}"></nav>
+  <div>
+    <header class="app-header"><h1 th:text="${guest == null ? 'Add guest' : 'Edit guest'}">Guest</h1></header>
+    <main id="main-content" class="page-content">
   <p><a th:href="@{/admin/guests}">Back to guests</a></p>
-  <p th:if="${duplicateWarning}" role="alert">This WhatsApp number already belongs to another guest. Check confirmation to continue.</p>
-  <p th:if="${reducePlannedAttendanceWarning}" role="alert">This RSVP plans two attendees. Confirm reducing planned attendance to one before disabling +1.</p>
-  <form method="post" th:action="${guest == null ? '/admin/guests' : '/admin/guests/' + guest.id}" th:object="${form}">
+  <p class="notice" th:if="${duplicateWarning}" role="alert">This WhatsApp number already belongs to another guest. Check confirmation to continue.</p>
+  <p class="notice" th:if="${reducePlannedAttendanceWarning}" role="alert">This RSVP plans two attendees. Confirm reducing planned attendance to one before disabling +1.</p>
+  <form class="card form-grid" method="post" th:action="${guest == null ? '/admin/guests' : '/admin/guests/' + guest.id}" th:object="${form}">
     <input th:if="${guest != null}" type="hidden" name="version" th:value="${guest.version}">
     <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Guest error</p>
     <label>Name <input th:field="*{displayName}" maxlength="160" required></label><p th:if="${#fields.hasErrors('displayName')}" th:errors="*{displayName}" role="alert">Name error</p>
@@ -28,8 +32,10 @@
     <input th:if="${duplicateAccepted}" type="hidden" name="acceptDuplicate" value="true">
     <label th:if="${reducePlannedAttendanceWarning}"><input type="checkbox" name="reducePlannedAttendance" value="true" required> Reduce planned attendance to one</label>
     <input th:if="${reducePlannedAttendanceAccepted}" type="hidden" name="reducePlannedAttendance" value="true">
-    <button type="submit" th:text="${guest == null ? 'Create guest' : 'Save guest'}">Save guest</button>
+    <button class="button" type="submit" th:text="${guest == null ? 'Create guest' : 'Save guest'}">Save guest</button>
   </form>
-</main>
+    </main>
+  </div>
+</div>
 </body>
 </html>

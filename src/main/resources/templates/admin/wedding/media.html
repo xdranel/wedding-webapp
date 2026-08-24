@@ -4,24 +4,31 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Wedding media</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<main>
-    <h1>Wedding media</h1>
-    <p role="status" th:if="${mediaError}" th:text="${mediaError}">Media error</p>
-    <p th:if="${param.photoAdded}">Photo added.</p>
-    <p th:if="${param.photoUpdated}">Photo updated.</p>
-    <p th:if="${param.photoReplaced}">Photo replaced.</p>
-    <p th:if="${param.photoMoved}">Photo moved.</p>
-    <p th:if="${param.photoDeleted}">Photo deleted.</p>
-    <p th:if="${param.galleryVisibilityChanged}">Gallery visibility updated.</p>
-    <p th:if="${param.audioReplaced}">Audio uploaded.</p>
-    <p th:if="${param.audioDeleted}">Audio deleted.</p>
-    <p th:if="${param.audioVisibilityChanged}">Audio visibility updated.</p>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+    <nav th:replace="~{fragments/admin-navigation :: sidebar('wedding')}"></nav>
+    <div>
+        <header class="app-header">
+            <h1>Wedding media</h1>
+        </header>
+        <main id="main-content" class="page-content">
+    <p class="notice" role="alert" th:if="${mediaError}" th:text="${mediaError}">Media error</p>
+    <p class="notice" role="status" th:if="${param.photoAdded}">Photo added.</p>
+    <p class="notice" role="status" th:if="${param.photoUpdated}">Photo updated.</p>
+    <p class="notice" role="status" th:if="${param.photoReplaced}">Photo replaced.</p>
+    <p class="notice" role="status" th:if="${param.photoMoved}">Photo moved.</p>
+    <p class="notice" role="status" th:if="${param.photoDeleted}">Photo deleted.</p>
+    <p class="notice" role="status" th:if="${param.galleryVisibilityChanged}">Gallery visibility updated.</p>
+    <p class="notice" role="status" th:if="${param.audioReplaced}">Audio uploaded.</p>
+    <p class="notice" role="status" th:if="${param.audioDeleted}">Audio deleted.</p>
+    <p class="notice" role="status" th:if="${param.audioVisibilityChanged}">Audio visibility updated.</p>
 
-    <section aria-labelledby="add-photo-heading">
+    <section class="card" aria-labelledby="add-photo-heading">
         <h2 id="add-photo-heading">Add photo</h2>
-        <form method="post" enctype="multipart/form-data" th:action="@{/admin/wedding/media/photos}" th:object="${photoForm}">
+        <form class="form-grid" method="post" enctype="multipart/form-data" th:action="@{/admin/wedding/media/photos}" th:object="${photoForm}">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 			<input type="hidden" th:field="*{version}">
             <label for="photo-image">Image</label>
@@ -34,22 +41,22 @@
             <label for="photo-caption-en">Caption (English)</label>
             <textarea id="photo-caption-en" th:field="*{captionEn}" maxlength="500"></textarea>
             <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Photo error</p>
-            <button type="submit">Add photo</button>
+			<button class="button" type="submit">Add photo</button>
         </form>
     </section>
 
-    <section aria-labelledby="gallery-heading">
+    <section class="card" aria-labelledby="gallery-heading">
         <h2 id="gallery-heading">Gallery</h2>
         <form method="post" th:action="@{/admin/wedding/media/gallery-enabled}">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <input type="hidden" name="version" th:value="${media.weddingVersion}">
             <input type="hidden" name="enabled" th:value="${!media.galleryEnabled}">
-            <button type="submit" th:text="${media.galleryEnabled} ? 'Hide gallery' : 'Show gallery'">Toggle gallery</button>
+            <button class="button button-secondary" type="submit" th:text="${media.galleryEnabled} ? 'Hide gallery' : 'Show gallery'">Toggle gallery</button>
         </form>
         <ol>
-            <li th:each="photo, state : ${media.photos}">
+            <li class="card" th:each="photo, state : ${media.photos}">
                 <img th:src="${photo.thumbnailUrl}" th:alt="${photo.altText}">
-                <form method="post" th:action="@{/admin/wedding/media/photos/{id}(id=${photo.id})}"
+                <form class="form-grid" method="post" th:action="@{/admin/wedding/media/photos/{id}(id=${photo.id})}"
                       th:if="${editingId != null and editingId == photo.id}" th:object="${photoForm}">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <input type="hidden" th:field="*{version}">
@@ -61,9 +68,9 @@
                     <label th:for="${'caption-en-' + photo.id}">Caption (English)</label>
                     <textarea th:id="${'caption-en-' + photo.id}" th:field="*{captionEn}" maxlength="500"></textarea>
                     <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Photo error</p>
-                    <button type="submit">Save photo</button>
+                    <button class="button" type="submit">Save photo</button>
                 </form>
-                <form method="post" th:action="@{/admin/wedding/media/photos/{id}(id=${photo.id})}"
+                <form class="form-grid" method="post" th:action="@{/admin/wedding/media/photos/{id}(id=${photo.id})}"
                       th:unless="${editingId != null and editingId == photo.id}">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <input type="hidden" name="version" th:value="${photo.version}">
@@ -73,53 +80,55 @@
                     <textarea th:id="${'caption-id-' + photo.id}" name="captionId" maxlength="500" th:text="${photo.captionId}"></textarea>
                     <label th:for="${'caption-en-' + photo.id}">Caption (English)</label>
                     <textarea th:id="${'caption-en-' + photo.id}" name="captionEn" maxlength="500" th:text="${photo.captionEn}"></textarea>
-                    <button type="submit">Save photo</button>
+                    <button class="button" type="submit">Save photo</button>
                 </form>
-                <form method="post" enctype="multipart/form-data" th:action="@{/admin/wedding/media/photos/{id}/replace(id=${photo.id})}">
+                <form class="form-grid" method="post" enctype="multipart/form-data" th:action="@{/admin/wedding/media/photos/{id}/replace(id=${photo.id})}">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <input type="hidden" name="version" th:value="${photo.version}">
                     <label th:for="${'replace-' + photo.id}">Replacement image</label>
                     <input th:id="${'replace-' + photo.id}" type="file" name="image" accept="image/jpeg,image/png,image/webp" required>
-                    <button type="submit">Replace photo</button>
+                    <button class="button button-secondary" type="submit">Replace photo</button>
                 </form>
                 <form method="post" th:action="@{/admin/wedding/media/photos/{id}/move(id=${photo.id})}">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <input type="hidden" name="version" th:value="${photo.version}">
-                    <button type="submit" name="direction" value="-1" th:disabled="${state.first}">Move up</button>
-                    <button type="submit" name="direction" value="1" th:disabled="${state.last}">Move down</button>
+                    <button class="button button-secondary" type="submit" name="direction" value="-1" th:disabled="${state.first}">Move up</button>
+                    <button class="button button-secondary" type="submit" name="direction" value="1" th:disabled="${state.last}">Move down</button>
                 </form>
-                <form method="post" th:action="@{/admin/wedding/media/photos/{id}/delete(id=${photo.id})}">
+                <form class="notice form-grid" method="post" th:action="@{/admin/wedding/media/photos/{id}/delete(id=${photo.id})}">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <input type="hidden" name="version" th:value="${photo.version}">
                     <label th:for="${'confirm-photo-' + photo.id}"><input th:id="${'confirm-photo-' + photo.id}" type="checkbox" name="confirm" value="true"> Confirm deletion</label>
-                    <button type="submit">Delete photo</button>
+                    <button class="button" type="submit">Delete photo</button>
                 </form>
             </li>
         </ol>
     </section>
 
-    <section aria-labelledby="audio-heading">
+    <section class="card" aria-labelledby="audio-heading">
         <h2 id="audio-heading">Background audio</h2>
-        <form method="post" enctype="multipart/form-data" th:action="@{/admin/wedding/media/audio}">
+        <form class="form-grid" method="post" enctype="multipart/form-data" th:action="@{/admin/wedding/media/audio}">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <input type="hidden" name="version" th:value="${media.weddingVersion}">
             <label for="audio-file">MP3 audio</label>
             <input id="audio-file" type="file" name="audio" accept="audio/mpeg,.mp3" required>
-            <button type="submit">Upload audio</button>
+            <button class="button" type="submit">Upload audio</button>
         </form>
         <form method="post" th:action="@{/admin/wedding/media/audio-enabled}">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <input type="hidden" name="version" th:value="${media.weddingVersion}">
             <input type="hidden" name="enabled" th:value="${!media.audioEnabled}">
-            <button type="submit" th:text="${media.audioEnabled} ? 'Disable audio' : 'Enable audio'">Toggle audio</button>
+            <button class="button button-secondary" type="submit" th:text="${media.audioEnabled} ? 'Disable audio' : 'Enable audio'">Toggle audio</button>
         </form>
-        <form method="post" th:action="@{/admin/wedding/media/audio/delete}">
+        <form class="notice form-grid" method="post" th:action="@{/admin/wedding/media/audio/delete}">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <input type="hidden" name="version" th:value="${media.weddingVersion}">
             <label for="confirm-audio"><input id="confirm-audio" type="checkbox" name="confirm" value="true"> Confirm deletion</label>
-            <button type="submit">Delete audio</button>
+            <button class="button" type="submit">Delete audio</button>
         </form>
     </section>
-</main>
+        </main>
+    </div>
+</div>
 </body>
 </html>

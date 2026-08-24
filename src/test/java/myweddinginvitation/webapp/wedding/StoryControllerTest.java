@@ -168,7 +168,7 @@ class StoryControllerTest {
 				.andExpect(content().string(containsString("confirm(")))
 				.andReturn().getResponse().getContentAsString();
 
-		assertThat(page.split("name=\"_csrf\"", -1)).hasSize(10);
+		assertThat(page.split("name=\"_csrf\"", -1)).hasSize(12);
 	}
 
 	@Test

@@ -7,10 +7,42 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 class PresentationStructureTest {
+	private static final String[] ADMIN_WORKSPACE_PAGES = {
+			"admin/wedding/overview.html",
+			"admin/wedding/settings.html",
+			"admin/wedding/partners.html",
+			"admin/wedding/events.html",
+			"admin/wedding/story.html",
+			"admin/wedding/media.html",
+			"admin/wedding/preview-form.html",
+			"admin/wedding/event-status.html",
+			"admin/wedding/event-status-confirm.html",
+			"admin/guests/list.html",
+			"admin/guests/detail.html",
+			"admin/guests/form.html",
+			"admin/guests/import.html",
+			"admin/guests/rsvp.html",
+			"admin/guest-categories/list.html"
+	};
+
 	@Test
 	void adminHomeUsesSharedNavigationAndInternalStyles() throws IOException {
 		String html = resource("templates/admin/home.html");
 		assertThat(html).contains("/css/app.css", "fragments/admin-navigation", "app-shell");
+	}
+
+	@Test
+	void administratorWorkspacePagesUseSharedShell() throws IOException {
+		for (String page : ADMIN_WORKSPACE_PAGES) {
+			String html = resource("templates/" + page);
+			assertThat(html).as(page).contains("/css/app.css", "fragments/admin-navigation", "app-shell");
+		}
+	}
+
+	@Test
+	void administratorStylesSupportResponsiveWorkspaceComponents() throws IOException {
+		String css = resource("static/css/app.css");
+		assertThat(css).contains(".filter-panel", ".action-cluster", ".mobile-card-list", "content: attr(data-label)");
 	}
 
 	@Test

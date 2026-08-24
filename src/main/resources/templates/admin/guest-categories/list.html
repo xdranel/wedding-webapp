@@ -4,60 +4,67 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Guest categories</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-  <main>
-    <h1>Guest categories</h1>
-    <p><a th:href="@{/admin}">Back to administrator home</a></p>
-    <p th:if="${categoryError}" th:text="${categoryError}" role="alert">Category error</p>
-    <p>Without category: <span th:text="${withoutCategoryCount}">0</span></p>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+  <nav th:replace="~{fragments/admin-navigation :: sidebar('guests')}"></nav>
+  <div>
+    <header class="app-header"><h1>Guest categories</h1></header>
+    <main id="main-content" class="page-content">
+    <p><a th:href="@{/admin}">Back to administrator home</a> · <a th:href="@{/admin/guests}">Back to guests</a></p>
+    <p class="notice" th:if="${categoryError}" th:text="${categoryError}" role="alert">Category error</p>
+    <p class="card">Without category: <span class="badge" th:text="${withoutCategoryCount}">0</span></p>
 
-    <section aria-labelledby="create-category-heading">
+    <section class="card" aria-labelledby="create-category-heading">
       <h2 id="create-category-heading">Create category</h2>
-      <form th:if="${editingId == null}" method="post" th:action="@{/admin/guest-categories}" th:object="${form}">
+      <form class="form-grid" th:if="${editingId == null}" method="post" th:action="@{/admin/guest-categories}" th:object="${form}">
         <label for="category-name">Name</label>
         <input id="category-name" th:field="*{name}" maxlength="80" required
                th:attr="aria-describedby=${#fields.hasErrors('name')} ? 'category-name-error' : null">
         <p id="category-name-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}" role="alert">Name error</p>
-        <button type="submit">Create category</button>
+        <button class="button" type="submit">Create category</button>
       </form>
-      <form th:unless="${editingId == null}" method="post" th:action="@{/admin/guest-categories}">
+      <form class="form-grid" th:unless="${editingId == null}" method="post" th:action="@{/admin/guest-categories}">
         <label for="category-name">Name</label>
         <input id="category-name" name="name" maxlength="80" required>
-        <button type="submit">Create category</button>
+        <button class="button" type="submit">Create category</button>
       </form>
     </section>
 
-    <section aria-labelledby="existing-categories-heading">
+    <section class="card" aria-labelledby="existing-categories-heading">
       <h2 id="existing-categories-heading">Existing categories</h2>
       <p th:if="${categories.empty}">No categories yet.</p>
       <ul>
-        <li th:each="category : ${categories}">
-          <form th:if="${editingId != null and editingId == category.id}" method="post"
+        <li class="card action-cluster" th:each="category : ${categories}">
+          <form class="form-grid" th:if="${editingId != null and editingId == category.id}" method="post"
                 th:action="@{/admin/guest-categories/{id}(id=${category.id})}" th:object="${form}">
             <input type="hidden" th:field="*{version}">
             <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Category error</p>
             <label th:for="${'category-name-' + category.id}">Name</label>
             <input th:id="${'category-name-' + category.id}" th:field="*{name}" maxlength="80" required>
             <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" role="alert">Name error</p>
-            <button type="submit">Rename</button>
+            <button class="button" type="submit">Rename</button>
           </form>
-          <form th:unless="${editingId != null and editingId == category.id}" method="post"
+          <form class="form-grid" th:unless="${editingId != null and editingId == category.id}" method="post"
                 th:action="@{/admin/guest-categories/{id}(id=${category.id})}">
             <input type="hidden" name="version" th:value="${category.version}">
             <label th:for="${'category-name-' + category.id}">Name</label>
             <input th:id="${'category-name-' + category.id}" name="name" th:value="${category.displayName}"
                    maxlength="80" required>
-            <button type="submit">Rename</button>
+            <button class="button" type="submit">Rename</button>
           </form>
-          <form method="post" th:action="@{/admin/guest-categories/{id}/delete(id=${category.id})}"
+          <form class="notice" method="post" th:action="@{/admin/guest-categories/{id}/delete(id=${category.id})}"
                 onsubmit="return confirm('Delete this category? Guests will remain without a category.');">
             <input type="hidden" name="version" th:value="${category.version}">
-            <button type="submit">Delete</button>
+            <button class="button" type="submit">Delete</button>
           </form>
         </li>
       </ul>
     </section>
-  </main>
+    </main>
+  </div>
+</div>
 </body>
 </html>

@@ -4,14 +4,21 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Wedding events</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<main>
-    <h1>Wedding events</h1>
-    <section aria-labelledby="ceremony-heading">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+    <nav th:replace="~{fragments/admin-navigation :: sidebar('wedding')}"></nav>
+    <div>
+        <header class="app-header">
+            <h1>Wedding events</h1>
+        </header>
+        <main id="main-content" class="page-content">
+    <section class="card" aria-labelledby="ceremony-heading">
         <h2 id="ceremony-heading">Ceremony</h2>
-        <form method="post" th:action="@{/admin/wedding/events/CEREMONY}" th:object="${ceremonyForm}">
-            <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Event error</p>
+        <form class="form-grid" method="post" th:action="@{/admin/wedding/events/CEREMONY}" th:object="${ceremonyForm}">
+            <p class="notice" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Event error</p>
             <input type="hidden" th:field="*{version}">
             <label><input type="checkbox" th:field="*{visible}"> Show ceremony</label>
             <label for="ceremony-date">Date</label>
@@ -34,13 +41,13 @@
             <label for="ceremony-map">Map URL</label>
             <input id="ceremony-map" th:field="*{mapUrl}" maxlength="1000" inputmode="url">
             <p th:if="${#fields.hasErrors('mapUrl')}" th:errors="*{mapUrl}" role="alert">Map URL error</p>
-            <button type="submit">Save ceremony</button>
+            <button class="button" type="submit">Save ceremony</button>
         </form>
     </section>
-    <section aria-labelledby="reception-heading">
+    <section class="card" aria-labelledby="reception-heading">
         <h2 id="reception-heading">Reception</h2>
-        <form method="post" th:action="@{/admin/wedding/events/RECEPTION}" th:object="${receptionForm}">
-            <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Event error</p>
+        <form class="form-grid" method="post" th:action="@{/admin/wedding/events/RECEPTION}" th:object="${receptionForm}">
+            <p class="notice" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Event error</p>
             <input type="hidden" th:field="*{version}">
             <label><input type="checkbox" th:field="*{visible}"> Show reception</label>
             <label for="reception-date">Date</label>
@@ -63,9 +70,11 @@
             <label for="reception-map">Map URL</label>
             <input id="reception-map" th:field="*{mapUrl}" maxlength="1000" inputmode="url">
             <p th:if="${#fields.hasErrors('mapUrl')}" th:errors="*{mapUrl}" role="alert">Map URL error</p>
-            <button type="submit">Save reception</button>
+            <button class="button" type="submit">Save reception</button>
         </form>
     </section>
-</main>
+        </main>
+    </div>
+</div>
 </body>
 </html>

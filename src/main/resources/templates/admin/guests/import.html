@@ -1,44 +1,50 @@
 <!doctype html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Import guests</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Import guests</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
 <body>
-<main>
-  <h1>Import guests</h1>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+  <nav th:replace="~{fragments/admin-navigation :: sidebar('guests')}"></nav>
+  <div>
+    <header class="app-header"><h1>Import guests</h1></header>
+    <main id="main-content" class="page-content">
   <p><a th:href="@{/admin/guests}">Back to guests</a> · <a th:href="@{/admin/guests/template.csv}">Download template</a></p>
-  <p>Upload a comma- or semicolon-separated UTF-8 CSV with the exact template columns. Maximum 2 MiB and 2,000 rows.</p>
-  <p th:if="${uploadError}" th:text="${uploadError}" role="alert">Upload error</p>
-  <form method="post" enctype="multipart/form-data" th:action="@{/admin/guests/import}">
+  <p class="notice">Upload a comma- or semicolon-separated UTF-8 CSV with the exact template columns. Maximum 2 MiB and 2,000 rows.</p>
+  <p class="notice" th:if="${uploadError}" th:text="${uploadError}" role="alert">Upload error</p>
+  <form class="card form-grid" method="post" enctype="multipart/form-data" th:action="@{/admin/guests/import}">
     <label>CSV file <input type="file" name="file" accept=".csv,text/csv" required></label>
-    <button type="submit">Preview</button>
+    <button class="button" type="submit">Preview</button>
   </form>
 
-  <section th:if="${preview}">
+  <section class="card" th:if="${preview}">
     <h2>Preview</h2>
     <p th:text="|${preview.rows.size()} rows, ${preview.errors.size()} errors, ${preview.warnings.size()} warnings|">Summary</p>
     <ul th:unless="${preview.issues.empty}">
       <li th:each="issue : ${preview.issues}" th:text="|${issue.severity} — row ${issue.row}, ${issue.column}: ${issue.message}|">Issue</li>
     </ul>
-    <table th:unless="${preview.rows.empty}">
+    <table class="data-table mobile-card-list" th:unless="${preview.rows.empty}">
       <thead><tr><th>Row</th><th>Name</th><th>WhatsApp</th><th>Salutation</th><th>Category</th><th>Plus one</th><th>Language</th><th>Note</th></tr></thead>
       <tbody>
         <tr th:each="row : ${preview.rows}">
-          <td th:text="${row.rowNumber}">2</td><td th:text="${row.displayName}">Name</td>
-          <td th:text="${row.normalizedWhatsappNumber ?: row.whatsappNumber}">+62</td>
-          <td th:text="${row.salutation}">Ibu</td><td th:text="${row.category}">Category</td>
-          <td th:text="${row.plusOneAllowed}">false</td><td th:text="${row.preferredLanguage}">ID</td>
-          <td th:text="${row.internalNote}"></td>
+          <td data-label="Row" th:text="${row.rowNumber}">2</td><td data-label="Name" th:text="${row.displayName}">Name</td>
+          <td data-label="WhatsApp" th:text="${row.normalizedWhatsappNumber ?: row.whatsappNumber}">+62</td>
+          <td data-label="Salutation" th:text="${row.salutation}">Ibu</td><td data-label="Category" th:text="${row.category}">Category</td>
+          <td data-label="Plus one" th:text="${row.plusOneAllowed}">false</td><td data-label="Language" th:text="${row.preferredLanguage}">ID</td>
+          <td data-label="Note" th:text="${row.internalNote}"></td>
         </tr>
       </tbody>
     </table>
-    <p th:if="${acceptWarningsRequired}" role="alert">Accept the warnings before importing.</p>
-    <form th:unless="${preview.hasErrors()}" method="post" th:action="@{/admin/guests/import/confirm}">
+    <p class="notice" th:if="${acceptWarningsRequired}" role="alert">Accept the warnings before importing.</p>
+    <form class="form-grid" th:unless="${preview.hasErrors()}" method="post" th:action="@{/admin/guests/import/confirm}">
       <label th:if="${preview.hasWarnings()}"><input type="checkbox" name="acceptWarnings" value="true"> I reviewed and accept every warning</label>
-      <button type="submit">Import all rows</button>
+      <button class="button" type="submit">Import all rows</button>
     </form>
     <form method="post" th:action="@{/admin/guests/import/cancel}">
-      <button type="submit">Cancel import</button>
+      <button class="button button-secondary" type="submit">Cancel import</button>
     </form>
   </section>
-</main>
+    </main>
+  </div>
+</div>
 </body>
 </html>

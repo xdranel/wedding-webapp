@@ -180,7 +180,7 @@ class GuestCategoryControllerTest {
 				.andExpect(content().string(containsString("Delete")))
 				.andExpect(content().string(containsString("confirm(")))
 				.andReturn().getResponse().getContentAsString();
-		assertThat(page.split("name=\"_csrf\"", -1)).hasSize(4);
+		assertThat(page.split("name=\"_csrf\"", -1)).hasSize(6);
 
 		mockMvc.perform(get("/admin").session(adminSession))
 				.andExpect(content().string(containsString("/admin/guest-categories")));

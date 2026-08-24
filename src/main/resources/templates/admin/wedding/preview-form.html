@@ -5,11 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title>Invitation preview</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<main>
-    <h1>Invitation preview</h1>
-    <form method="get" th:action="@{/admin/wedding/preview/render}" th:object="${form}">
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+    <nav th:replace="~{fragments/admin-navigation :: sidebar('wedding')}"></nav>
+    <div>
+        <header class="app-header">
+            <h1>Invitation preview</h1>
+        </header>
+        <main id="main-content" class="page-content">
+    <form class="card form-grid" method="get" th:action="@{/admin/wedding/preview/render}" th:object="${form}">
         <label for="salutation">Salutation</label>
         <input id="salutation" th:field="*{salutation}" required maxlength="120">
         <p th:if="${#fields.hasErrors('salutation')}" th:errors="*{salutation}">Salutation error</p>
@@ -22,8 +29,10 @@
             <option value="EN">EN</option>
         </select>
         <p th:if="${#fields.hasErrors('language')}" th:errors="*{language}">Language error</p>
-        <button type="submit">Render preview</button>
+        <button class="button" type="submit">Render preview</button>
     </form>
-</main>
+        </main>
+    </div>
+</div>
 </body>
 </html>

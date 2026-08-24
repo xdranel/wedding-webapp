@@ -157,6 +157,10 @@ button, input, select, textarea { min-block-size: 44px; }
 .notice { padding: var(--space-2); border-inline-start: .25rem solid var(--color-primary); background: var(--color-notice); }
 .form-grid { display: grid; gap: var(--space-2); }
 .form-grid label { display: grid; gap: .25rem; font-weight: 700; }
+.filter-panel { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+.filter-panel .button { align-self: end; }
+.action-cluster { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-2); }
+.action-cluster form { margin: 0; }
 
 input, select, textarea {
     inline-size: 100%;
@@ -167,6 +171,8 @@ input, select, textarea {
     color: inherit;
 }
 
+input[type="checkbox"], input[type="radio"] { inline-size: auto; }
+
 .data-table { inline-size: 100%; border-collapse: collapse; }
 .data-table th, .data-table td { padding: .75rem; border-block-end: 1px solid var(--color-border); text-align: start; }
 .data-table th { color: var(--color-muted); }
@@ -176,6 +182,11 @@ input, select, textarea {
     .app-sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: var(--space-2); }
     .app-sidebar .brand, .app-sidebar form, .nav-heading { grid-column: 1 / -1; }
     .app-header, .page-content { padding: var(--space-2); }
+    .mobile-card-list, .mobile-card-list tbody, .mobile-card-list tr, .mobile-card-list td { display: block; }
+    .mobile-card-list thead { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); }
+    .mobile-card-list tr { margin-block-end: var(--space-2); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); }
+    .mobile-card-list td { display: grid; grid-template-columns: minmax(8rem, 40%) 1fr; gap: var(--space-1); }
+    .mobile-card-list td::before { content: attr(data-label); color: var(--color-muted); font-weight: 700; }
 }
 
 @media (prefers-reduced-motion: reduce) {

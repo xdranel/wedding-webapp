@@ -1,14 +1,20 @@
 <!doctype html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Edit RSVP</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Edit RSVP</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
 <body>
-<main>
-  <h1>Edit RSVP</h1>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+  <nav th:replace="~{fragments/admin-navigation :: sidebar('guests')}"></nav>
+  <div>
+    <header class="app-header"><h1>Edit RSVP</h1></header>
+    <main id="main-content" class="page-content">
   <p><a th:href="@{/admin/guests/{id}(id=${guest.id})}">Back to guest</a></p>
+  <section class="card">
   <p><strong>Guest:</strong> <span th:text="${guest.displayName}">Guest</span></p>
   <p th:if="${rsvp != null}">Last update: <span th:text="${rsvp.updateSource}">GUEST</span> at <span th:text="${rsvp.updatedAt}">Time</span></p>
   <p th:unless="${rsvp != null}">No RSVP has been submitted.</p>
-  <form method="post" th:action="@{/admin/guests/{id}/rsvp(id=${guest.id})}" th:object="${form}">
+  </section>
+  <form class="card form-grid" method="post" th:action="@{/admin/guests/{id}/rsvp(id=${guest.id})}" th:object="${form}">
     <input type="hidden" th:field="*{version}">
     <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">RSVP error</p>
     <label>Response
@@ -26,8 +32,10 @@
       </select>
     </label>
     <p th:if="${#fields.hasErrors('plannedAttendeeCount')}" th:errors="*{plannedAttendeeCount}" role="alert">Count error</p>
-    <button type="submit">Save RSVP</button>
+    <button class="button" type="submit">Save RSVP</button>
   </form>
-</main>
+    </main>
+  </div>
+</div>
 </body>
 </html>

@@ -156,7 +156,7 @@ class EventPartControllerTest {
 				.andExpect(content().string(containsString("Address (English, falls back to Indonesian)")))
 				.andReturn().getResponse().getContentAsString();
 
-		assertThat(page.split("name=\"_csrf\"", -1)).hasSize(3);
+		assertThat(page.split("name=\"_csrf\"", -1)).hasSize(5);
 	}
 
 	@Test
