@@ -9,10 +9,12 @@
     <header class="app-header"><h1>Reminders</h1></header>
     <main id="main-content" class="page-content">
   <p><a th:href="@{/admin}">Back to administrator home</a></p>
-  <nav class="action-cluster" aria-label="Reminder queues" role="tablist">
-    <a th:href="@{/admin/reminders(kind=RSVP,categoryId=${categoryId})}" role="tab" th:aria-selected="${kind.name() == 'RSVP'}">RSVP reminders</a>
-    <a th:href="@{/admin/reminders(kind=EVENT,categoryId=${categoryId})}" role="tab" th:aria-selected="${kind.name() == 'EVENT'}">Event reminders</a>
+  <nav class="action-cluster" aria-label="Reminder queues">
+    <a th:href="@{/admin/reminders(kind=RSVP,categoryId=${categoryId})}" th:aria-current="${kind.name() == 'RSVP'} ? 'true' : null">RSVP reminders</a>
+    <a th:href="@{/admin/reminders(kind=EVENT,categoryId=${categoryId})}" th:aria-current="${kind.name() == 'EVENT'} ? 'true' : null">Event reminders</a>
   </nav>
+  <details class="filter-disclosure" open>
+  <summary>Filters</summary>
   <form class="card filter-panel form-grid" method="get" th:action="@{/admin/reminders}">
     <label>Reminder queue
       <select name="kind"><option value="RSVP" th:selected="${kind.name() == 'RSVP'}">RSVP</option><option value="EVENT" th:selected="${kind.name() == 'EVENT'}">Event</option></select>
@@ -22,6 +24,7 @@
     </label>
     <button class="button" type="submit">Filter</button>
   </form>
+  </details>
   <p class="notice" th:if="${reminderError}" th:text="${reminderError}" role="alert">Reminder error</p>
   <p class="notice" th:if="${reminderCompletion}" th:text="${reminderCompletion}" role="status">Reminder queue complete.</p>
   <p class="card" th:if="${queue.empty}">No eligible guests remain.</p>
@@ -44,11 +47,16 @@
             </label>
             <button class="button" type="submit">Open WhatsApp</button>
           </form>
+          <details class="action-overflow">
+          <summary>More actions</summary>
+          <div>
           <form method="post" th:action="@{/admin/reminders/{kind}/{guestId}/confirm-sent(kind=${kind},guestId=${guest.id})}">
             <input type="hidden" name="version" th:value="${guest.version}">
             <input type="hidden" name="categoryId" th:value="${categoryId}">
             <button class="button" type="submit">Confirm sent</button>
           </form>
+          </div>
+          </details>
         </div></td>
       </tr>
     </tbody>

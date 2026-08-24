@@ -7,6 +7,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -147,6 +148,18 @@ class CheckInControllerTest {
 				.andExpect(content().string(not(containsString("<script type=\"module\" src=\"/webjars/"))))
 				.andExpect(content().string(not(containsString("https://cdn"))))
 				.andExpect(content().string(not(containsString("http://cdn"))));
+	}
+
+	@Test
+	void staffHeaderUsesWeddingLabelAndAuthenticatedOperator() throws Exception {
+		jdbc.update("update wedding_settings set couple_title = 'Rama & Shinta' where id = 1");
+
+		mockMvc.perform(get("/check-in").session(staffSession))
+				.andExpect(status().isOk())
+				.andExpect(model().attribute("staffEvent", "Rama & Shinta"))
+				.andExpect(model().attribute("staffIdentity", "staff"))
+				.andExpect(content().string(containsString(">Rama &amp; Shinta</strong>")))
+				.andExpect(content().string(containsString(">staff</span>")));
 	}
 
 	@Test

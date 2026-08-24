@@ -55,7 +55,7 @@ public class PublicRsvpController {
 		ClosedEventView closure = eventStatus.publicClosure(language).orElse(null);
 		if (closure != null) return invitationPage.closed(closure, model);
 		Access access = invitationAccess.resolve(publicId, version, signature, language);
-		if (access == null) return invitationPage.unavailable(response);
+		if (access == null) return invitationPage.unavailable(response, language, model);
 		String path = path(publicId, version, signature);
 
 		localizeStructuralErrors(form, errors, access.language());
@@ -70,7 +70,9 @@ public class PublicRsvpController {
 		PinVerificationResult pin = pins.verify(access.guest().getPublicId(),
 				access.guest().getInvitationTokenVersion(), form.pin());
 		if (pin.status() != PinVerificationResult.Status.SUCCESS) {
-			if (pin.status() == PinVerificationResult.Status.UNAVAILABLE) return invitationPage.unavailable(response);
+			if (pin.status() == PinVerificationResult.Status.UNAVAILABLE) {
+				return invitationPage.unavailable(response, access.language(), model);
+			}
 			addPinError(pin, access, errors);
 			return redisplay(access, path, form, errors, model, request);
 		}
@@ -109,7 +111,7 @@ public class PublicRsvpController {
 		ClosedEventView closure = eventStatus.publicClosure(language).orElse(null);
 		if (closure != null) return invitationPage.closed(closure, model);
 		Access access = invitationAccess.resolve(publicId, version, signature, language);
-		if (access == null) return invitationPage.unavailable(response);
+		if (access == null) return invitationPage.unavailable(response, language, model);
 		String path = path(publicId, version, signature);
 		RsvpView rsvp = rsvps.view(access.guest().getId()).orElse(null);
 		if (rsvp == null || rsvp.response() != AttendanceResponse.HADIR) {
@@ -124,7 +126,9 @@ public class PublicRsvpController {
 
 		PinVerificationResult result = pins.verify(access.guest().getPublicId(),
 				access.guest().getInvitationTokenVersion(), pin);
-		if (result.status() == PinVerificationResult.Status.UNAVAILABLE) return invitationPage.unavailable(response);
+		if (result.status() == PinVerificationResult.Status.UNAVAILABLE) {
+			return invitationPage.unavailable(response, access.language(), model);
+		}
 		if (result.status() != PinVerificationResult.Status.SUCCESS) {
 			model.addAttribute("qrError", pinMessage(result, access));
 			return invitationPage.render(access, path, null, 0, model, request.getSession());

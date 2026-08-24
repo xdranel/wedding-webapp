@@ -302,6 +302,12 @@ public class WeddingContentService {
                         localized(entry.getTitleId(), entry.getTitleEn(), language), localized(entry.getBodyId(), entry.getBodyEn(), language))).toList());
     }
 
+    @Transactional(readOnly = true)
+    public String staffLabel() {
+        String label = coupleTitle(weddingSettings(), partners.findAllByOrderByDisplayOrderAsc());
+        return hasText(label) ? label : null;
+    }
+
     public static String localized(String indonesian, String english, String language) {
         return "EN".equals(language) && hasText(english) ? english : indonesian;
     }

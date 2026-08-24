@@ -77,7 +77,7 @@ class SystemStatusAdminControllerTest {
 				.andExpect(content().string(not(containsString("java.lang."))))
 				.andReturn().getResponse().getContentAsString();
 		assertThat(page).containsOnlyOnce(
-				"<a href=\"/admin/system-status\" aria-current=\"page\">System status</a>");
+				"<a href=\"/admin/system-status\" aria-current=\"page\">System Status</a>");
 	}
 
 	private MockHttpSession login(String username) throws Exception {

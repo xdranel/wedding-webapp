@@ -265,6 +265,25 @@ class SecurityRoutesTest {
 	}
 
 	@Test
+	void passwordErrorsRenderOnlyWhenPresentAndDescribeTheirField() throws Exception {
+		MockHttpSession session = login("admin");
+		mockMvc.perform(get("/account/password").session(session))
+				.andExpect(status().isOk())
+				.andExpect(content().string(not(containsString("class=\"status status-error\""))))
+				.andExpect(content().string(not(containsString("aria-describedby="))));
+
+		mockMvc.perform(post("/account/password").session(session).with(csrf())
+				.param("currentPassword", PASSWORD)
+				.param("newPassword", "New-Password-2026")
+				.param("confirmPassword", "Different-Password-2026"))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("aria-describedby=\"confirm-password-error\"")))
+				.andExpect(content().string(containsString("id=\"confirm-password-error\"")))
+				.andExpect(content().string(not(containsString("id=\"current-password-error\""))))
+				.andExpect(content().string(not(containsString("id=\"new-password-error\""))));
+	}
+
+	@Test
 	void passwordChangeClearsFirstLoginFlagAndRevokesSession() throws Exception {
 		var login = mockMvc.perform(post("/login")
 				.with(SecurityMockMvcRequestPostProcessors.csrf())

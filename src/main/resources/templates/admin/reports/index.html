@@ -15,6 +15,8 @@
     <main id="main-content" class="page-content">
   <p><a th:href="@{/admin}">Back to administrator home</a></p>
 
+  <details class="filter-disclosure" open>
+  <summary>Filters</summary>
   <form class="card filter-panel form-grid" method="get" th:action="@{/admin/reports}">
     <label for="category">Category</label>
     <select id="category" name="categoryId">
@@ -24,10 +26,15 @@
     </select>
     <button class="button" type="submit">Filter</button>
   </form>
+  </details>
 
-  <p class="action-cluster"><a th:href="@{/admin/reports/print(categoryId=${categoryId})}">Print report</a>
+  <details class="action-overflow">
+    <summary>More report actions</summary>
+    <div>
     <a th:href="@{/admin/guests/export.csv}">Export complete CSV</a>
-    <a th:href="@{/admin/greetings}">Moderate greetings</a></p>
+    <a th:href="@{/admin/greetings}">Moderate greetings</a>
+    </div>
+  </details>
 
   <section class="card" aria-labelledby="summary-heading">
     <h2 id="summary-heading">Summary</h2>

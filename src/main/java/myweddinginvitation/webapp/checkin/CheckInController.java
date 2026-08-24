@@ -8,6 +8,7 @@ import myweddinginvitation.webapp.guest.GuestRepository;
 import myweddinginvitation.webapp.rsvp.AttendanceResponse;
 import myweddinginvitation.webapp.rsvp.RsvpService;
 import myweddinginvitation.webapp.rsvp.RsvpView;
+import myweddinginvitation.webapp.wedding.WeddingContentService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -26,11 +27,20 @@ public class CheckInController {
 	private final CheckInService checkIns;
 	private final GuestRepository guests;
 	private final RsvpService rsvps;
+	private final WeddingContentService weddingContent;
 
-	public CheckInController(CheckInService checkIns, GuestRepository guests, RsvpService rsvps) {
+	public CheckInController(CheckInService checkIns, GuestRepository guests, RsvpService rsvps,
+			WeddingContentService weddingContent) {
 		this.checkIns = checkIns;
 		this.guests = guests;
 		this.rsvps = rsvps;
+		this.weddingContent = weddingContent;
+	}
+
+	@ModelAttribute
+	void staffHeader(Model model, Authentication authentication) {
+		model.addAttribute("staffEvent", weddingContent.staffLabel());
+		model.addAttribute("staffIdentity", authentication == null ? null : authentication.getName());
 	}
 
 	@GetMapping("/check-in")

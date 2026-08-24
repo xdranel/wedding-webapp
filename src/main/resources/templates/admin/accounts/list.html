@@ -9,7 +9,7 @@
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <div class="app-shell">
-  <nav th:replace="~{fragments/admin-navigation :: sidebar('accounts')}"></nav>
+  <nav th:replace="~{fragments/admin-navigation :: sidebar('staff-accounts')}"></nav>
   <div>
     <header class="app-header"><h1>Staff accounts</h1><a class="button" th:href="@{/admin/accounts/new}">Create staff account</a></header>
     <main id="main-content" class="page-content">
@@ -21,7 +21,9 @@
         <td data-label="Username"><strong th:text="${account.username}">staff</strong></td>
         <td data-label="Account status"><span class="badge" th:text="${account.enabled} ? 'Enabled' : 'Disabled'">Enabled</span></td>
         <td data-label="Password status"><span class="badge" th:text="${account.passwordChangeRequired} ? 'Password change required' : 'Password changed'">Password change required</span></td>
-        <td data-label="Actions"><div class="action-cluster">
+        <td data-label="Actions"><details class="action-overflow">
+        <summary>More actions</summary>
+        <div>
         <a th:href="@{/admin/accounts/{id}/reset(id=${account.id})}">Reset password</a>
         <form th:if="${account.enabled}" method="post" th:action="@{/admin/accounts/{id}/disable(id=${account.id})}">
           <button class="button" type="submit">Disable</button>
@@ -29,7 +31,8 @@
         <form th:unless="${account.enabled}" method="post" th:action="@{/admin/accounts/{id}/enable(id=${account.id})}">
           <button class="button" type="submit">Enable</button>
         </form>
-        </div></td>
+        </div>
+        </details></td>
       </tr></tbody>
     </table>
     </main>

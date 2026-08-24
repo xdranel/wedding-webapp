@@ -4,7 +4,7 @@
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <div class="app-shell">
-  <nav th:replace="~{fragments/admin-navigation :: sidebar('guests')}"></nav>
+  <nav th:replace="~{fragments/admin-navigation :: sidebar('guest-list')}"></nav>
   <div>
     <header class="app-header"><h1 th:text="${guest.displayName}">Guest</h1><a class="button" th:href="@{/admin/guests/{id}/edit(id=${guest.id})}">Edit guest</a></header>
     <main id="main-content" class="page-content">
@@ -99,6 +99,9 @@
       </label>
       <button class="button" type="submit">Open WhatsApp</button>
     </form>
+    <details class="action-overflow">
+    <summary>More invitation actions</summary>
+    <div>
     <form method="post" th:action="@{/admin/guests/{id}/confirm-sent(id=${guest.id})}">
       <input type="hidden" name="version" th:value="${guest.version}">
       <button class="button button-secondary" type="submit">Confirm sent</button>
@@ -109,11 +112,18 @@
       <button class="button" type="submit">Regenerate invitation link</button>
     </form>
     </div>
+    </details>
+    </div>
   </section>
-  <section class="card notice action-cluster" aria-label="Guest record actions">
+  <section class="card notice" aria-label="Guest record actions">
+  <details class="action-overflow">
+  <summary>More guest actions</summary>
+  <div>
   <form th:if="${!guest.archived}" method="post" th:action="@{/admin/guests/{id}/archive(id=${guest.id})}"><input type="hidden" name="version" th:value="${guest.version}"><button class="button button-secondary" type="submit">Archive guest</button></form>
   <form th:if="${guest.archived}" method="post" th:action="@{/admin/guests/{id}/restore(id=${guest.id})}"><input type="hidden" name="version" th:value="${guest.version}"><button class="button button-secondary" type="submit">Restore guest</button></form>
   <form method="post" th:action="@{/admin/guests/{id}/delete(id=${guest.id})}" onsubmit="return confirm('Permanently delete this guest?');"><input type="hidden" name="version" th:value="${guest.version}"><button class="button" type="submit">Permanently delete</button></form>
+  </div>
+  </details>
   </section>
     </main>
   </div>

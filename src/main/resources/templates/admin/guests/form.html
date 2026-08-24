@@ -4,7 +4,7 @@
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <div class="app-shell">
-  <nav th:replace="~{fragments/admin-navigation :: sidebar('guests')}"></nav>
+  <nav th:replace="~{fragments/admin-navigation :: sidebar('guest-list')}"></nav>
   <div>
     <header class="app-header"><h1 th:text="${guest == null ? 'Add guest' : 'Edit guest'}">Guest</h1></header>
     <main id="main-content" class="page-content">

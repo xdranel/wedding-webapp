@@ -11,6 +11,8 @@
   <p><a th:href="@{/admin}">Back to administrator home</a> · <a th:href="@{/admin/guests/import}">Import CSV</a> · <a th:href="@{/admin/guests/export.csv}">Export CSV</a></p>
   <p class="notice" role="status" th:if="${param.imported}" th:text="|Imported ${param.imported[0]} guests.|">Guests imported.</p>
   <p class="notice" th:if="${guestError}" th:text="${guestError}" role="alert">Guest error</p>
+  <details class="filter-disclosure" open>
+  <summary>Filters</summary>
   <form class="card filter-panel form-grid" method="get" th:action="@{/admin/guests}">
     <label>Search <input type="search" name="query" th:value="${filters.query}"></label>
     <label>Delivery <select name="delivery"><option value="">Any</option><option th:each="state : ${T(myweddinginvitation.webapp.guest.DeliveryState).values()}" th:value="${state}" th:text="${state}" th:selected="${state == filters.delivery}">UNSENT</option></select></label>
@@ -21,6 +23,7 @@
     <label>Sort <select name="sort"><option value="updatedAt,desc" th:selected="${sort == 'updatedAt,desc'}">Recently updated</option><option value="updatedAt,asc" th:selected="${sort == 'updatedAt,asc'}">Oldest updated</option><option value="name,asc" th:selected="${sort == 'name,asc'}">Name A–Z</option><option value="name,desc" th:selected="${sort == 'name,desc'}">Name Z–A</option></select></label>
     <button class="button" type="submit">Filter</button>
   </form>
+  </details>
   <p class="card" th:if="${page.empty}">No guests found.</p>
   <table class="data-table mobile-card-list" th:unless="${page.empty}"><thead><tr><th>Name</th><th>WhatsApp</th><th>Category</th><th>Delivery</th><th>RSVP</th><th>Planned attendees</th><th>Actual attendees</th><th>Checked in at</th><th>Archived</th><th>Action</th></tr></thead>
     <tbody><tr th:each="guest : ${page.content}" th:with="rsvp=${rsvps[guest.id]},checkIn=${checkIns[guest.id]}"><td data-label="Name"><a th:href="@{/admin/guests/{id}(id=${guest.id})}" th:text="${guest.displayName}">Guest</a></td><td data-label="WhatsApp" th:text="${guest.normalizedWhatsappNumber}">+62</td><td data-label="Category" th:text="${guest.category == null ? 'Uncategorized' : guest.category.displayName}">Uncategorized</td><td data-label="Delivery"><span class="badge" th:text="${guest.deliveryState}">UNSENT</span></td><td data-label="RSVP" th:text="${rsvp == null ? 'No RSVP' : rsvp.response}">No RSVP</td><td data-label="Planned attendees" th:text="${rsvp == null ? '—' : rsvp.plannedAttendeeCount}">—</td><td data-label="Actual attendees" th:text="${checkIn == null ? '—' : checkIn.actualAttendeeCount}">—</td><td data-label="Checked in at" th:text="${checkIn == null ? '—' : checkIn.checkedInAt}">—</td><td data-label="Archived" th:text="${guest.archived ? 'Yes' : 'No'}">No</td><td data-label="Action"><a th:if="${!guest.archived}" th:href="@{/admin/guests/{id}/rsvp(id=${guest.id})}">Edit RSVP</a></td></tr></tbody>

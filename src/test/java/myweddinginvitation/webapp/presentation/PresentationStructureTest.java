@@ -69,15 +69,30 @@ class PresentationStructureTest {
 	}
 
 	@Test
-	void taskFivePagesUseExactActivePageKeys() throws IOException {
+	void administratorPagesUseExactActivePageKeys() throws IOException {
 		String navigation = resource("templates/fragments/admin-navigation.html");
 		for (String[] page : new String[][] {
-				{"admin/message-templates/edit.html", "messages"},
-				{"admin/message-templates/list.html", "messages"},
+				{"admin/home.html", "overview"},
+				{"admin/wedding/overview.html", "wedding-settings"},
+				{"admin/wedding/settings.html", "wedding-settings"},
+				{"admin/wedding/event-status.html", "wedding-settings"},
+				{"admin/wedding/event-status-confirm.html", "wedding-settings"},
+				{"admin/wedding/partners.html", "wedding-partners"},
+				{"admin/wedding/events.html", "wedding-events"},
+				{"admin/wedding/story.html", "wedding-story"},
+				{"admin/wedding/media.html", "wedding-media"},
+				{"admin/wedding/preview-form.html", "wedding-preview"},
+				{"admin/guests/detail.html", "guest-list"},
+				{"admin/guests/form.html", "guest-list"},
+				{"admin/guests/import.html", "guest-import-export"},
+				{"admin/guests/rsvp.html", "rsvp"},
+				{"admin/guest-categories/list.html", "guest-categories"},
+				{"admin/message-templates/edit.html", "message-templates"},
+				{"admin/message-templates/list.html", "message-templates"},
 				{"admin/reminders/list.html", "reminders"},
 				{"admin/greetings/list.html", "greetings"},
-				{"admin/accounts/form.html", "accounts"},
-				{"admin/accounts/list.html", "accounts"},
+				{"admin/accounts/form.html", "staff-accounts"},
+				{"admin/accounts/list.html", "staff-accounts"},
 				{"admin/reports/index.html", "reports"},
 				{"admin/system-status.html", "system-status"}
 		}) {
@@ -88,33 +103,87 @@ class PresentationStructureTest {
 	}
 
 	@Test
-	void administratorNavigationKeepsApprovedGroupsAndLinkOrder() throws IOException {
+	void administratorNavigationExposesEveryApprovedDestinationInOrder() throws IOException {
 		String navigation = resource("templates/fragments/admin-navigation.html");
-		assertThat(navigation).contains(
-				"th:href=\"@{/admin/guests(delivery=UNSENT)}\" th:aria-current=\"${activePage == 'invitations'} ? 'page'\"",
-				"th:href=\"@{/admin/guests(rsvpStatus=NONE)}\" th:aria-current=\"${activePage == 'rsvp'} ? 'page'\"",
-				"th:href=\"@{/admin/guests(checkedIn=false)}\" th:aria-current=\"${activePage == 'check-ins'} ? 'page'\"")
-				.containsSubsequence(
+		assertThat(navigation).containsSubsequence(
+				">Dashboard</a>",
+				"<p class=\"nav-heading\">Wedding</p>",
+				"th:href=\"@{/admin/wedding/settings}\"", ">Settings</a>",
+				"th:href=\"@{/admin/wedding/partners}\"", ">Partners</a>",
+				"th:href=\"@{/admin/wedding/events}\"", ">Events</a>",
+				"th:href=\"@{/admin/wedding/story}\"", ">Story</a>",
+				"th:href=\"@{/admin/wedding/media}\"", ">Media</a>",
+				"th:href=\"@{/admin/wedding/preview}\"", ">Preview</a>",
+				"<p class=\"nav-heading\">Guests</p>",
+				">Guest List</a>", ">Categories</a>", ">Import/Export</a>",
 				"<p class=\"nav-heading\">Communication</p>",
+				">Templates</a>",
 				">Invitations</a>",
-				">Message templates</a>",
 				">Reminders</a>",
 				"<p class=\"nav-heading\">Attendance</p>",
 				">RSVP</a>",
-				">Check-ins</a>",
 				">Greetings</a>",
+				">Check-ins</a>",
 				"<p class=\"nav-heading\">Operations</p>",
 				">Reports</a>",
-				">Staff accounts</a>",
-				">System status</a>");
+				">Staff Accounts</a>",
+				">System Status</a>")
+				.doesNotContain("@{/admin/wedding/event-status}", ">Event status</a>");
+		for (String activePage : new String[] {"overview", "wedding-settings", "wedding-partners",
+				"wedding-events", "wedding-story", "wedding-media", "wedding-preview", "guest-list",
+				"guest-categories", "guest-import-export", "message-templates", "invitations", "reminders",
+				"rsvp", "greetings", "check-ins", "reports", "staff-accounts", "system-status"}) {
+			assertThat(occurrences(navigation, "activePage == '" + activePage + "'"))
+					.as(activePage + " active navigation mapping").isEqualTo(1);
+		}
 		assertThat(resource("templates/admin/guests/list.html")).contains("sidebar(${navigationPage})");
+		assertThat(resource("templates/admin/wedding/settings.html")).contains("@{/admin/wedding/event-status}");
 	}
 
 	@Test
 	void administratorStylesSupportResponsiveWorkspaceComponents() throws IOException {
 		String css = resource("static/css/app.css");
 		assertThat(css).contains(".filter-panel", ".action-cluster", ".mobile-card-list", "content: attr(data-label)",
-				".page-content img {", "max-inline-size: 100%;", "block-size: auto;");
+				".page-content img {", "max-inline-size: 100%;", "block-size: auto;",
+				".app-navigation", "position: sticky", ".navigation-toggle", ".filter-disclosure",
+				".action-overflow");
+		String navigation = resource("templates/fragments/admin-navigation.html");
+		assertThat(navigation).contains("<details th:fragment=\"sidebar(activePage)\" class=\"app-navigation\" open>",
+				"<summary class=\"navigation-toggle\">Administrator menu</summary>");
+		for (String page : new String[] {"admin/guests/list.html", "admin/reminders/list.html", "admin/reports/index.html"}) {
+			assertThat(resource("templates/" + page)).as(page)
+					.contains("<details class=\"filter-disclosure\" open>", "<summary>Filters</summary>");
+		}
+		for (String page : new String[] {"admin/guests/detail.html", "admin/reminders/list.html",
+				"admin/accounts/list.html", "admin/reports/index.html"}) {
+			assertThat(resource("templates/" + page)).as(page).contains("class=\"action-overflow\"");
+		}
+	}
+
+	@Test
+	void passwordFieldsConditionallyAssociateAndRenderErrors() throws IOException {
+		String password = resource("templates/account/password.html");
+		fieldError(password, "currentPassword", "current-password-error");
+		fieldError(password, "newPassword", "new-password-error");
+		fieldError(password, "confirmPassword", "confirm-password-error");
+		assertThat(password).contains("th:if=\"${#fields.hasErrors('currentPassword')}\"",
+				"th:if=\"${#fields.hasErrors('newPassword')}\"",
+				"th:if=\"${#fields.hasErrors('confirmPassword')}\"");
+	}
+
+	@Test
+	void internalControlBordersMeetStableContrastContract() throws IOException {
+		String css = resource("static/css/app.css");
+		assertThat(css).contains("--color-border: #6b7280;",
+				".button-secondary { background: transparent; border-color: var(--color-border); color: inherit; }",
+				"input:hover, select:hover, textarea:hover,",
+				"input:focus, select:focus, textarea:focus");
+	}
+
+	@Test
+	void checkInSearchResultNameKeepsTouchTarget() throws IOException {
+		assertThat(resource("static/css/app.css"))
+				.contains(".result-name {", "min-block-size: 44px;");
 	}
 
 	@Test

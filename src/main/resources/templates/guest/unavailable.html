@@ -1,18 +1,18 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" th:lang="${language == 'EN'} ? 'en' : 'id'" xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <title>Undangan tidak tersedia</title>
+    <title th:text="${language == 'EN'} ? 'Invitation unavailable' : 'Undangan tidak tersedia'">Undangan tidak tersedia</title>
     <link rel="stylesheet" href="/css/invitation.css">
 </head>
 <body class="guest-state-page">
 <main class="guest-state">
-    <h1>Undangan tidak tersedia</h1>
-    <p>Invitation unavailable</p>
-    <p>Silakan hubungi pengirim undangan untuk mendapatkan tautan terbaru.</p>
-    <a class="action-link guest-state-action" href="/i">Buka halaman undangan</a>
+    <h1 th:text="${language == 'EN'} ? 'Invitation unavailable' : 'Undangan tidak tersedia'">Undangan tidak tersedia</h1>
+    <p th:text="${language == 'EN'} ? 'This invitation link cannot be used.' : 'Tautan undangan ini tidak dapat digunakan.'">Tautan undangan ini tidak dapat digunakan.</p>
+    <a class="action-link guest-state-action" th:href="@{/i(language=${language})}"
+       th:text="${language == 'EN'} ? 'Back to invitation page' : 'Kembali ke halaman undangan'">Kembali ke halaman undangan</a>
 </main>
 </body>
 </html>

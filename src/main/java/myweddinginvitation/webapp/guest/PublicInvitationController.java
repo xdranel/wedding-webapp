@@ -54,7 +54,7 @@ public class PublicInvitationController {
 		ClosedEventView closure = eventStatus.publicClosure(language).orElse(null);
 		if (closure != null) return closed(closure, model);
 		Access resolved = access.resolve(publicId, version, signature, language);
-		if (resolved == null) return unavailable(response);
+		if (resolved == null) return unavailable(response, language, model);
 		return render(resolved, invitationPath(publicId, version, signature), null, page, model, session);
 	}
 
@@ -94,8 +94,9 @@ public class PublicInvitationController {
 		return clock.instant().isBefore(deadline);
 	}
 
-	public String unavailable(HttpServletResponse response) {
+	public String unavailable(HttpServletResponse response, String language, Model model) {
 		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		model.addAttribute("language", "EN".equals(language) ? "EN" : "ID");
 		return "guest/unavailable";
 	}
 

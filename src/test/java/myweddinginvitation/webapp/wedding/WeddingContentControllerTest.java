@@ -131,6 +131,16 @@ class WeddingContentControllerTest {
 	}
 
 	@Test
+	void weddingOverviewAndSettingsUseTheSettingsNavigationState() throws Exception {
+		for (String path : new String[] {"/admin/wedding", "/admin/wedding/settings"}) {
+			String page = mockMvc.perform(get(path).session(adminSession))
+					.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+			assertThat(page).containsOnlyOnce("aria-current=\"page\"")
+					.containsOnlyOnce("<a href=\"/admin/wedding/settings\" aria-current=\"page\">Settings</a>");
+		}
+	}
+
+	@Test
 	void failedPublicationReturnsToOverviewWithErrors() throws Exception {
 		mockMvc.perform(post("/admin/wedding/publish")
 				.session(adminSession)

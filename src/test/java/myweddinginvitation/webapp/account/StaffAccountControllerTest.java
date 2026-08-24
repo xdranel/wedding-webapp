@@ -69,7 +69,7 @@ class StaffAccountControllerTest {
 				.andExpect(content().string(containsString("Password change required")))
 				.andReturn().getResponse().getContentAsString();
 		assertThat(page).doesNotContain("Temporary-Password-2026")
-				.containsOnlyOnce("<a href=\"/admin/accounts\" aria-current=\"page\">Staff accounts</a>");
+				.containsOnlyOnce("<a href=\"/admin/accounts\" aria-current=\"page\">Staff Accounts</a>");
 	}
 
 	@Test
@@ -84,7 +84,7 @@ class StaffAccountControllerTest {
 				.andExpect(content().string(containsString("name=\"_csrf\"")))
 				.andExpect(content().string(not(containsString("Temporary-Password-2026"))))
 				.andReturn().getResponse().getContentAsString();
-		assertThat(page).containsOnlyOnce("<a href=\"/admin/accounts\" aria-current=\"page\">Staff accounts</a>");
+		assertThat(page).containsOnlyOnce("<a href=\"/admin/accounts\" aria-current=\"page\">Staff Accounts</a>");
 	}
 
 	@Test

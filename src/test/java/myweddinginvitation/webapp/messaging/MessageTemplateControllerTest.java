@@ -77,7 +77,7 @@ class MessageTemplateControllerTest {
 				.andExpect(content().string(containsString("EVENT_REMINDER")))
 				.andReturn().getResponse().getContentAsString();
 		assertThat(page).containsOnlyOnce(
-				"<a href=\"/admin/message-templates\" aria-current=\"page\">Message templates</a>");
+				"<a href=\"/admin/message-templates\" aria-current=\"page\">Templates</a>");
 
 		mockMvc.perform(get("/admin").session(adminSession))
 				.andExpect(content().string(containsString("/admin/message-templates")));
@@ -96,7 +96,7 @@ class MessageTemplateControllerTest {
 				.andExpect(content().string(containsString("Hi {{unknown}}")))
 				.andReturn().getResponse().getContentAsString();
 		assertThat(page).containsOnlyOnce(
-				"<a href=\"/admin/message-templates\" aria-current=\"page\">Message templates</a>");
+				"<a href=\"/admin/message-templates\" aria-current=\"page\">Templates</a>");
 		assertThat(invitationEn().getBody()).isEqualTo("Dear {{salutation}} {{guest_name}}");
 	}
 

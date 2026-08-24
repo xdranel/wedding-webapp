@@ -62,7 +62,7 @@ public class GuestController {
 				rsvp, "NONE".equals(rsvpStatus), checkedIn);
 		var pageOfGuests = guests.search(filters, PageRequest.of(Math.max(page, 0), 50, sort(sort)));
 		model.addAttribute("navigationPage", delivery == DeliveryState.UNSENT ? "invitations"
-				: "NONE".equals(rsvpStatus) ? "rsvp" : Boolean.FALSE.equals(checkedIn) ? "check-ins" : "guests");
+				: "NONE".equals(rsvpStatus) ? "rsvp" : Boolean.FALSE.equals(checkedIn) ? "check-ins" : "guest-list");
 		model.addAttribute("filters", filters);
 		model.addAttribute("sort", sort);
 		model.addAttribute("page", pageOfGuests);

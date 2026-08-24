@@ -110,9 +110,9 @@ class ReminderAdminControllerTest {
 				.andReturn().getResponse().getContentAsString();
 		assertThat(page).containsOnlyOnce("<a href=\"/admin/reminders\" aria-current=\"page\">Reminders</a>");
 		assertThat(page).containsOnlyOnce("aria-current=\"page\"")
-				.containsOnlyOnce("role=\"tablist\"")
-				.contains("role=\"tab\" aria-selected=\"true\">RSVP reminders</a>",
-						"role=\"tab\" aria-selected=\"false\">Event reminders</a>");
+				.containsOnlyOnce("aria-current=\"true\"")
+				.contains("aria-current=\"true\">RSVP reminders</a>", ">Event reminders</a>")
+				.doesNotContain("role=\"tablist\"", "role=\"tab\"", "aria-selected=");
 
 		String eventPage = mockMvc.perform(get("/admin/reminders").session(adminSession)
 				.param("kind", "EVENT").param("categoryId", Long.toString(familyId)))
@@ -122,8 +122,9 @@ class ReminderAdminControllerTest {
 				.andExpect(content().string(containsString("Confirm sent")))
 				.andReturn().getResponse().getContentAsString();
 		assertThat(eventPage).containsOnlyOnce("aria-current=\"page\"")
-				.contains("role=\"tab\" aria-selected=\"false\">RSVP reminders</a>",
-						"role=\"tab\" aria-selected=\"true\">Event reminders</a>");
+				.containsOnlyOnce("aria-current=\"true\"")
+				.contains(">RSVP reminders</a>", "aria-current=\"true\">Event reminders</a>")
+				.doesNotContain("role=\"tablist\"", "role=\"tab\"", "aria-selected=");
 	}
 
 	@Test

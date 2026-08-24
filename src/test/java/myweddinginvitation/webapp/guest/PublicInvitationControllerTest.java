@@ -195,11 +195,35 @@ class PublicInvitationControllerTest {
 				.andExpect(header().string("Cache-Control", "no-store"))
 				.andExpect(view().name("guest/unavailable"))
 				.andExpect(content().string(containsString("Undangan tidak tersedia")))
-				.andExpect(content().string(containsString("Invitation unavailable")))
+				.andExpect(content().string(not(containsString("Invitation unavailable"))))
 				.andExpect(content().string(containsString("noindex, nofollow")))
 				.andExpect(content().string(not(containsString(GUEST_NAME))))
 				.andExpect(content().string(not(containsString(WHATSAPP))))
 				.andExpect(content().string(not(containsString(INTERNAL_NOTE))));
+	}
+
+	@Test
+	void unavailableInvitationPreservesIndonesianSelection() throws Exception {
+		mockMvc.perform(get("/i/not-a-uuid/not-a-version/not-a-signature").param("language", "ID"))
+				.andExpect(status().isNotFound())
+				.andExpect(view().name("guest/unavailable"))
+				.andExpect(content().string(containsString("lang=\"id\"")))
+				.andExpect(content().string(containsString("<title>Undangan tidak tersedia</title>")))
+				.andExpect(content().string(containsString("Tautan undangan ini tidak dapat digunakan.")))
+				.andExpect(content().string(containsString("href=\"/i?language=ID\"")))
+				.andExpect(content().string(not(containsString("Invitation unavailable"))));
+	}
+
+	@Test
+	void unavailableInvitationPreservesEnglishSelection() throws Exception {
+		mockMvc.perform(get("/i/not-a-uuid/not-a-version/not-a-signature").param("language", "EN"))
+				.andExpect(status().isNotFound())
+				.andExpect(view().name("guest/unavailable"))
+				.andExpect(content().string(containsString("lang=\"en\"")))
+				.andExpect(content().string(containsString("<title>Invitation unavailable</title>")))
+				.andExpect(content().string(containsString("This invitation link cannot be used.")))
+				.andExpect(content().string(containsString("href=\"/i?language=EN\"")))
+				.andExpect(content().string(not(containsString("Undangan tidak tersedia"))));
 	}
 
 	@Test

@@ -1,34 +1,42 @@
-<nav th:fragment="sidebar(activePage)" class="app-sidebar" aria-label="Administrator navigation">
-    <a class="brand" th:href="@{/admin}">Wedding Admin</a>
+<details th:fragment="sidebar(activePage)" class="app-navigation" open>
+    <summary class="navigation-toggle">Administrator menu</summary>
+    <nav class="app-sidebar" aria-label="Administrator navigation">
+        <a class="brand" th:href="@{/admin}">Wedding Admin</a>
 
-    <p class="nav-heading">Overview</p>
-    <a th:href="@{/admin}" th:aria-current="${activePage == 'overview'} ? 'page'">Dashboard</a>
+        <p class="nav-heading">Overview</p>
+        <a th:href="@{/admin}" th:aria-current="${activePage == 'overview'} ? 'page'">Dashboard</a>
 
-    <p class="nav-heading">Wedding</p>
-    <a th:href="@{/admin/wedding}" th:aria-current="${activePage == 'wedding'} ? 'page'">Wedding content</a>
-    <a th:href="@{/admin/wedding/event-status}" th:aria-current="${activePage == 'event-status'} ? 'page'">Event status</a>
+        <p class="nav-heading">Wedding</p>
+        <a th:href="@{/admin/wedding/settings}" th:aria-current="${activePage == 'wedding-settings'} ? 'page'">Settings</a>
+        <a th:href="@{/admin/wedding/partners}" th:aria-current="${activePage == 'wedding-partners'} ? 'page'">Partners</a>
+        <a th:href="@{/admin/wedding/events}" th:aria-current="${activePage == 'wedding-events'} ? 'page'">Events</a>
+        <a th:href="@{/admin/wedding/story}" th:aria-current="${activePage == 'wedding-story'} ? 'page'">Story</a>
+        <a th:href="@{/admin/wedding/media}" th:aria-current="${activePage == 'wedding-media'} ? 'page'">Media</a>
+        <a th:href="@{/admin/wedding/preview}" th:aria-current="${activePage == 'wedding-preview'} ? 'page'">Preview</a>
 
-    <p class="nav-heading">Guests</p>
-    <a th:href="@{/admin/guests}" th:aria-current="${activePage == 'guests'} ? 'page'">Guest List</a>
-    <a th:href="@{/admin/guest-categories}" th:aria-current="${activePage == 'guest-categories'} ? 'page'">Guest categories</a>
+        <p class="nav-heading">Guests</p>
+        <a th:href="@{/admin/guests}" th:aria-current="${activePage == 'guest-list'} ? 'page'">Guest List</a>
+        <a th:href="@{/admin/guest-categories}" th:aria-current="${activePage == 'guest-categories'} ? 'page'">Categories</a>
+        <a th:href="@{/admin/guests/import}" th:aria-current="${activePage == 'guest-import-export'} ? 'page'">Import/Export</a>
 
-    <p class="nav-heading">Communication</p>
-    <a th:href="@{/admin/guests(delivery=UNSENT)}" th:aria-current="${activePage == 'invitations'} ? 'page'">Invitations</a>
-    <a th:href="@{/admin/message-templates}" th:aria-current="${activePage == 'messages'} ? 'page'">Message templates</a>
-    <a th:href="@{/admin/reminders}" th:aria-current="${activePage == 'reminders'} ? 'page'">Reminders</a>
+        <p class="nav-heading">Communication</p>
+        <a th:href="@{/admin/message-templates}" th:aria-current="${activePage == 'message-templates'} ? 'page'">Templates</a>
+        <a th:href="@{/admin/guests(delivery=UNSENT)}" th:aria-current="${activePage == 'invitations'} ? 'page'">Invitations</a>
+        <a th:href="@{/admin/reminders}" th:aria-current="${activePage == 'reminders'} ? 'page'">Reminders</a>
 
-    <p class="nav-heading">Attendance</p>
-    <a th:href="@{/admin/guests(rsvpStatus=NONE)}" th:aria-current="${activePage == 'rsvp'} ? 'page'">RSVP</a>
-    <a th:href="@{/admin/guests(checkedIn=false)}" th:aria-current="${activePage == 'check-ins'} ? 'page'">Check-ins</a>
-    <a th:href="@{/admin/greetings}" th:aria-current="${activePage == 'greetings'} ? 'page'">Greetings</a>
+        <p class="nav-heading">Attendance</p>
+        <a th:href="@{/admin/guests(rsvpStatus=NONE)}" th:aria-current="${activePage == 'rsvp'} ? 'page'">RSVP</a>
+        <a th:href="@{/admin/greetings}" th:aria-current="${activePage == 'greetings'} ? 'page'">Greetings</a>
+        <a th:href="@{/admin/guests(checkedIn=false)}" th:aria-current="${activePage == 'check-ins'} ? 'page'">Check-ins</a>
 
-    <p class="nav-heading">Operations</p>
-    <a th:href="@{/admin/reports}" th:aria-current="${activePage == 'reports'} ? 'page'">Reports</a>
-    <a th:href="@{/admin/accounts}" th:aria-current="${activePage == 'accounts'} ? 'page'">Staff accounts</a>
-    <a th:href="@{/admin/system-status}" th:aria-current="${activePage == 'system-status'} ? 'page'">System status</a>
+        <p class="nav-heading">Operations</p>
+        <a th:href="@{/admin/reports}" th:aria-current="${activePage == 'reports'} ? 'page'">Reports</a>
+        <a th:href="@{/admin/accounts}" th:aria-current="${activePage == 'staff-accounts'} ? 'page'">Staff Accounts</a>
+        <a th:href="@{/admin/system-status}" th:aria-current="${activePage == 'system-status'} ? 'page'">System Status</a>
 
-    <form method="post" th:action="@{/logout}">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <button type="submit" class="button button-secondary">Sign out</button>
-    </form>
-</nav>
+        <form method="post" th:action="@{/logout}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" class="button button-secondary">Sign out</button>
+        </form>
+    </nav>
+</details>
