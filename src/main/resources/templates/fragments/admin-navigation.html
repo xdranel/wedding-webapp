@@ -13,10 +13,13 @@
     <a th:href="@{/admin/guest-categories}" th:aria-current="${activePage == 'guest-categories'} ? 'page'">Guest categories</a>
 
     <p class="nav-heading">Communication</p>
+    <a th:href="@{/admin/guests(delivery=UNSENT)}" th:aria-current="${activePage == 'invitations'} ? 'page'">Invitations</a>
     <a th:href="@{/admin/message-templates}" th:aria-current="${activePage == 'messages'} ? 'page'">Message templates</a>
     <a th:href="@{/admin/reminders}" th:aria-current="${activePage == 'reminders'} ? 'page'">Reminders</a>
 
     <p class="nav-heading">Attendance</p>
+    <a th:href="@{/admin/guests(rsvpStatus=NONE)}" th:aria-current="${activePage == 'rsvp'} ? 'page'">RSVP</a>
+    <a th:href="@{/admin/guests(checkedIn=false)}" th:aria-current="${activePage == 'check-ins'} ? 'page'">Check-ins</a>
     <a th:href="@{/admin/greetings}" th:aria-current="${activePage == 'greetings'} ? 'page'">Greetings</a>
 
     <p class="nav-heading">Operations</p>

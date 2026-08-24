@@ -109,13 +109,21 @@ class ReminderAdminControllerTest {
 				.andExpect(content().string(not(containsString("batch"))))
 				.andReturn().getResponse().getContentAsString();
 		assertThat(page).containsOnlyOnce("<a href=\"/admin/reminders\" aria-current=\"page\">Reminders</a>");
+		assertThat(page).containsOnlyOnce("aria-current=\"page\"")
+				.containsOnlyOnce("role=\"tablist\"")
+				.contains("role=\"tab\" aria-selected=\"true\">RSVP reminders</a>",
+						"role=\"tab\" aria-selected=\"false\">Event reminders</a>");
 
-		mockMvc.perform(get("/admin/reminders").session(adminSession)
+		String eventPage = mockMvc.perform(get("/admin/reminders").session(adminSession)
 				.param("kind", "EVENT").param("categoryId", Long.toString(familyId)))
 				.andExpect(status().isOk())
 				.andExpect(content().string(containsString("Attending guest")))
 				.andExpect(content().string(containsString("Open WhatsApp")))
-				.andExpect(content().string(containsString("Confirm sent")));
+				.andExpect(content().string(containsString("Confirm sent")))
+				.andReturn().getResponse().getContentAsString();
+		assertThat(eventPage).containsOnlyOnce("aria-current=\"page\"")
+				.contains("role=\"tab\" aria-selected=\"false\">RSVP reminders</a>",
+						"role=\"tab\" aria-selected=\"true\">Event reminders</a>");
 	}
 
 	@Test

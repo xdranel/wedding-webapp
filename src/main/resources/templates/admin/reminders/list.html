@@ -9,9 +9,9 @@
     <header class="app-header"><h1>Reminders</h1></header>
     <main id="main-content" class="page-content">
   <p><a th:href="@{/admin}">Back to administrator home</a></p>
-  <nav class="action-cluster" aria-label="Reminder queues">
-    <a th:href="@{/admin/reminders(kind=RSVP,categoryId=${categoryId})}" th:aria-current="${kind.name() == 'RSVP' ? 'page' : null}">RSVP reminders</a>
-    <a th:href="@{/admin/reminders(kind=EVENT,categoryId=${categoryId})}" th:aria-current="${kind.name() == 'EVENT' ? 'page' : null}">Event reminders</a>
+  <nav class="action-cluster" aria-label="Reminder queues" role="tablist">
+    <a th:href="@{/admin/reminders(kind=RSVP,categoryId=${categoryId})}" role="tab" th:aria-selected="${kind.name() == 'RSVP'}">RSVP reminders</a>
+    <a th:href="@{/admin/reminders(kind=EVENT,categoryId=${categoryId})}" role="tab" th:aria-selected="${kind.name() == 'EVENT'}">Event reminders</a>
   </nav>
   <form class="card filter-panel form-grid" method="get" th:action="@{/admin/reminders}">
     <label>Reminder queue

@@ -68,16 +68,25 @@ class PresentationStructureTest {
 
 	@Test
 	void administratorNavigationKeepsApprovedGroupsAndLinkOrder() throws IOException {
-		assertThat(resource("templates/fragments/admin-navigation.html")).containsSubsequence(
+		String navigation = resource("templates/fragments/admin-navigation.html");
+		assertThat(navigation).contains(
+				"th:href=\"@{/admin/guests(delivery=UNSENT)}\" th:aria-current=\"${activePage == 'invitations'} ? 'page'\"",
+				"th:href=\"@{/admin/guests(rsvpStatus=NONE)}\" th:aria-current=\"${activePage == 'rsvp'} ? 'page'\"",
+				"th:href=\"@{/admin/guests(checkedIn=false)}\" th:aria-current=\"${activePage == 'check-ins'} ? 'page'\"")
+				.containsSubsequence(
 				"<p class=\"nav-heading\">Communication</p>",
+				">Invitations</a>",
 				">Message templates</a>",
 				">Reminders</a>",
 				"<p class=\"nav-heading\">Attendance</p>",
+				">RSVP</a>",
+				">Check-ins</a>",
 				">Greetings</a>",
 				"<p class=\"nav-heading\">Operations</p>",
 				">Reports</a>",
 				">Staff accounts</a>",
 				">System status</a>");
+		assertThat(resource("templates/admin/guests/list.html")).contains("sidebar(${navigationPage})");
 	}
 
 	@Test

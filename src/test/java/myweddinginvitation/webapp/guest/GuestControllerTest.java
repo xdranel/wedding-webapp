@@ -112,6 +112,36 @@ class GuestControllerTest {
 	}
 
 	@Test
+	void guestNavigationRendersFilteredShortcutsWithOneCurrentPage() throws Exception {
+		String defaultPage = mockMvc.perform(get("/admin/guests").session(adminSession))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+		assertThat(defaultPage).contains(
+				"href=\"/admin/guests?delivery=UNSENT\"",
+				"href=\"/admin/guests?rsvpStatus=NONE\"",
+				"href=\"/admin/guests?checkedIn=false\"");
+		assertCurrentNavigation(defaultPage, "<a href=\"/admin/guests\" aria-current=\"page\">Guest List</a>");
+
+		String invitations = mockMvc.perform(get("/admin/guests").session(adminSession).param("delivery", "UNSENT"))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+		assertCurrentNavigation(invitations,
+				"<a href=\"/admin/guests?delivery=UNSENT\" aria-current=\"page\">Invitations</a>");
+
+		String rsvp = mockMvc.perform(get("/admin/guests").session(adminSession).param("rsvpStatus", "NONE"))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+		assertCurrentNavigation(rsvp,
+				"<a href=\"/admin/guests?rsvpStatus=NONE\" aria-current=\"page\">RSVP</a>");
+
+		String checkIns = mockMvc.perform(get("/admin/guests").session(adminSession).param("checkedIn", "false"))
+				.andExpect(status().isOk())
+				.andReturn().getResponse().getContentAsString();
+		assertCurrentNavigation(checkIns,
+				"<a href=\"/admin/guests?checkedIn=false\" aria-current=\"page\">Check-ins</a>");
+	}
+
+	@Test
 	void filtersAndDisplaysCurrentRsvpState() throws Exception {
 		Guest attending = service.create(form("Hadir Guest", "081234567891", true), false);
 		Guest declined = service.create(form("Declined Guest", "081234567892"), false);
@@ -397,5 +427,9 @@ class GuestControllerTest {
 				.param("username", username)
 				.param("password", PASSWORD))
 				.andReturn().getRequest().getSession(false);
+	}
+
+	private void assertCurrentNavigation(String page, String currentLink) {
+		assertThat(page).containsOnlyOnce("aria-current=\"page\"").containsOnlyOnce(currentLink);
 	}
 }

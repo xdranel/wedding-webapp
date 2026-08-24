@@ -61,6 +61,8 @@ public class GuestController {
 		GuestListQuery filters = new GuestListQuery(query, delivery, archived, categoryId,
 				rsvp, "NONE".equals(rsvpStatus), checkedIn);
 		var pageOfGuests = guests.search(filters, PageRequest.of(Math.max(page, 0), 50, sort(sort)));
+		model.addAttribute("navigationPage", delivery == DeliveryState.UNSENT ? "invitations"
+				: "NONE".equals(rsvpStatus) ? "rsvp" : Boolean.FALSE.equals(checkedIn) ? "check-ins" : "guests");
 		model.addAttribute("filters", filters);
 		model.addAttribute("sort", sort);
 		model.addAttribute("page", pageOfGuests);
