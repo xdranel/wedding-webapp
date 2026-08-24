@@ -4,29 +4,34 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Operational reports</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<main>
-  <h1>Operational reports</h1>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+  <nav th:replace="~{fragments/admin-navigation :: sidebar('operations')}"></nav>
+  <div>
+    <header class="app-header"><h1>Operational reports</h1><a class="button" th:href="@{/admin/reports/print(categoryId=${categoryId})}">Print report</a></header>
+    <main id="main-content" class="page-content">
   <p><a th:href="@{/admin}">Back to administrator home</a></p>
 
-  <form method="get" th:action="@{/admin/reports}">
+  <form class="card filter-panel form-grid" method="get" th:action="@{/admin/reports}">
     <label for="category">Category</label>
     <select id="category" name="categoryId">
       <option value="" th:selected="${categoryId == null}">All categories</option>
       <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.displayName}"
               th:selected="${category.id == categoryId}">Category</option>
     </select>
-    <button type="submit">Filter</button>
+    <button class="button" type="submit">Filter</button>
   </form>
 
-  <p><a th:href="@{/admin/reports/print(categoryId=${categoryId})}">Print report</a>
+  <p class="action-cluster"><a th:href="@{/admin/reports/print(categoryId=${categoryId})}">Print report</a>
     <a th:href="@{/admin/guests/export.csv}">Export complete CSV</a>
     <a th:href="@{/admin/greetings}">Moderate greetings</a></p>
 
-  <section aria-labelledby="summary-heading">
+  <section class="card" aria-labelledby="summary-heading">
     <h2 id="summary-heading">Summary</h2>
-    <dl>
+    <dl class="summary-grid">
       <dt>Invitations</dt><dd th:text="${report.totals.invitations}">0</dd>
       <dt>Potential people</dt><dd th:text="${report.totals.potentialPeople}">0</dd>
       <dt>RSVP Hadir</dt><dd th:text="${report.totals.rsvpAttending}">0</dd>
@@ -44,24 +49,26 @@
     </dl>
   </section>
 
-  <section aria-labelledby="categories-heading">
+  <section class="card" aria-labelledby="categories-heading">
     <h2 id="categories-heading">Category breakdown</h2>
     <p th:if="${report.categories.empty}">No active guests match this filter.</p>
-    <table th:unless="${report.categories.empty}">
+    <table class="data-table mobile-card-list" th:unless="${report.categories.empty}">
       <thead><tr><th>Category</th><th>Invitations</th><th>Potential people</th><th>Hadir</th><th>Declined</th><th>No RSVP</th><th>Planned people</th><th>Checked in</th><th>Actual people</th></tr></thead>
       <tbody><tr th:each="category : ${report.categories}">
-        <td th:text="${category.categoryName}">Category</td>
-        <td th:text="${category.metrics.invitations}">0</td>
-        <td th:text="${category.metrics.potentialPeople}">0</td>
-        <td th:text="${category.metrics.rsvpAttending}">0</td>
-        <td th:text="${category.metrics.rsvpDeclined}">0</td>
-        <td th:text="${category.metrics.rsvpMissing}">0</td>
-        <td th:text="${category.metrics.plannedPeople}">0</td>
-        <td th:text="${category.metrics.checkedInInvitations}">0</td>
-        <td th:text="${category.metrics.actualPeople}">0</td>
+        <td data-label="Category" th:text="${category.categoryName}">Category</td>
+        <td data-label="Invitations" th:text="${category.metrics.invitations}">0</td>
+        <td data-label="Potential people" th:text="${category.metrics.potentialPeople}">0</td>
+        <td data-label="Hadir" th:text="${category.metrics.rsvpAttending}">0</td>
+        <td data-label="Declined" th:text="${category.metrics.rsvpDeclined}">0</td>
+        <td data-label="No RSVP" th:text="${category.metrics.rsvpMissing}">0</td>
+        <td data-label="Planned people" th:text="${category.metrics.plannedPeople}">0</td>
+        <td data-label="Checked in" th:text="${category.metrics.checkedInInvitations}">0</td>
+        <td data-label="Actual people" th:text="${category.metrics.actualPeople}">0</td>
       </tr></tbody>
     </table>
   </section>
-</main>
+    </main>
+  </div>
+</div>
 </body>
 </html>

@@ -4,22 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title th:text="${heading}">Staff account</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-  <main>
-    <h1 th:text="${heading}">Staff account</h1>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+  <nav th:replace="~{fragments/admin-navigation :: sidebar('operations')}"></nav>
+  <div>
+    <header class="app-header"><h1 th:text="${heading}">Staff account</h1></header>
+    <main id="main-content" class="page-content">
     <p><a th:href="@{/admin/accounts}">Back to staff accounts</a></p>
-    <form method="post" th:action="${action}" th:object="${form}">
+    <form class="card form-grid" method="post" th:action="${action}" th:object="${form}">
       <div th:if="${action == '/admin/accounts'}">
         <label for="username">Username</label>
-        <input id="username" th:field="*{username}" maxlength="100" required>
-        <p th:if="${#fields.hasErrors('username')}" th:errors="*{username}" role="alert">Username error</p>
+        <input id="username" th:field="*{username}" maxlength="100" required
+               th:attr="aria-describedby=${#fields.hasErrors('username')} ? 'username-error' : null">
+        <p id="username-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}" role="alert">Username error</p>
       </div>
       <label for="temporary-password">Temporary password</label>
-      <input id="temporary-password" type="password" th:field="*{temporaryPassword}" minlength="12" maxlength="200" required>
-      <p th:if="${#fields.hasErrors('temporaryPassword')}" th:errors="*{temporaryPassword}" role="alert">Password error</p>
-      <button type="submit" th:text="${action == '/admin/accounts'} ? 'Create staff account' : 'Reset password'">Submit</button>
+      <input id="temporary-password" type="password" th:field="*{temporaryPassword}" minlength="12" maxlength="200" required
+             th:attr="aria-describedby=${#fields.hasErrors('temporaryPassword')} ? 'temporary-password-error' : null">
+      <p id="temporary-password-error" th:if="${#fields.hasErrors('temporaryPassword')}" th:errors="*{temporaryPassword}" role="alert">Password error</p>
+      <button class="button" type="submit" th:text="${action == '/admin/accounts'} ? 'Create staff account' : 'Reset password'">Submit</button>
     </form>
-  </main>
+    </main>
+  </div>
+</div>
 </body>
 </html>

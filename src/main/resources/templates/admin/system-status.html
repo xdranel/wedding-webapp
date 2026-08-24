@@ -4,18 +4,25 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>System status</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<main>
-  <h1>System status</h1>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+  <nav th:replace="~{fragments/admin-navigation :: sidebar('operations')}"></nav>
+  <div>
+    <header class="app-header"><h1>System status</h1><a class="button" th:href="@{/admin/system-status}">Refresh</a></header>
+    <main id="main-content" class="page-content">
   <p><a th:href="@{/admin/system-status}">Refresh</a> <a th:href="@{/admin}">Back to administrator home</a></p>
-  <dl>
-    <div th:each="check : ${status.checks}">
+  <dl class="summary-grid">
+    <div class="card" th:each="check : ${status.checks}">
       <dt th:text="${check.label}">Check</dt>
-      <dd><strong th:text="${check.ok} ? 'OK' : 'Problem'">OK</strong> <span th:text="${check.value}">Value</span></dd>
+      <dd><strong class="badge" th:text="${check.ok} ? 'OK' : 'Problem'">OK</strong> <span th:text="${check.value}">Value</span></dd>
     </div>
   </dl>
   <p>Checked at <time th:datetime="${status.checkedAt}" th:text="${status.checkedAt}">2026-08-18T00:00:00Z</time>.</p>
-</main>
+    </main>
+  </div>
+</div>
 </body>
 </html>

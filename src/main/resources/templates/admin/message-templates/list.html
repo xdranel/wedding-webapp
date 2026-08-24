@@ -4,19 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Message templates</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-  <main>
-    <h1>Message templates</h1>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+  <nav th:replace="~{fragments/admin-navigation :: sidebar('communication')}"></nav>
+  <div>
+    <header class="app-header"><h1>Message templates</h1></header>
+    <main id="main-content" class="page-content">
     <p><a th:href="@{/admin}">Back to administrator home</a></p>
-    <p>Edit the Indonesian and English WhatsApp messages used for each delivery type.</p>
-    <ul>
-      <li th:each="template : ${templates}">
-        <strong th:text="${template.type}">INVITATION</strong>
-        <span th:text="${template.language}">ID</span>
-        <a th:href="@{/admin/message-templates/{id}(id=${template.id})}">Edit template</a>
-      </li>
-    </ul>
-  </main>
+    <p class="card">Edit the Indonesian and English WhatsApp messages used for each delivery type.</p>
+    <table class="data-table mobile-card-list">
+      <thead><tr><th>Type</th><th>Language</th><th>Action</th></tr></thead>
+      <tbody><tr th:each="template : ${templates}">
+        <td data-label="Type"><strong class="badge" th:text="${template.type}">INVITATION</strong></td>
+        <td data-label="Language"><span class="badge" th:text="${template.language}">ID</span></td>
+        <td data-label="Action"><a th:href="@{/admin/message-templates/{id}(id=${template.id})}">Edit template</a></td>
+      </tr></tbody>
+    </table>
+    </main>
+  </div>
+</div>
 </body>
 </html>

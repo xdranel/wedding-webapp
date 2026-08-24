@@ -22,7 +22,15 @@ class PresentationStructureTest {
 			"admin/guests/form.html",
 			"admin/guests/import.html",
 			"admin/guests/rsvp.html",
-			"admin/guest-categories/list.html"
+			"admin/guest-categories/list.html",
+			"admin/message-templates/edit.html",
+			"admin/message-templates/list.html",
+			"admin/reminders/list.html",
+			"admin/greetings/list.html",
+			"admin/accounts/form.html",
+			"admin/accounts/list.html",
+			"admin/reports/index.html",
+			"admin/system-status.html"
 	};
 
 	@Test
@@ -119,6 +127,12 @@ class PresentationStructureTest {
 		String categories = resource("templates/admin/guest-categories/list.html");
 		fieldError(categories, "name", "category-name-error");
 		fieldError(categories, "name", "category-edit-name-error");
+
+		fieldError(resource("templates/admin/message-templates/edit.html"), "body", "template-body-error");
+
+		String accounts = resource("templates/admin/accounts/form.html");
+		fieldError(accounts, "username", "username-error");
+		fieldError(accounts, "temporaryPassword", "temporary-password-error");
 	}
 
 	@Test
