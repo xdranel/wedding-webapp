@@ -10,232 +10,303 @@
     <link rel="stylesheet" th:href="@{/css/invitation.css}">
 </head>
 <body th:attr="data-font=${preview.fontPreset}" th:style="|--accent: ${accentColor};|">
-<main>
-    <nav class="language-switch" th:aria-label="${language == 'EN'} ? 'Invitation language' : 'Bahasa undangan'">
-        <a th:href="${invitationPath + '?language=ID'}" lang="id">Indonesia</a>
-        <a th:href="${invitationPath + '?language=EN'}" lang="en">English</a>
-    </nav>
-    <section id="cover" class="cover" aria-labelledby="invitation-title">
-        <p th:text="${language == 'EN'} ? 'Wedding invitation' : 'Undangan pernikahan'">Undangan pernikahan</p>
-        <h1 id="invitation-title"
-            th:text="${#strings.isEmpty(preview.coupleTitle) ? 'Wedding invitation' : preview.coupleTitle}">
-            Wedding invitation
-        </h1>
-        <p th:if="${preview.coverDate != null}">
-            <time th:datetime="${preview.coverDate}" th:text="${preview.coverDate}">2027-05-01</time>
-        </p>
-        <p th:text="${preview.salutation + ' ' + preview.guestName}">Bapak/Ibu Nama Tamu</p>
-        <button type="button" id="open-invitation" aria-controls="invitation" aria-expanded="false"
-                th:text="${language == 'EN'} ? 'Open invitation' : 'Buka Undangan'">Buka Undangan</button>
+<main class="guest-presentation">
+    <section id="cover" class="cover" aria-labelledby="invitation-title"
+             th:classappend="${preview.partners.empty or #strings.isEmpty(preview.partners[0].photoPath)} ? 'cover-fallback' : 'cover-photo'">
+        <img th:if="${!preview.partners.empty and !#strings.isEmpty(preview.partners[0].photoPath)}"
+             class="cover-image" th:src="@{/media/partner/{id}(id=${preview.partners[0].id})}" alt=""
+             fetchpriority="high">
+        <nav class="language-switch" th:aria-label="${language == 'EN'} ? 'Invitation language' : 'Bahasa undangan'">
+            <a th:href="${invitationPath + '?language=ID'}" lang="id">Indonesia</a>
+            <a th:href="${invitationPath + '?language=EN'}" lang="en">English</a>
+        </nav>
+        <div class="cover-content">
+            <p class="cover-kicker" th:text="${language == 'EN'} ? 'Wedding invitation' : 'Undangan pernikahan'">
+                Undangan pernikahan
+            </p>
+            <h1 id="invitation-title"
+                th:text="${#strings.isEmpty(preview.coupleTitle) ? 'Wedding invitation' : preview.coupleTitle}">
+                Wedding invitation
+            </h1>
+            <p class="cover-date" th:if="${preview.coverDate != null}">
+                <time th:datetime="${preview.coverDate}" th:text="${preview.coverDate}">2027-05-01</time>
+            </p>
+            <p class="cover-guest" th:text="${preview.salutation + ' ' + preview.guestName}">
+                Bapak/Ibu Nama Tamu
+            </p>
+            <button type="button" id="open-invitation" aria-controls="invitation" aria-expanded="false"
+                    th:text="${language == 'EN'} ? 'Open invitation' : 'Buka Undangan'">Buka Undangan</button>
+            <noscript>
+                <p class="noscript-notice"
+                   th:text="${language == 'EN'} ? 'The invitation is available below.' : 'Undangan tersedia di bawah.'">
+                    Undangan tersedia di bawah.
+                </p>
+            </noscript>
+        </div>
     </section>
 
     <div id="invitation" tabindex="-1">
-    <section th:if="${!#strings.isEmpty(preview.openingText)}" aria-labelledby="opening-title">
-        <h2 id="opening-title" th:text="${language == 'EN'} ? 'Welcome' : 'Sapaan'">Sapaan</h2>
-        <p th:text="${preview.openingText}">Selamat datang</p>
-    </section>
+        <nav class="guest-navigation" th:aria-label="${language == 'EN'} ? 'Invitation sections' : 'Bagian undangan'">
+            <a href="#cover" data-scroll-target="cover" th:text="${language == 'EN'} ? 'Home' : 'Awal'">Awal</a>
+            <a href="#couple" data-scroll-target="couple" th:text="${language == 'EN'} ? 'Couple' : 'Mempelai'">Mempelai</a>
+            <a href="#events" data-scroll-target="events" th:text="${language == 'EN'} ? 'Event' : 'Acara'">Acara</a>
+            <a th:if="${media.galleryEnabled and !media.photos.empty}" href="#gallery" data-scroll-target="gallery"
+               th:text="${language == 'EN'} ? 'Gallery' : 'Galeri'">Galeri</a>
+            <a href="#rsvp" data-scroll-target="rsvp">RSVP</a>
+        </nav>
 
-    <section aria-labelledby="partners-title">
-        <h2 id="partners-title" th:text="${language == 'EN'} ? 'The couple' : 'Mempelai'">Mempelai</h2>
-        <article th:each="partner : ${preview.partners}">
-            <img th:if="${!#strings.isEmpty(partner.photoPath)}"
-                 th:src="@{/media/partner/{id}(id=${partner.id})}"
-                 th:alt="${'Portrait of ' + (partner.fullName ?: partner.nickname ?: 'partner')}">
-            <h3 th:text="${partner.fullName ?: partner.nickname ?: 'Partner'}">Partner</h3>
-            <p th:if="${!#strings.isEmpty(partner.childOfLabel)}" th:text="${partner.childOfLabel}">Putra/Putri</p>
-            <p th:if="${!#strings.isEmpty(partner.parentsNames)}" th:text="${partner.parentsNames}">Keluarga</p>
-            <a th:if="${!#strings.isEmpty(partner.instagramUrl)}" th:href="${partner.instagramUrl}"
-               rel="noopener noreferrer">Instagram</a>
-        </article>
-    </section>
-
-    <section th:each="event : ${preview.events}" th:aria-labelledby="${'event-' + event.type}">
-        <h2 th:id="${'event-' + event.type}"
-            th:text="${event.type.name() == 'CEREMONY'} ? (${language == 'EN'} ? 'Ceremony' : 'Akad') : (${language == 'EN'} ? 'Reception' : 'Resepsi')">
-            Akad
-        </h2>
-        <p th:if="${event.date != null}">
-            <time th:datetime="${event.date}" th:text="${event.date}">2027-05-01</time>
-        </p>
-        <p th:if="${event.startTime != null}"
-           th:text="${event.endTime != null} ? ${event.startTime + '–' + event.endTime} : ${event.startTime}">
-            08:00
-        </p>
-        <h3 th:if="${!#strings.isEmpty(event.venueName)}" th:text="${event.venueName}">Venue</h3>
-        <p th:if="${!#strings.isEmpty(event.address)}" th:text="${event.address}">Address</p>
-        <a th:if="${!#strings.isEmpty(event.mapUrl)}" th:href="${event.mapUrl}" rel="noopener noreferrer"
-           target="_blank" th:text="${language == 'EN'} ? 'Open map' : 'Buka peta'">Buka peta</a>
-        <a th:if="${calendarEventTypes.contains(event.type)}"
-           th:href="${invitationPath + '/calendar/' + event.type.name() + '.ics?language=' + language}"
-           th:text="${event.type.name() == 'CEREMONY'} ? (${language == 'EN'} ? 'Add Ceremony to Calendar' : 'Tambahkan Akad ke Kalender') : (${language == 'EN'} ? 'Add Reception to Calendar' : 'Tambahkan Resepsi ke Kalender')">
-            Tambahkan ke Kalender
-        </a>
-    </section>
-
-    <section th:if="${!preview.story.empty}" aria-labelledby="story-title">
-        <h2 id="story-title" th:text="${language == 'EN'} ? 'Our story' : 'Kisah kami'">Kisah kami</h2>
-        <article th:each="entry : ${preview.story}">
-            <p th:if="${entry.date != null}">
-                <time th:datetime="${entry.date}" th:text="${entry.date}">2027-05-01</time>
+        <section th:if="${!#strings.isEmpty(preview.openingText)}"
+                 class="invitation-section opening-section" aria-labelledby="opening-title">
+            <p class="section-eyebrow" th:text="${language == 'EN'} ? 'Together with our families' : 'Bersama keluarga kami'">
+                Bersama keluarga kami
             </p>
-            <h3 th:text="${entry.title}">Story title</h3>
-            <p th:text="${entry.body}">Story body</p>
-        </article>
-    </section>
+            <h2 id="opening-title" class="section-heading"
+                th:text="${language == 'EN'} ? 'Welcome' : 'Sapaan'">Sapaan</h2>
+            <p class="opening-copy" th:text="${preview.openingText}">Selamat datang</p>
+        </section>
 
-    <section th:if="${media.galleryEnabled and !media.photos.empty}" class="gallery" aria-labelledby="gallery-title">
-        <h2 id="gallery-title" th:text="${language == 'EN'} ? 'Gallery' : 'Galeri'">Galeri</h2>
-        <div class="gallery-grid">
-            <button th:each="photo, photoStat : ${media.photos}" type="button" class="gallery-thumbnail"
-                    th:attr="data-gallery-index=${photoStat.index},data-image-url=${photo.imageUrl},data-alt=${photo.altText},data-caption=${photo.caption ?: ''}"
-                    th:aria-label="${(language == 'EN' ? 'Open photo: ' : 'Buka foto: ') + photo.altText}">
-                <img th:src="${photo.thumbnailUrl}" th:alt="${photo.altText}" loading="lazy">
-            </button>
-        </div>
-        <dialog id="gallery-dialog" aria-labelledby="gallery-dialog-title">
-            <h2 id="gallery-dialog-title" class="visually-hidden"
-                th:text="${language == 'EN'} ? 'Gallery photo' : 'Foto galeri'">Foto galeri</h2>
-            <figure>
-                <img id="gallery-image" alt="">
-                <figcaption id="gallery-caption" hidden></figcaption>
-            </figure>
-            <div class="gallery-controls">
-                <button type="button" id="gallery-previous"
-                        th:aria-label="${language == 'EN'} ? 'Previous photo' : 'Foto sebelumnya'">&#8592;</button>
-                <button type="button" id="gallery-next"
-                        th:aria-label="${language == 'EN'} ? 'Next photo' : 'Foto berikutnya'">&#8594;</button>
-                <button type="button" id="gallery-close"
-                        th:aria-label="${language == 'EN'} ? 'Close gallery' : 'Tutup galeri'">&#215;</button>
+        <section id="couple" class="invitation-section" aria-labelledby="partners-title">
+            <p class="section-eyebrow" th:text="${language == 'EN'} ? 'Bride & Groom' : 'Mempelai'">Mempelai</p>
+            <h2 id="partners-title" class="section-heading"
+                th:text="${language == 'EN'} ? 'The couple' : 'Mempelai'">Mempelai</h2>
+            <div class="partner-grid">
+                <article class="partner-card" th:each="partner : ${preview.partners}">
+                    <img th:if="${!#strings.isEmpty(partner.photoPath)}"
+                         th:src="@{/media/partner/{id}(id=${partner.id})}"
+                         th:alt="${'Portrait of ' + (partner.fullName ?: partner.nickname ?: 'partner')}"
+                         loading="lazy">
+                    <div class="partner-copy">
+                        <h3 th:text="${partner.fullName ?: partner.nickname ?: 'Partner'}">Partner</h3>
+                        <p th:if="${!#strings.isEmpty(partner.childOfLabel)}" th:text="${partner.childOfLabel}">Putra/Putri</p>
+                        <p th:if="${!#strings.isEmpty(partner.parentsNames)}" th:text="${partner.parentsNames}">Keluarga</p>
+                        <a th:if="${!#strings.isEmpty(partner.instagramUrl)}" th:href="${partner.instagramUrl}"
+                           rel="noopener noreferrer">Instagram</a>
+                    </div>
+                </article>
             </div>
-        </dialog>
-    </section>
+        </section>
 
-    <section th:if="${!#strings.isEmpty(preview.closingText)}" aria-labelledby="closing-title">
-        <h2 id="closing-title" th:text="${language == 'EN'} ? 'Closing' : 'Penutup'">Penutup</h2>
-        <p th:text="${preview.closingText}">Terima kasih</p>
-    </section>
+        <section id="events" class="invitation-section event-section" aria-labelledby="events-title">
+            <p class="section-eyebrow" th:text="${language == 'EN'} ? 'Save the date' : 'Simpan tanggalnya'">Simpan tanggalnya</p>
+            <h2 id="events-title" class="section-heading"
+                th:text="${language == 'EN'} ? 'Wedding events' : 'Rangkaian acara'">Rangkaian acara</h2>
+            <div class="event-grid">
+                <article class="event-card" th:each="event : ${preview.events}" th:aria-labelledby="${'event-' + event.type}">
+                    <h2 th:id="${'event-' + event.type}"
+                        th:text="${event.type.name() == 'CEREMONY'} ? (${language == 'EN'} ? 'Ceremony' : 'Akad') : (${language == 'EN'} ? 'Reception' : 'Resepsi')">
+                        Akad
+                    </h2>
+                    <p class="event-date" th:if="${event.date != null}">
+                        <time th:datetime="${event.date}" th:text="${event.date}">2027-05-01</time>
+                    </p>
+                    <p th:if="${event.startTime != null}"
+                       th:text="${event.endTime != null} ? ${event.startTime + '–' + event.endTime} : ${event.startTime}">
+                        08:00
+                    </p>
+                    <h3 th:if="${!#strings.isEmpty(event.venueName)}" th:text="${event.venueName}">Venue</h3>
+                    <p th:if="${!#strings.isEmpty(event.address)}" th:text="${event.address}">Address</p>
+                    <div class="event-actions">
+                        <a th:if="${!#strings.isEmpty(event.mapUrl)}" th:href="${event.mapUrl}" rel="noopener noreferrer"
+                           target="_blank" th:text="${language == 'EN'} ? 'Open map' : 'Buka peta'">Buka peta</a>
+                        <a th:if="${calendarEventTypes.contains(event.type)}"
+                           th:href="${invitationPath + '/calendar/' + event.type.name() + '.ics?language=' + language}"
+                           th:text="${event.type.name() == 'CEREMONY'} ? (${language == 'EN'} ? 'Add Ceremony to Calendar' : 'Tambahkan Akad ke Kalender') : (${language == 'EN'} ? 'Add Reception to Calendar' : 'Tambahkan Resepsi ke Kalender')">
+                            Tambahkan ke Kalender
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </section>
 
-    <section class="rsvp" aria-labelledby="rsvp-title">
-        <h2 id="rsvp-title">RSVP</h2>
-        <p th:if="${qrError != null}" role="alert" th:text="${qrError}">PIN tidak cocok.</p>
-        <p th:if="${param.rsvpSaved}" role="status"
-           th:text="${language == 'EN'} ? 'Your RSVP has been saved.' : 'RSVP Anda telah disimpan.'">
-            RSVP Anda telah disimpan.
-        </p>
+        <section th:if="${!preview.story.empty}" class="invitation-section story-section" aria-labelledby="story-title">
+            <p class="section-eyebrow" th:text="${language == 'EN'} ? 'The journey' : 'Perjalanan kami'">Perjalanan kami</p>
+            <h2 id="story-title" class="section-heading"
+                th:text="${language == 'EN'} ? 'Our story' : 'Kisah kami'">Kisah kami</h2>
+            <div class="story-list">
+                <article th:each="entry : ${preview.story}">
+                    <p th:if="${entry.date != null}">
+                        <time th:datetime="${entry.date}" th:text="${entry.date}">2027-05-01</time>
+                    </p>
+                    <h3 th:text="${entry.title}">Story title</h3>
+                    <p th:text="${entry.body}">Story body</p>
+                </article>
+            </div>
+        </section>
 
-        <div th:if="${rsvp != null}" class="rsvp-current">
-            <h3 th:text="${language == 'EN'} ? 'Current response' : 'Jawaban saat ini'">Jawaban saat ini</h3>
-            <p th:text="${rsvp.response.name() == 'HADIR'} ? (${language == 'EN'} ? 'Attending' : 'Hadir') : (${language == 'EN'} ? 'Not attending' : 'Tidak hadir')">
-                Hadir
+        <section id="gallery" th:if="${media.galleryEnabled and !media.photos.empty}"
+                 class="invitation-section gallery editorial-gallery" aria-labelledby="gallery-title">
+            <p class="section-eyebrow" th:text="${language == 'EN'} ? 'Captured moments' : 'Momen kami'">Momen kami</p>
+            <h2 id="gallery-title" class="section-heading"
+                th:text="${language == 'EN'} ? 'Gallery' : 'Galeri'">Galeri</h2>
+            <div class="gallery-grid">
+                <button th:each="photo, photoStat : ${media.photos}" type="button" class="gallery-thumbnail"
+                        th:classappend="${photoStat.first} ? 'gallery-featured'"
+                        th:attr="data-gallery-index=${photoStat.index},data-image-url=${photo.imageUrl},data-alt=${photo.altText},data-caption=${photo.caption ?: ''}"
+                        th:aria-label="${(language == 'EN' ? 'Open photo: ' : 'Buka foto: ') + photo.altText}">
+                    <img th:src="${photo.thumbnailUrl}"
+                         th:srcset="|${photo.thumbnailUrl} 480w, ${photo.imageUrl} 1280w|"
+                         sizes="(min-width: 48rem) 33vw, 50vw" th:alt="${photo.altText}" loading="lazy">
+                </button>
+            </div>
+            <dialog id="gallery-dialog" aria-labelledby="gallery-dialog-title">
+                <h2 id="gallery-dialog-title" class="visually-hidden"
+                    th:text="${language == 'EN'} ? 'Gallery photo' : 'Foto galeri'">Foto galeri</h2>
+                <figure>
+                    <img id="gallery-image" alt="">
+                    <figcaption id="gallery-caption" hidden></figcaption>
+                </figure>
+                <div class="gallery-controls">
+                    <button type="button" id="gallery-previous"
+                            th:aria-label="${language == 'EN'} ? 'Previous photo' : 'Foto sebelumnya'">&#8592;</button>
+                    <button type="button" id="gallery-next"
+                            th:aria-label="${language == 'EN'} ? 'Next photo' : 'Foto berikutnya'">&#8594;</button>
+                    <button type="button" id="gallery-close"
+                            th:aria-label="${language == 'EN'} ? 'Close gallery' : 'Tutup galeri'">&#215;</button>
+                </div>
+            </dialog>
+        </section>
+
+        <section id="rsvp" class="invitation-section rsvp rsvp-card" aria-labelledby="rsvp-title">
+            <p class="section-eyebrow" th:text="${language == 'EN'} ? 'Kindly respond' : 'Konfirmasi kehadiran'">Konfirmasi kehadiran</p>
+            <h2 id="rsvp-title" class="section-heading">RSVP</h2>
+            <p th:if="${qrError != null}" role="alert" th:text="${qrError}">PIN tidak cocok.</p>
+            <p th:if="${param.rsvpSaved}" role="status"
+               th:text="${language == 'EN'} ? 'Your RSVP has been saved.' : 'RSVP Anda telah disimpan.'">
+                RSVP Anda telah disimpan.
             </p>
-            <p th:if="${rsvp.response.name() == 'HADIR'}"
-               th:text="${(language == 'EN' ? 'Planned guests: ' : 'Jumlah rencana hadir: ') + rsvp.plannedAttendeeCount}">
-                Jumlah rencana hadir: 1
-            </p>
-        </div>
 
-        <p th:if="${!rsvpWritable}" class="notice" th:text="${rsvpClosedReason}">RSVP belum dibuka</p>
-
-        <form th:if="${rsvpWritable}" th:action="${invitationPath + '/rsvp'}" method="post"
-              th:object="${rsvpForm}" class="rsvp-form">
-            <div th:if="${rsvpErrors != null && !rsvpErrors.empty}" class="form-errors" role="alert" aria-live="polite">
-                <p th:each="error : ${rsvpErrors}" th:text="${error}">Data tidak valid</p>
+            <div th:if="${rsvp != null}" class="rsvp-current">
+                <h3 th:text="${language == 'EN'} ? 'Current response' : 'Jawaban saat ini'">Jawaban saat ini</h3>
+                <p th:text="${rsvp.response.name() == 'HADIR'} ? (${language == 'EN'} ? 'Attending' : 'Hadir') : (${language == 'EN'} ? 'Not attending' : 'Tidak hadir')">
+                    Hadir
+                </p>
+                <p th:if="${rsvp.response.name() == 'HADIR'}"
+                   th:text="${(language == 'EN' ? 'Planned guests: ' : 'Jumlah rencana hadir: ') + rsvp.plannedAttendeeCount}">
+                    Jumlah rencana hadir: 1
+                </p>
             </div>
 
-            <fieldset>
-                <legend th:text="${language == 'EN'} ? 'Will you attend?' : 'Apakah Anda akan hadir?'">
-                    Apakah Anda akan hadir?
-                </legend>
-                <label>
-                    <input type="radio" th:field="*{response}" value="HADIR">
-                    <span th:text="${language == 'EN'} ? 'Attending' : 'Hadir'">Hadir</span>
-                </label>
-                <label>
-                    <input type="radio" th:field="*{response}" value="TIDAK_HADIR">
-                    <span th:text="${language == 'EN'} ? 'Not attending' : 'Tidak hadir'">Tidak hadir</span>
-                </label>
-            </fieldset>
+            <p th:if="${!rsvpWritable}" class="notice" th:text="${rsvpClosedReason}">RSVP belum dibuka</p>
 
-            <label class="attendance-count">
-                <span th:text="${language == 'EN'} ? 'Planned attendance' : 'Jumlah rencana hadir'">
-                    Jumlah rencana hadir
-                </span>
-                <select th:field="*{plannedAttendeeCount}">
-                    <option value="1">1</option>
-                    <option th:if="${plusOneAllowed}" value="2">2</option>
-                </select>
-            </label>
+            <form th:if="${rsvpWritable}" th:action="${invitationPath + '/rsvp'}" method="post"
+                  th:object="${rsvpForm}" class="rsvp-form">
+                <div th:if="${rsvpErrors != null && !rsvpErrors.empty}" class="form-errors" role="alert" aria-live="polite">
+                    <p th:each="error : ${rsvpErrors}" th:text="${error}">Data tidak valid</p>
+                </div>
 
-            <div th:if="${greetingsEnabled}">
-                <label for="greeting" th:text="${language == 'EN'} ? 'Greeting (optional)' : 'Ucapan (opsional)'">
-                    Ucapan (opsional)
-                </label>
-                <textarea id="greeting" th:field="*{greeting}" maxlength="500" rows="4"></textarea>
-                <label>
-                    <input type="checkbox" th:field="*{greetingPublicConsent}">
-                    <span th:text="${language == 'EN'} ? 'I allow this greeting to be shown after administrator approval.' : 'Saya mengizinkan ucapan ini ditampilkan setelah disetujui admin.'">
-                        Saya mengizinkan ucapan ini ditampilkan setelah disetujui admin.
+                <fieldset>
+                    <legend th:text="${language == 'EN'} ? 'Will you attend?' : 'Apakah Anda akan hadir?'">
+                        Apakah Anda akan hadir?
+                    </legend>
+                    <label>
+                        <input type="radio" th:field="*{response}" value="HADIR">
+                        <span th:text="${language == 'EN'} ? 'Attending' : 'Hadir'">Hadir</span>
+                    </label>
+                    <label>
+                        <input type="radio" th:field="*{response}" value="TIDAK_HADIR">
+                        <span th:text="${language == 'EN'} ? 'Not attending' : 'Tidak hadir'">Tidak hadir</span>
+                    </label>
+                </fieldset>
+
+                <label class="attendance-count">
+                    <span th:text="${language == 'EN'} ? 'Planned attendance' : 'Jumlah rencana hadir'">
+                        Jumlah rencana hadir
                     </span>
+                    <select th:field="*{plannedAttendeeCount}">
+                        <option value="1">1</option>
+                        <option th:if="${plusOneAllowed}" value="2">2</option>
+                    </select>
                 </label>
-            </div>
 
-            <div th:if="${privateNoteEnabled}">
-                <label for="private-note"
-                       th:text="${language == 'EN'} ? 'Private note for the organizer (optional)' : 'Catatan privat untuk penyelenggara (opsional)'">
-                    Catatan privat untuk penyelenggara (opsional)
+                <div th:if="${greetingsEnabled}">
+                    <label for="greeting" th:text="${language == 'EN'} ? 'Greeting (optional)' : 'Ucapan (opsional)'">
+                        Ucapan (opsional)
+                    </label>
+                    <textarea id="greeting" th:field="*{greeting}" maxlength="500" rows="4"></textarea>
+                    <label>
+                        <input type="checkbox" th:field="*{greetingPublicConsent}">
+                        <span th:text="${language == 'EN'} ? 'I allow this greeting to be shown after administrator approval.' : 'Saya mengizinkan ucapan ini ditampilkan setelah disetujui admin.'">
+                            Saya mengizinkan ucapan ini ditampilkan setelah disetujui admin.
+                        </span>
+                    </label>
+                </div>
+
+                <div th:if="${privateNoteEnabled}">
+                    <label for="private-note"
+                           th:text="${language == 'EN'} ? 'Private note for the organizer (optional)' : 'Catatan privat untuk penyelenggara (opsional)'">
+                        Catatan privat untuk penyelenggara (opsional)
+                    </label>
+                    <textarea id="private-note" th:field="*{privateOrganizerNote}" maxlength="1000" rows="4"></textarea>
+                </div>
+
+                <label for="rsvp-pin" th:text="${language == 'EN'} ? 'Four-digit PIN' : 'PIN empat digit'">
+                    PIN empat digit
                 </label>
-                <textarea id="private-note" th:field="*{privateOrganizerNote}" maxlength="1000" rows="4"></textarea>
+                <input id="rsvp-pin" name="pin" type="password" inputmode="numeric" autocomplete="one-time-code"
+                       pattern="[0-9]{4}" maxlength="4" required aria-describedby="pin-help">
+                <small id="pin-help"
+                       th:text="${language == 'EN'} ? 'Use the last four digits of the invited WhatsApp number.' : 'Gunakan empat digit terakhir nomor WhatsApp yang diundang.'">
+                    Gunakan empat digit terakhir nomor WhatsApp yang diundang.
+                </small>
+                <input type="hidden" th:field="*{version}">
+                <input type="hidden" name="language" th:value="${language}">
+                <button type="submit" th:text="${language == 'EN'} ? 'Save RSVP' : 'Simpan RSVP'">Simpan RSVP</button>
+            </form>
+        </section>
+
+        <section th:if="${rsvp != null && rsvp.response.name() == 'HADIR'}"
+                 class="invitation-section qr-card" aria-labelledby="qr-access-title">
+            <h2 id="qr-access-title" class="section-heading"
+                th:text="${language == 'EN'} ? 'Check-in QR' : 'QR check-in'">QR check-in</h2>
+            <p th:if="${param.qrPinRequired}" role="alert"
+               th:text="${language == 'EN'} ? 'Verify your PIN to view the QR.' : 'Verifikasi PIN untuk melihat QR.'">
+                Verifikasi PIN untuk melihat QR.
+            </p>
+            <p th:if="${qrVerified}" role="status"
+               th:text="${language == 'EN'} ? 'PIN verified.' : 'PIN terverifikasi.'">PIN terverifikasi.</p>
+            <div th:if="${qrVerified}">
+                <img th:src="${invitationPath + '/qr.png?language=' + language}" width="320" height="320"
+                     th:alt="${language == 'EN'} ? 'Wedding check-in QR' : 'QR check-in pernikahan'">
+                <a th:href="${invitationPath + '/qr-download.png?language=' + language}"
+                   th:text="${language == 'EN'} ? 'Download QR' : 'Unduh QR'">Unduh QR</a>
             </div>
+            <form th:if="${!qrVerified}" th:action="${invitationPath + '/verify-qr'}" method="post" class="rsvp-form">
+                <label for="qr-pin" th:text="${language == 'EN'} ? 'Four-digit PIN' : 'PIN empat digit'">PIN empat digit</label>
+                <input id="qr-pin" name="pin" type="password" inputmode="numeric" autocomplete="one-time-code"
+                       pattern="[0-9]{4}" maxlength="4" required>
+                <input type="hidden" name="language" th:value="${language}">
+                <button type="submit" th:text="${language == 'EN'} ? 'Verify PIN' : 'Verifikasi PIN'">Verifikasi PIN</button>
+            </form>
+        </section>
 
-            <label for="rsvp-pin" th:text="${language == 'EN'} ? 'Four-digit PIN' : 'PIN empat digit'">
-                PIN empat digit
-            </label>
-            <input id="rsvp-pin" name="pin" type="password" inputmode="numeric" autocomplete="one-time-code"
-                   pattern="[0-9]{4}" maxlength="4" required aria-describedby="pin-help">
-            <small id="pin-help"
-                   th:text="${language == 'EN'} ? 'Use the last four digits of the invited WhatsApp number.' : 'Gunakan empat digit terakhir nomor WhatsApp yang diundang.'">
-                Gunakan empat digit terakhir nomor WhatsApp yang diundang.
-            </small>
-            <input type="hidden" th:field="*{version}">
-            <input type="hidden" name="language" th:value="${language}">
-            <button type="submit" th:text="${language == 'EN'} ? 'Save RSVP' : 'Simpan RSVP'">Simpan RSVP</button>
-        </form>
-    </section>
+        <section th:if="${greetingsEnabled && !greetings.empty}"
+                 class="invitation-section greetings-section" aria-labelledby="greetings-title">
+            <p class="section-eyebrow" th:text="${language == 'EN'} ? 'From our guests' : 'Dari para tamu'">Dari para tamu</p>
+            <h2 id="greetings-title" class="section-heading"
+                th:text="${language == 'EN'} ? 'Greetings' : 'Ucapan'">Ucapan</h2>
+            <div class="greetings-list">
+                <article th:each="item : ${greetings}" class="greeting">
+                    <h3 th:text="${item.displayName}">Nama tamu</h3>
+                    <p th:text="${item.greeting}">Ucapan</p>
+                    <time th:datetime="${item.date}" th:text="${item.date}">2026-08-01</time>
+                </article>
+            </div>
+            <a th:if="${greetingHasNext}"
+               th:href="${invitationPath + '?language=' + language + '&page=' + (greetingPage + 1)}"
+               th:text="${language == 'EN'} ? 'Load more' : 'Lihat lainnya'">Lihat lainnya</a>
+        </section>
 
-    <section th:if="${rsvp != null && rsvp.response.name() == 'HADIR'}" aria-labelledby="qr-access-title">
-        <h2 id="qr-access-title" th:text="${language == 'EN'} ? 'Check-in QR' : 'QR check-in'">QR check-in</h2>
-        <p th:if="${param.qrPinRequired}" role="alert"
-           th:text="${language == 'EN'} ? 'Verify your PIN to view the QR.' : 'Verifikasi PIN untuk melihat QR.'">
-            Verifikasi PIN untuk melihat QR.
-        </p>
-        <p th:if="${qrVerified}" role="status"
-           th:text="${language == 'EN'} ? 'PIN verified.' : 'PIN terverifikasi.'">PIN terverifikasi.</p>
-        <div th:if="${qrVerified}">
-            <img th:src="${invitationPath + '/qr.png?language=' + language}" width="320" height="320"
-                 th:alt="${language == 'EN'} ? 'Wedding check-in QR' : 'QR check-in pernikahan'">
-            <a th:href="${invitationPath + '/qr-download.png?language=' + language}"
-               th:text="${language == 'EN'} ? 'Download QR' : 'Unduh QR'">Unduh QR</a>
-        </div>
-        <form th:if="${!qrVerified}" th:action="${invitationPath + '/verify-qr'}" method="post" class="rsvp-form">
-            <label for="qr-pin" th:text="${language == 'EN'} ? 'Four-digit PIN' : 'PIN empat digit'">PIN empat digit</label>
-            <input id="qr-pin" name="pin" type="password" inputmode="numeric" autocomplete="one-time-code"
-                   pattern="[0-9]{4}" maxlength="4" required>
-            <input type="hidden" name="language" th:value="${language}">
-            <button type="submit" th:text="${language == 'EN'} ? 'Verify PIN' : 'Verifikasi PIN'">Verifikasi PIN</button>
-        </form>
-    </section>
-
-    <section th:if="${greetingsEnabled && !greetings.empty}" aria-labelledby="greetings-title">
-        <h2 id="greetings-title" th:text="${language == 'EN'} ? 'Greetings' : 'Ucapan'">Ucapan</h2>
-        <article th:each="item : ${greetings}" class="greeting">
-            <h3 th:text="${item.displayName}">Nama tamu</h3>
-            <p th:text="${item.greeting}">Ucapan</p>
-            <time th:datetime="${item.date}" th:text="${item.date}">2026-08-01</time>
-        </article>
-        <a th:if="${greetingHasNext}"
-           th:href="${invitationPath + '?language=' + language + '&page=' + (greetingPage + 1)}"
-           th:text="${language == 'EN'} ? 'Load more' : 'Lihat lainnya'">Lihat lainnya</a>
-    </section>
+        <footer class="invitation-footer">
+            <section th:if="${!#strings.isEmpty(preview.closingText)}" aria-labelledby="closing-title">
+                <h2 id="closing-title" class="section-heading"
+                    th:text="${language == 'EN'} ? 'Closing' : 'Penutup'">Penutup</h2>
+                <p th:text="${preview.closingText}">Terima kasih</p>
+            </section>
+            <p class="footer-couple"
+               th:text="${#strings.isEmpty(preview.coupleTitle) ? 'Wedding invitation' : preview.coupleTitle}">
+                Wedding invitation
+            </p>
+        </footer>
     </div>
 
     <audio th:if="${media.audioEnabled}" id="background-audio" preload="none" src="/media/wedding/audio"

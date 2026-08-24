@@ -3,6 +3,7 @@
     const open = document.querySelector('#open-invitation');
     const audio = document.querySelector('#background-audio');
     const audioToggle = document.querySelector('#audio-toggle');
+    const reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
     const updateAudioLabel = playing => {
         if (!audioToggle) return;
@@ -15,11 +16,20 @@
         document.documentElement.classList.add('js');
         open.addEventListener('click', () => {
             invitation.classList.add('is-open');
+            document.body?.classList.add('invitation-open');
             open.setAttribute('aria-expanded', 'true');
             invitation.focus();
             if (audio) playAudio();
         });
     }
+
+    document.querySelectorAll('[data-scroll-target]').forEach(link => {
+        link.addEventListener('click', () => {
+            document.getElementById(link.dataset.scrollTarget)?.scrollIntoView({
+                behavior: reducedMotion ? 'auto' : 'smooth'
+            });
+        });
+    });
 
     if (audio && audioToggle) {
         updateAudioLabel(false);
@@ -40,6 +50,7 @@
     if (dialog && image && caption && previous && next && close && thumbnails.length) {
         let current = 0;
         let opener;
+        let pointerStart;
         const show = index => {
             current = (index + thumbnails.length) % thumbnails.length;
             const thumbnail = thumbnails[current];
@@ -59,6 +70,17 @@
         previous.addEventListener('click', () => show(current - 1));
         next.addEventListener('click', () => show(current + 1));
         close.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('pointerdown', event => {
+            if (event.isPrimary !== false) pointerStart = { x: event.clientX, y: event.clientY };
+        });
+        dialog.addEventListener('pointerup', event => {
+            if (!pointerStart) return;
+            const x = event.clientX - pointerStart.x;
+            const y = event.clientY - pointerStart.y;
+            pointerStart = undefined;
+            if (Math.abs(x) > 48 && Math.abs(x) > Math.abs(y)) show(current + (x < 0 ? 1 : -1));
+        });
+        dialog.addEventListener('pointercancel', () => pointerStart = undefined);
         dialog.addEventListener('keydown', event => {
             if (event.key === 'ArrowLeft') {
                 event.preventDefault();

@@ -13,6 +13,19 @@ class PresentationStructureTest {
 		assertThat(html).contains("/css/app.css", "fragments/admin-navigation", "app-shell");
 	}
 
+	@Test
+	void invitationProvidesCinematicCoverAndProgressiveNavigation() throws IOException {
+		String html = resource("templates/guest/invitation.html");
+		assertThat(html).contains("guest-navigation", "cover-content", "section-heading", "noscript");
+		assertThat(html).contains("id=\"couple\"", "id=\"events\"", "id=\"rsvp\"");
+	}
+
+	@Test
+	void invitationCssProvidesFallbackAndReducedMotion() throws IOException {
+		String css = resource("static/css/invitation.css");
+		assertThat(css).contains(".cover-fallback", "prefers-reduced-motion", ":focus-visible");
+	}
+
 	private String resource(String path) throws IOException {
 		try (var input = getClass().getClassLoader().getResourceAsStream(path)) {
 			assertThat(input).as(path).isNotNull();
