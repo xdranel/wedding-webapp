@@ -97,7 +97,7 @@ class ReminderAdminControllerTest {
 		Guest attending = guest("Attending guest", familyId, MessageLanguage.ID);
 		rsvp(attending, AttendanceResponse.HADIR);
 
-		mockMvc.perform(get("/admin/reminders").session(adminSession)
+		String page = mockMvc.perform(get("/admin/reminders").session(adminSession)
 				.param("kind", "RSVP").param("categoryId", Long.toString(familyId)))
 				.andExpect(status().isOk())
 				.andExpect(content().string(containsString("RSVP reminders")))
@@ -106,7 +106,9 @@ class ReminderAdminControllerTest {
 				.andExpect(content().string(containsString("Family")))
 				.andExpect(content().string(containsString("value=\"EN\" selected=\"selected\">English</option>")))
 				.andExpect(content().string(containsString(NOW.toString())))
-				.andExpect(content().string(not(containsString("batch"))));
+				.andExpect(content().string(not(containsString("batch"))))
+				.andReturn().getResponse().getContentAsString();
+		assertThat(page).containsOnlyOnce("<a href=\"/admin/reminders\" aria-current=\"page\">Reminders</a>");
 
 		mockMvc.perform(get("/admin/reminders").session(adminSession)
 				.param("kind", "EVENT").param("categoryId", Long.toString(familyId)))

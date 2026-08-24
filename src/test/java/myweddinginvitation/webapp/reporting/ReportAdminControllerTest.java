@@ -95,6 +95,7 @@ class ReportAdminControllerTest {
 				.andExpect(content().string(containsString("Export complete CSV")))
 				.andExpect(content().string(containsString("Print report")))
 				.andReturn().getResponse().getContentAsString();
+		assertThat(report).containsOnlyOnce("<a href=\"/admin/reports\" aria-current=\"page\">Reports</a>");
 		assertThat(report.indexOf("Alpha")).isLessThan(report.indexOf("Zeta"));
 
 		mockMvc.perform(get("/admin/reports").session(admin).param("categoryId", Long.toString(zetaCategoryId)))

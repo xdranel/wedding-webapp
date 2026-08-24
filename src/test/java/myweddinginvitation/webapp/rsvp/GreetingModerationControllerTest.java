@@ -82,14 +82,16 @@ class GreetingModerationControllerTest {
 		rsvp("Approved Guest", "Approved greeting", GreetingModerationState.APPROVED);
 		rsvp("Hidden Guest", "Hidden greeting", GreetingModerationState.HIDDEN);
 
-		mockMvc.perform(get("/admin/greetings").session(adminSession))
+		String page = mockMvc.perform(get("/admin/greetings").session(adminSession))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/greetings/list"))
 				.andExpect(model().attribute("state", GreetingModerationState.PENDING))
 				.andExpect(model().attribute("page", hasProperty("size", is(50))))
 				.andExpect(content().string(containsString("Pending greeting")))
 				.andExpect(content().string(not(containsString("Approved greeting"))))
-				.andExpect(content().string(not(containsString("Hidden greeting"))));
+				.andExpect(content().string(not(containsString("Hidden greeting"))))
+				.andReturn().getResponse().getContentAsString();
+		assertThat(page).containsOnlyOnce("<a href=\"/admin/greetings\" aria-current=\"page\">Greetings</a>");
 
 		mockMvc.perform(get("/admin/greetings").param("state", "APPROVED").session(adminSession))
 				.andExpect(content().string(containsString("Approved greeting")))

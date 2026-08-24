@@ -68,7 +68,8 @@ class StaffAccountControllerTest {
 				.andExpect(content().string(containsString("Door staff")))
 				.andExpect(content().string(containsString("Password change required")))
 				.andReturn().getResponse().getContentAsString();
-		assertThat(page).doesNotContain("Temporary-Password-2026");
+		assertThat(page).doesNotContain("Temporary-Password-2026")
+				.containsOnlyOnce("<a href=\"/admin/accounts\" aria-current=\"page\">Staff accounts</a>");
 	}
 
 	@Test
@@ -79,9 +80,11 @@ class StaffAccountControllerTest {
 				.param("username", "Blocked")
 				.param("temporaryPassword", "Temporary-Password-2026"))
 				.andExpect(status().isForbidden());
-		mockMvc.perform(get("/admin/accounts/new").session(adminSession))
+		String page = mockMvc.perform(get("/admin/accounts/new").session(adminSession))
 				.andExpect(content().string(containsString("name=\"_csrf\"")))
-				.andExpect(content().string(not(containsString("Temporary-Password-2026"))));
+				.andExpect(content().string(not(containsString("Temporary-Password-2026"))))
+				.andReturn().getResponse().getContentAsString();
+		assertThat(page).containsOnlyOnce("<a href=\"/admin/accounts\" aria-current=\"page\">Staff accounts</a>");
 	}
 
 	@Test

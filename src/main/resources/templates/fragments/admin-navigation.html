@@ -13,16 +13,16 @@
     <a th:href="@{/admin/guest-categories}" th:aria-current="${activePage == 'guest-categories'} ? 'page'">Guest categories</a>
 
     <p class="nav-heading">Communication</p>
-    <a th:href="@{/admin/reminders}" th:aria-current="${activePage == 'reminders'} ? 'page'">Reminders</a>
-    <a th:href="@{/admin/greetings}" th:aria-current="${activePage == 'greetings'} ? 'page'">Greetings</a>
     <a th:href="@{/admin/message-templates}" th:aria-current="${activePage == 'messages'} ? 'page'">Message templates</a>
+    <a th:href="@{/admin/reminders}" th:aria-current="${activePage == 'reminders'} ? 'page'">Reminders</a>
 
     <p class="nav-heading">Attendance</p>
-    <a th:href="@{/admin/reports}" th:aria-current="${activePage == 'reports'} ? 'page'">Reports</a>
+    <a th:href="@{/admin/greetings}" th:aria-current="${activePage == 'greetings'} ? 'page'">Greetings</a>
 
     <p class="nav-heading">Operations</p>
-    <a th:href="@{/admin/system-status}" th:aria-current="${activePage == 'system-status'} ? 'page'">System status</a>
+    <a th:href="@{/admin/reports}" th:aria-current="${activePage == 'reports'} ? 'page'">Reports</a>
     <a th:href="@{/admin/accounts}" th:aria-current="${activePage == 'accounts'} ? 'page'">Staff accounts</a>
+    <a th:href="@{/admin/system-status}" th:aria-current="${activePage == 'system-status'} ? 'page'">System status</a>
 
     <form method="post" th:action="@{/logout}">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">

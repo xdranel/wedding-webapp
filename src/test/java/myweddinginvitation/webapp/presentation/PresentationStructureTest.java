@@ -48,6 +48,39 @@ class PresentationStructureTest {
 	}
 
 	@Test
+	void taskFivePagesUseExactActivePageKeys() throws IOException {
+		String navigation = resource("templates/fragments/admin-navigation.html");
+		for (String[] page : new String[][] {
+				{"admin/message-templates/edit.html", "messages"},
+				{"admin/message-templates/list.html", "messages"},
+				{"admin/reminders/list.html", "reminders"},
+				{"admin/greetings/list.html", "greetings"},
+				{"admin/accounts/form.html", "accounts"},
+				{"admin/accounts/list.html", "accounts"},
+				{"admin/reports/index.html", "reports"},
+				{"admin/system-status.html", "system-status"}
+		}) {
+			assertThat(resource("templates/" + page[0])).as(page[0]).contains("sidebar('" + page[1] + "')");
+			assertThat(occurrences(navigation, "activePage == '" + page[1] + "'"))
+					.as(page[1] + " active navigation mapping").isEqualTo(1);
+		}
+	}
+
+	@Test
+	void administratorNavigationKeepsApprovedGroupsAndLinkOrder() throws IOException {
+		assertThat(resource("templates/fragments/admin-navigation.html")).containsSubsequence(
+				"<p class=\"nav-heading\">Communication</p>",
+				">Message templates</a>",
+				">Reminders</a>",
+				"<p class=\"nav-heading\">Attendance</p>",
+				">Greetings</a>",
+				"<p class=\"nav-heading\">Operations</p>",
+				">Reports</a>",
+				">Staff accounts</a>",
+				">System status</a>");
+	}
+
+	@Test
 	void administratorStylesSupportResponsiveWorkspaceComponents() throws IOException {
 		String css = resource("static/css/app.css");
 		assertThat(css).contains(".filter-panel", ".action-cluster", ".mobile-card-list", "content: attr(data-label)",

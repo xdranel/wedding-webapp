@@ -68,13 +68,16 @@ class MessageTemplateControllerTest {
 
 	@Test
 	void listsTheSixEnglishTemplateRowsAndLinksFromAdminHome() throws Exception {
-		mockMvc.perform(get("/admin/message-templates").session(adminSession))
+		String page = mockMvc.perform(get("/admin/message-templates").session(adminSession))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/message-templates/list"))
 				.andExpect(content().string(containsString("Message templates")))
 				.andExpect(content().string(containsString("INVITATION")))
 				.andExpect(content().string(containsString("RSVP_REMINDER")))
-				.andExpect(content().string(containsString("EVENT_REMINDER")));
+				.andExpect(content().string(containsString("EVENT_REMINDER")))
+				.andReturn().getResponse().getContentAsString();
+		assertThat(page).containsOnlyOnce(
+				"<a href=\"/admin/message-templates\" aria-current=\"page\">Message templates</a>");
 
 		mockMvc.perform(get("/admin").session(adminSession))
 				.andExpect(content().string(containsString("/admin/message-templates")));
@@ -84,13 +87,16 @@ class MessageTemplateControllerTest {
 	void unknownPlaceholderPreservesSubmittedTemplate() throws Exception {
 		MessageTemplate template = invitationEn();
 
-		mockMvc.perform(post("/admin/message-templates/{id}", template.getId()).session(adminSession).with(csrf())
+		String page = mockMvc.perform(post("/admin/message-templates/{id}", template.getId()).session(adminSession).with(csrf())
 				.param("version", Long.toString(template.getVersion()))
 				.param("body", "Hi {{unknown}}"))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/message-templates/edit"))
 				.andExpect(model().attributeHasFieldErrors("form", "body"))
-				.andExpect(content().string(containsString("Hi {{unknown}}")));
+				.andExpect(content().string(containsString("Hi {{unknown}}")))
+				.andReturn().getResponse().getContentAsString();
+		assertThat(page).containsOnlyOnce(
+				"<a href=\"/admin/message-templates\" aria-current=\"page\">Message templates</a>");
 		assertThat(invitationEn().getBody()).isEqualTo("Dear {{salutation}} {{guest_name}}");
 	}
 

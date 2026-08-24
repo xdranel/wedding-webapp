@@ -1,5 +1,6 @@
 package myweddinginvitation.webapp.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -59,7 +60,7 @@ class SystemStatusAdminControllerTest {
 
 	@Test
 	void administratorCanRefreshTheSafeOnDemandStatusPage() throws Exception {
-		mockMvc.perform(get("/admin/system-status").session(login("admin")))
+		String page = mockMvc.perform(get("/admin/system-status").session(login("admin")))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/system-status"))
 				.andExpect(content().string(containsString("System status")))
@@ -73,7 +74,10 @@ class SystemStatusAdminControllerTest {
 				.andExpect(content().string(not(containsString(mediaDirectory.toString()))))
 				.andExpect(content().string(not(containsString("jdbc:mysql"))))
 				.andExpect(content().string(not(containsString("Test-Only-Password-2026"))))
-				.andExpect(content().string(not(containsString("java.lang."))));
+				.andExpect(content().string(not(containsString("java.lang."))))
+				.andReturn().getResponse().getContentAsString();
+		assertThat(page).containsOnlyOnce(
+				"<a href=\"/admin/system-status\" aria-current=\"page\">System status</a>");
 	}
 
 	private MockHttpSession login(String username) throws Exception {
