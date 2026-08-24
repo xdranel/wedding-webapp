@@ -106,8 +106,8 @@ class WeddingPreviewTest {
 		assertThat(page.indexOf("<h2 id=\"opening-title\">Welcome"))
 				.isLessThan(page.indexOf("<h2 id=\"partners-title\">The couple"));
 		assertThat(page.indexOf("<h2 id=\"partners-title\">The couple"))
-				.isLessThan(page.indexOf("<h2 id=\"event-CEREMONY\">Ceremony"));
-		assertThat(page.indexOf("<h2 id=\"event-CEREMONY\">Ceremony"))
+				.isLessThan(page.indexOf("<h3 id=\"event-CEREMONY\">Ceremony"));
+		assertThat(page.indexOf("<h3 id=\"event-CEREMONY\">Ceremony"))
 				.isLessThan(page.indexOf("<h2 id=\"closing-title\">Closing"));
 		assertThat(page).contains("for=\"salutation\"", "for=\"guest-name\"", "for=\"language\"")
 				.contains("<button type=\"button\" id=\"open-invitation\"")

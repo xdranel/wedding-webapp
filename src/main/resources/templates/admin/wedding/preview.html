@@ -97,16 +97,16 @@
                 th:text="${form.language == 'EN'} ? 'Wedding events' : 'Rangkaian acara'">Wedding events</h2>
             <div class="event-grid">
                 <article class="event-card" th:each="event : ${preview.events}" th:aria-labelledby="${'event-' + event.type}">
-                    <h2 th:id="${'event-' + event.type}"
+                    <h3 th:id="${'event-' + event.type}"
                         th:text="${event.type.name() == 'CEREMONY'} ? (${form.language == 'EN'} ? 'Ceremony' : 'Akad') : (${form.language == 'EN'} ? 'Reception' : 'Resepsi')">
-                        Ceremony</h2>
+                        Ceremony</h3>
                     <p class="event-date" th:if="${event.date != null}">
                         <time th:datetime="${event.date}" th:text="${event.date}">2027-05-01</time>
                     </p>
                     <p th:if="${event.startTime != null}"
                        th:text="${event.endTime != null} ? ${event.startTime + '–' + event.endTime} : ${event.startTime}">
                         08:00</p>
-                    <h3 th:if="${!#strings.isEmpty(event.venueName)}" th:text="${event.venueName}">Venue</h3>
+                    <p class="event-venue" th:if="${!#strings.isEmpty(event.venueName)}" th:text="${event.venueName}">Venue</p>
                     <p th:if="${!#strings.isEmpty(event.address)}" th:text="${event.address}">Address</p>
                     <div class="event-actions">
                         <a th:if="${!#strings.isEmpty(event.mapUrl)}" th:href="${event.mapUrl}" rel="noopener noreferrer"
@@ -145,9 +145,7 @@
                         th:classappend="${photoStat.first} ? 'gallery-featured'"
                         th:attr="data-gallery-index=${photoStat.index},data-image-url=${photo.imageUrl},data-alt=${photo.altText},data-caption=${photo.caption ?: ''}"
                         th:aria-label="${(form.language == 'EN' ? 'Open photo: ' : 'Buka foto: ') + photo.altText}">
-                    <img th:src="${photo.thumbnailUrl}"
-                         th:srcset="|${photo.thumbnailUrl} 480w, ${photo.imageUrl} 1280w|"
-                         sizes="(min-width: 48rem) 33vw, 50vw" th:alt="${photo.altText}" loading="lazy">
+                    <img th:src="${photo.thumbnailUrl}" th:alt="${photo.altText}" loading="lazy">
                 </button>
             </div>
             <dialog id="gallery-dialog" aria-labelledby="gallery-dialog-title">

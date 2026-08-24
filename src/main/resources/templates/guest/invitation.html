@@ -92,10 +92,10 @@
                 th:text="${language == 'EN'} ? 'Wedding events' : 'Rangkaian acara'">Rangkaian acara</h2>
             <div class="event-grid">
                 <article class="event-card" th:each="event : ${preview.events}" th:aria-labelledby="${'event-' + event.type}">
-                    <h2 th:id="${'event-' + event.type}"
+                    <h3 th:id="${'event-' + event.type}"
                         th:text="${event.type.name() == 'CEREMONY'} ? (${language == 'EN'} ? 'Ceremony' : 'Akad') : (${language == 'EN'} ? 'Reception' : 'Resepsi')">
                         Akad
-                    </h2>
+                    </h3>
                     <p class="event-date" th:if="${event.date != null}">
                         <time th:datetime="${event.date}" th:text="${event.date}">2027-05-01</time>
                     </p>
@@ -103,7 +103,7 @@
                        th:text="${event.endTime != null} ? ${event.startTime + '–' + event.endTime} : ${event.startTime}">
                         08:00
                     </p>
-                    <h3 th:if="${!#strings.isEmpty(event.venueName)}" th:text="${event.venueName}">Venue</h3>
+                    <p class="event-venue" th:if="${!#strings.isEmpty(event.venueName)}" th:text="${event.venueName}">Venue</p>
                     <p th:if="${!#strings.isEmpty(event.address)}" th:text="${event.address}">Address</p>
                     <div class="event-actions">
                         <a th:if="${!#strings.isEmpty(event.mapUrl)}" th:href="${event.mapUrl}" rel="noopener noreferrer"
@@ -143,9 +143,7 @@
                         th:classappend="${photoStat.first} ? 'gallery-featured'"
                         th:attr="data-gallery-index=${photoStat.index},data-image-url=${photo.imageUrl},data-alt=${photo.altText},data-caption=${photo.caption ?: ''}"
                         th:aria-label="${(language == 'EN' ? 'Open photo: ' : 'Buka foto: ') + photo.altText}">
-                    <img th:src="${photo.thumbnailUrl}"
-                         th:srcset="|${photo.thumbnailUrl} 480w, ${photo.imageUrl} 1280w|"
-                         sizes="(min-width: 48rem) 33vw, 50vw" th:alt="${photo.altText}" loading="lazy">
+                    <img th:src="${photo.thumbnailUrl}" th:alt="${photo.altText}" loading="lazy">
                 </button>
             </div>
             <dialog id="gallery-dialog" aria-labelledby="gallery-dialog-title">
@@ -267,7 +265,7 @@
             <div th:if="${qrVerified}">
                 <img th:src="${invitationPath + '/qr.png?language=' + language}" width="320" height="320"
                      th:alt="${language == 'EN'} ? 'Wedding check-in QR' : 'QR check-in pernikahan'">
-                <a th:href="${invitationPath + '/qr-download.png?language=' + language}"
+                <a class="action-link" th:href="${invitationPath + '/qr-download.png?language=' + language}"
                    th:text="${language == 'EN'} ? 'Download QR' : 'Unduh QR'">Unduh QR</a>
             </div>
             <form th:if="${!qrVerified}" th:action="${invitationPath + '/verify-qr'}" method="post" class="rsvp-form">
@@ -291,7 +289,7 @@
                     <time th:datetime="${item.date}" th:text="${item.date}">2026-08-01</time>
                 </article>
             </div>
-            <a th:if="${greetingHasNext}"
+            <a class="action-link" th:if="${greetingHasNext}"
                th:href="${invitationPath + '?language=' + language + '&page=' + (greetingPage + 1)}"
                th:text="${language == 'EN'} ? 'Load more' : 'Lihat lainnya'">Lihat lainnya</a>
         </section>

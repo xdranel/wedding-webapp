@@ -26,6 +26,27 @@ class PresentationStructureTest {
 		assertThat(css).contains(".cover-fallback", "prefers-reduced-motion", ":focus-visible");
 	}
 
+	@Test
+	void invitationUsesCorrectHeadingsImagesAndActionTargets() throws IOException {
+		String guest = resource("templates/guest/invitation.html");
+		String preview = resource("templates/admin/wedding/preview.html");
+		assertThat(guest).contains("<h3 th:id=\"${'event-' + event.type}\"", "class=\"action-link\"")
+				.doesNotContain("<h2 th:id=\"${'event-' + event.type}\"", "th:srcset=", "sizes=\"");
+		assertThat(preview).contains("<h3 th:id=\"${'event-' + event.type}\"")
+				.doesNotContain("<h2 th:id=\"${'event-' + event.type}\"", "th:srcset=", "sizes=\"");
+	}
+
+	@Test
+	void invitationInteractionStylesProtectContrastTouchAndMotion() throws IOException {
+		String css = resource("static/css/invitation.css");
+		String js = resource("static/js/invitation-media.js");
+		assertThat(css).contains(".cover-photo .cover-content {\n    background: rgb(12 20 16 / 82%)",
+				"box-shadow: 0 0 0 5px #111 !important",
+				"touch-action: pan-y", ".action-link", "min-height: 2.75rem");
+		assertThat(js).contains("prefers-reduced-motion", "pointerdown", "pointerup",
+				"setPointerCapture", "releasePointerCapture");
+	}
+
 	private String resource(String path) throws IOException {
 		try (var input = getClass().getClassLoader().getResourceAsStream(path)) {
 			assertThat(input).as(path).isNotNull();

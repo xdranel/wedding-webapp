@@ -142,10 +142,10 @@ class PublicInvitationControllerTest {
 		String enLink = invitationPath + "/calendar/CEREMONY.ics?language=EN";
 		String idReceptionLink = invitationPath + "/calendar/RECEPTION.ics?language=ID";
 		String enReceptionLink = invitationPath + "/calendar/RECEPTION.ics?language=EN";
-		assertThat(indonesian).contains("<h2 id=\"event-CEREMONY\">Akad", "href=\"" + idLink + "\"",
+		assertThat(indonesian).contains("<h3 id=\"event-CEREMONY\">Akad", "href=\"" + idLink + "\"",
 				"Tambahkan Akad ke Kalender", "href=\"" + idReceptionLink + "\"", "Tambahkan Resepsi ke Kalender");
 		assertThat(indonesian.indexOf(idLink)).isGreaterThan(indonesian.indexOf("id=\"event-CEREMONY\""));
-		assertThat(english).contains("<h2 id=\"event-CEREMONY\">Ceremony", "href=\"" + enLink + "\"",
+		assertThat(english).contains("<h3 id=\"event-CEREMONY\">Ceremony", "href=\"" + enLink + "\"",
 				"Add Ceremony to Calendar", "href=\"" + enReceptionLink + "\"", "Add Reception to Calendar");
 		assertThat(english.indexOf(enLink)).isGreaterThan(english.indexOf("id=\"event-CEREMONY\""));
 	}

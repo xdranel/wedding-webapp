@@ -71,13 +71,16 @@
         next.addEventListener('click', () => show(current + 1));
         close.addEventListener('click', () => dialog.close());
         dialog.addEventListener('pointerdown', event => {
-            if (event.isPrimary !== false) pointerStart = { x: event.clientX, y: event.clientY };
+            if (event.isPrimary === false) return;
+            pointerStart = { id: event.pointerId, x: event.clientX, y: event.clientY };
+            dialog.setPointerCapture?.(event.pointerId);
         });
         dialog.addEventListener('pointerup', event => {
-            if (!pointerStart) return;
+            if (!pointerStart || event.pointerId !== pointerStart.id) return;
             const x = event.clientX - pointerStart.x;
             const y = event.clientY - pointerStart.y;
             pointerStart = undefined;
+            dialog.releasePointerCapture?.(event.pointerId);
             if (Math.abs(x) > 48 && Math.abs(x) > Math.abs(y)) show(current + (x < 0 ? 1 : -1));
         });
         dialog.addEventListener('pointercancel', () => pointerStart = undefined);
