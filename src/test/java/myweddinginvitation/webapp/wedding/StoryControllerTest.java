@@ -107,6 +107,8 @@ class StoryControllerTest {
 				.param("titleEn", "English title"))
 				.andExpect(status().isOk())
 				.andExpect(model().attributeHasFieldErrors("form", "titleId"))
+				.andExpect(content().string(containsString("aria-describedby=\"story-title-id-error\"")))
+				.andExpect(content().string(containsString("id=\"story-title-id-error\"")))
 				.andExpect(content().string(containsString("Submitted body")));
 
 		assertThat(stories.findById(id).orElseThrow().getTitleId()).isEqualTo("Original");

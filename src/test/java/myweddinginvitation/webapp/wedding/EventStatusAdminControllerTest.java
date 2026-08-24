@@ -103,6 +103,16 @@ class EventStatusAdminControllerTest {
 	}
 
 	@Test
+	void missingStatusConfirmationIsAssociatedWithItsControl() throws Exception {
+		mockMvc.perform(post("/admin/wedding/event-status/close").session(adminSession).with(csrf())
+				.param("version", Long.toString(service.view().version())))
+				.andExpect(status().isOk())
+				.andExpect(model().attributeHasFieldErrors("form", "confirmed"))
+				.andExpect(content().string(containsString("aria-describedby=\"confirmed-error\"")))
+				.andExpect(content().string(containsString("id=\"confirmed-error\"")));
+	}
+
+	@Test
 	void staleReopenSubmissionRedisplaysTheCurrentOpenStateAsACloseAction() throws Exception {
 		service.change(true, service.view().version(), true, "admin");
 		long staleVersion = service.view().version();

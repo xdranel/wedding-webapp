@@ -1,6 +1,7 @@
 package myweddinginvitation.webapp.rsvp;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -121,6 +122,21 @@ class AdminRsvpControllerTest {
 				select a.username from rsvp r join user_account a on a.id = r.updated_by_account_id
 				where r.id = ?
 				""", String.class, corrected.id())).isEqualTo("admin");
+	}
+
+	@Test
+	void invalidCorrectionAssociatesEachRenderedFieldError() throws Exception {
+		Guest guest = guest("Batas", true);
+
+		mockMvc.perform(post("/admin/guests/{id}/rsvp", guest.getId()).session(adminSession).with(csrf())
+				.param("plannedAttendeeCount", "3")
+				.param("version", "-1"))
+				.andExpect(status().isOk())
+				.andExpect(model().attributeHasFieldErrors("form", "response", "plannedAttendeeCount"))
+				.andExpect(content().string(containsString("aria-describedby=\"response-error\"")))
+				.andExpect(content().string(containsString("id=\"response-error\"")))
+				.andExpect(content().string(containsString("aria-describedby=\"planned-attendee-count-error\"")))
+				.andExpect(content().string(containsString("id=\"planned-attendee-count-error\"")));
 	}
 
 	@Test

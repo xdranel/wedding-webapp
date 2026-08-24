@@ -103,6 +103,7 @@ button, input, select, textarea { min-block-size: 44px; }
 
 .page-content { min-inline-size: 0; padding: var(--space-4); }
 .page-content > * { max-inline-size: 72rem; }
+.page-content img { max-inline-size: 100%; block-size: auto; }
 
 .summary-grid {
     display: grid;

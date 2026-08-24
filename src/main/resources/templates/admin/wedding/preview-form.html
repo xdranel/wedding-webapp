@@ -18,17 +18,20 @@
         <main id="main-content" class="page-content">
     <form class="card form-grid" method="get" th:action="@{/admin/wedding/preview/render}" th:object="${form}">
         <label for="salutation">Salutation</label>
-        <input id="salutation" th:field="*{salutation}" required maxlength="120">
-        <p th:if="${#fields.hasErrors('salutation')}" th:errors="*{salutation}">Salutation error</p>
+        <input id="salutation" th:field="*{salutation}" required maxlength="120"
+               th:attr="aria-describedby=${#fields.hasErrors('salutation')} ? 'salutation-error' : null">
+        <p id="salutation-error" th:if="${#fields.hasErrors('salutation')}" th:errors="*{salutation}">Salutation error</p>
         <label for="guest-name">Guest name</label>
-        <input id="guest-name" th:field="*{guestName}" required maxlength="160">
-        <p th:if="${#fields.hasErrors('guestName')}" th:errors="*{guestName}">Guest name error</p>
+        <input id="guest-name" th:field="*{guestName}" required maxlength="160"
+               th:attr="aria-describedby=${#fields.hasErrors('guestName')} ? 'guest-name-error' : null">
+        <p id="guest-name-error" th:if="${#fields.hasErrors('guestName')}" th:errors="*{guestName}">Guest name error</p>
         <label for="language">Language</label>
-        <select id="language" th:field="*{language}">
+        <select id="language" th:field="*{language}"
+                th:attr="aria-describedby=${#fields.hasErrors('language')} ? 'language-error' : null">
             <option value="ID">ID</option>
             <option value="EN">EN</option>
         </select>
-        <p th:if="${#fields.hasErrors('language')}" th:errors="*{language}">Language error</p>
+        <p id="language-error" th:if="${#fields.hasErrors('language')}" th:errors="*{language}">Language error</p>
         <button class="button" type="submit">Render preview</button>
     </form>
         </main>

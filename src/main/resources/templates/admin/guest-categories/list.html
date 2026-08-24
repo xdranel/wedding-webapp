@@ -43,8 +43,9 @@
             <input type="hidden" th:field="*{version}">
             <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Category error</p>
             <label th:for="${'category-name-' + category.id}">Name</label>
-            <input th:id="${'category-name-' + category.id}" th:field="*{name}" maxlength="80" required>
-            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" role="alert">Name error</p>
+            <input th:id="${'category-name-' + category.id}" th:field="*{name}" maxlength="80" required
+                   th:attr="aria-describedby=${#fields.hasErrors('name')} ? 'category-edit-name-error' : null">
+            <p id="category-edit-name-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}" role="alert">Name error</p>
             <button class="button" type="submit">Rename</button>
           </form>
           <form class="form-grid" th:unless="${editingId != null and editingId == category.id}" method="post"

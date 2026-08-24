@@ -22,25 +22,31 @@
             <input type="hidden" th:field="*{version}">
             <label><input type="checkbox" th:field="*{visible}"> Show ceremony</label>
             <label for="ceremony-date">Date</label>
-            <input id="ceremony-date" type="date" th:field="*{eventDate}">
-            <p th:if="${#fields.hasErrors('eventDate')}" th:errors="*{eventDate}" role="alert">Date error</p>
+            <input id="ceremony-date" type="date" th:field="*{eventDate}"
+                   th:attr="aria-describedby=${#fields.hasErrors('eventDate')} ? 'ceremony-date-error' : null">
+            <p id="ceremony-date-error" th:if="${#fields.hasErrors('eventDate')}" th:errors="*{eventDate}" role="alert">Date error</p>
             <label for="ceremony-start">Start time</label>
-            <input id="ceremony-start" type="time" th:field="*{startTime}">
-            <p th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" role="alert">Start time error</p>
+            <input id="ceremony-start" type="time" th:field="*{startTime}"
+                   th:attr="aria-describedby=${#fields.hasErrors('startTime')} ? 'ceremony-start-error' : null">
+            <p id="ceremony-start-error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" role="alert">Start time error</p>
             <label for="ceremony-end">End time</label>
-            <input id="ceremony-end" type="time" th:field="*{endTime}">
-            <p th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" role="alert">End time error</p>
+            <input id="ceremony-end" type="time" th:field="*{endTime}"
+                   th:attr="aria-describedby=${#fields.hasErrors('endTime')} ? 'ceremony-end-error' : null">
+            <p id="ceremony-end-error" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" role="alert">End time error</p>
             <label for="ceremony-venue">Venue name</label>
-            <input id="ceremony-venue" th:field="*{venueName}" maxlength="200">
-            <p th:if="${#fields.hasErrors('venueName')}" th:errors="*{venueName}" role="alert">Venue error</p>
+            <input id="ceremony-venue" th:field="*{venueName}" maxlength="200"
+                   th:attr="aria-describedby=${#fields.hasErrors('venueName')} ? 'ceremony-venue-error' : null">
+            <p id="ceremony-venue-error" th:if="${#fields.hasErrors('venueName')}" th:errors="*{venueName}" role="alert">Venue error</p>
             <label for="ceremony-address-id">Address (Indonesian)</label>
-            <textarea id="ceremony-address-id" th:field="*{addressId}" maxlength="1000"></textarea>
-            <p th:if="${#fields.hasErrors('addressId')}" th:errors="*{addressId}" role="alert">Address error</p>
+            <textarea id="ceremony-address-id" th:field="*{addressId}" maxlength="1000"
+                      th:attr="aria-describedby=${#fields.hasErrors('addressId')} ? 'ceremony-address-id-error' : null"></textarea>
+            <p id="ceremony-address-id-error" th:if="${#fields.hasErrors('addressId')}" th:errors="*{addressId}" role="alert">Address error</p>
             <label for="ceremony-address-en">Address (English, falls back to Indonesian)</label>
             <textarea id="ceremony-address-en" th:field="*{addressEn}" maxlength="1000"></textarea>
             <label for="ceremony-map">Map URL</label>
-            <input id="ceremony-map" th:field="*{mapUrl}" maxlength="1000" inputmode="url">
-            <p th:if="${#fields.hasErrors('mapUrl')}" th:errors="*{mapUrl}" role="alert">Map URL error</p>
+            <input id="ceremony-map" th:field="*{mapUrl}" maxlength="1000" inputmode="url"
+                   th:attr="aria-describedby=${#fields.hasErrors('mapUrl')} ? 'ceremony-map-error' : null">
+            <p id="ceremony-map-error" th:if="${#fields.hasErrors('mapUrl')}" th:errors="*{mapUrl}" role="alert">Map URL error</p>
             <button class="button" type="submit">Save ceremony</button>
         </form>
     </section>
@@ -51,25 +57,31 @@
             <input type="hidden" th:field="*{version}">
             <label><input type="checkbox" th:field="*{visible}"> Show reception</label>
             <label for="reception-date">Date</label>
-            <input id="reception-date" type="date" th:field="*{eventDate}">
-            <p th:if="${#fields.hasErrors('eventDate')}" th:errors="*{eventDate}" role="alert">Date error</p>
+            <input id="reception-date" type="date" th:field="*{eventDate}"
+                   th:attr="aria-describedby=${#fields.hasErrors('eventDate')} ? 'reception-date-error' : null">
+            <p id="reception-date-error" th:if="${#fields.hasErrors('eventDate')}" th:errors="*{eventDate}" role="alert">Date error</p>
             <label for="reception-start">Start time</label>
-            <input id="reception-start" type="time" th:field="*{startTime}">
-            <p th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" role="alert">Start time error</p>
+            <input id="reception-start" type="time" th:field="*{startTime}"
+                   th:attr="aria-describedby=${#fields.hasErrors('startTime')} ? 'reception-start-error' : null">
+            <p id="reception-start-error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" role="alert">Start time error</p>
             <label for="reception-end">End time</label>
-            <input id="reception-end" type="time" th:field="*{endTime}">
-            <p th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" role="alert">End time error</p>
+            <input id="reception-end" type="time" th:field="*{endTime}"
+                   th:attr="aria-describedby=${#fields.hasErrors('endTime')} ? 'reception-end-error' : null">
+            <p id="reception-end-error" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" role="alert">End time error</p>
             <label for="reception-venue">Venue name</label>
-            <input id="reception-venue" th:field="*{venueName}" maxlength="200">
-            <p th:if="${#fields.hasErrors('venueName')}" th:errors="*{venueName}" role="alert">Venue error</p>
+            <input id="reception-venue" th:field="*{venueName}" maxlength="200"
+                   th:attr="aria-describedby=${#fields.hasErrors('venueName')} ? 'reception-venue-error' : null">
+            <p id="reception-venue-error" th:if="${#fields.hasErrors('venueName')}" th:errors="*{venueName}" role="alert">Venue error</p>
             <label for="reception-address-id">Address (Indonesian)</label>
-            <textarea id="reception-address-id" th:field="*{addressId}" maxlength="1000"></textarea>
-            <p th:if="${#fields.hasErrors('addressId')}" th:errors="*{addressId}" role="alert">Address error</p>
+            <textarea id="reception-address-id" th:field="*{addressId}" maxlength="1000"
+                      th:attr="aria-describedby=${#fields.hasErrors('addressId')} ? 'reception-address-id-error' : null"></textarea>
+            <p id="reception-address-id-error" th:if="${#fields.hasErrors('addressId')}" th:errors="*{addressId}" role="alert">Address error</p>
             <label for="reception-address-en">Address (English, falls back to Indonesian)</label>
             <textarea id="reception-address-en" th:field="*{addressEn}" maxlength="1000"></textarea>
             <label for="reception-map">Map URL</label>
-            <input id="reception-map" th:field="*{mapUrl}" maxlength="1000" inputmode="url">
-            <p th:if="${#fields.hasErrors('mapUrl')}" th:errors="*{mapUrl}" role="alert">Map URL error</p>
+            <input id="reception-map" th:field="*{mapUrl}" maxlength="1000" inputmode="url"
+                   th:attr="aria-describedby=${#fields.hasErrors('mapUrl')} ? 'reception-map-error' : null">
+            <p id="reception-map-error" th:if="${#fields.hasErrors('mapUrl')}" th:errors="*{mapUrl}" role="alert">Map URL error</p>
             <button class="button" type="submit">Save reception</button>
         </form>
     </section>

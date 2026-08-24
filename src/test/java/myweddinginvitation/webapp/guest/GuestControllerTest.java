@@ -333,7 +333,9 @@ class GuestControllerTest {
 				.param("whatsappNumber", "081234567890")
 				.param("preferredLanguage", "ID"))
 				.andExpect(status().isOk())
-				.andExpect(model().attributeHasFieldErrors("form", "phoneRegion"));
+				.andExpect(model().attributeHasFieldErrors("form", "phoneRegion"))
+				.andExpect(content().string(containsString("aria-describedby=\"phone-region-error\"")))
+				.andExpect(content().string(containsString("id=\"phone-region-error\"")));
 	}
 
 	@Test

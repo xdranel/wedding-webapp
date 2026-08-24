@@ -164,6 +164,10 @@ class WeddingPreviewTest {
 				.andExpect(status().isBadRequest())
 				.andExpect(view().name("admin/wedding/preview-form"))
 				.andExpect(model().attributeHasFieldErrors("form", "salutation", "guestName"))
+				.andExpect(content().string(containsString("aria-describedby=\"salutation-error\"")))
+				.andExpect(content().string(containsString("id=\"salutation-error\"")))
+				.andExpect(content().string(containsString("aria-describedby=\"guest-name-error\"")))
+				.andExpect(content().string(containsString("id=\"guest-name-error\"")))
 				.andExpect(content().string(containsString("name=\"salutation\" value=\"\"")))
 				.andExpect(content().string(containsString("name=\"guestName\" value=\"\"")));
 

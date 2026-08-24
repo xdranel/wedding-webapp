@@ -78,6 +78,8 @@ class EventPartControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(model().attributeHasFieldErrors("form", "endTime", "venueName", "addressId", "mapUrl"))
 				.andExpect(content().string(containsString("End time must be after start time")))
+				.andExpect(content().string(containsString("aria-describedby=\"ceremony-end-error\"")))
+				.andExpect(content().string(containsString("id=\"ceremony-end-error\"")))
 				.andExpect(content().string(containsString("javascript:alert(1)")));
 	}
 

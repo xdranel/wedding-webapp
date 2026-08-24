@@ -22,9 +22,10 @@
 		<p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Status error</p>
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <input type="hidden" th:field="*{version}">
-        <input id="confirmed" type="checkbox" th:field="*{confirmed}">
+        <input id="confirmed" type="checkbox" th:field="*{confirmed}"
+               th:attr="aria-describedby=${#fields.hasErrors('confirmed')} ? 'confirmed-error' : null">
 		<label for="confirmed" th:text="${status.closed} ? 'I confirm that guest-facing operations may be restored.' : 'I confirm that guest-facing operations must be blocked.'">Confirmation</label>
-        <p th:if="${#fields.hasErrors('confirmed')}" th:errors="*{confirmed}">Confirmation is required</p>
+        <p id="confirmed-error" th:if="${#fields.hasErrors('confirmed')}" th:errors="*{confirmed}">Confirmation is required</p>
 		<button class="button" type="submit" th:text="${status.closed} ? 'Reopen event' : 'Close event'">Change status</button>
     </form>
     <p><a th:href="@{/admin/wedding/event-status}">Back to event status</a></p>

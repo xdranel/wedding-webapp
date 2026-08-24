@@ -91,6 +91,8 @@ class PartnerControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/wedding/partners"))
 				.andExpect(model().attributeHasFieldErrors("form", "photo"))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("aria-describedby=\"photo-error\"")))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"photo-error\"")))
 				.andExpect(content().string(org.hamcrest.Matchers.containsString("Photo must be a JPEG, PNG, or WebP image")));
 
 		assertThat(partners.findById(partnerId).orElseThrow().getPhotoPath()).isEqualTo(oldPath);

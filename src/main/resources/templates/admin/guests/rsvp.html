@@ -18,20 +18,22 @@
     <input type="hidden" th:field="*{version}">
     <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">RSVP error</p>
     <label>Response
-      <select th:field="*{response}" required>
+      <select th:field="*{response}" required
+              th:attr="aria-describedby=${#fields.hasErrors('response')} ? 'response-error' : null">
         <option value="HADIR">Hadir</option>
         <option value="TIDAK_HADIR">Tidak hadir</option>
       </select>
     </label>
-    <p th:if="${#fields.hasErrors('response')}" th:errors="*{response}" role="alert">Response error</p>
+    <p id="response-error" th:if="${#fields.hasErrors('response')}" th:errors="*{response}" role="alert">Response error</p>
     <label>Planned attendees
-      <select th:field="*{plannedAttendeeCount}">
+      <select th:field="*{plannedAttendeeCount}"
+              th:attr="aria-describedby=${#fields.hasErrors('plannedAttendeeCount')} ? 'planned-attendee-count-error' : null">
         <option value="0">0</option>
         <option value="1">1</option>
         <option th:if="${guest.plusOneAllowed}" value="2">2</option>
       </select>
     </label>
-    <p th:if="${#fields.hasErrors('plannedAttendeeCount')}" th:errors="*{plannedAttendeeCount}" role="alert">Count error</p>
+    <p id="planned-attendee-count-error" th:if="${#fields.hasErrors('plannedAttendeeCount')}" th:errors="*{plannedAttendeeCount}" role="alert">Count error</p>
     <button class="button" type="submit">Save RSVP</button>
   </form>
     </main>

@@ -137,6 +137,8 @@ class WeddingMediaAdminControllerTest {
 				.andExpect(view().name("admin/wedding/media"))
 				.andExpect(model().attributeHasFieldErrors("photoForm", "altText"))
 				.andExpect(model().attributeExists("media"))
+				.andExpect(content().string(containsString("aria-describedby=\"photo-alt-error\"")))
+				.andExpect(content().string(containsString("id=\"photo-alt-error\"")))
 				.andExpect(content().string(containsString("Still shown")));
 	}
 

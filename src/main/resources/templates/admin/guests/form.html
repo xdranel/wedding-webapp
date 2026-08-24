@@ -14,15 +14,22 @@
   <form class="card form-grid" method="post" th:action="${guest == null ? '/admin/guests' : '/admin/guests/' + guest.id}" th:object="${form}">
     <input th:if="${guest != null}" type="hidden" name="version" th:value="${guest.version}">
     <p th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Guest error</p>
-    <label>Name <input th:field="*{displayName}" maxlength="160" required></label><p th:if="${#fields.hasErrors('displayName')}" th:errors="*{displayName}" role="alert">Name error</p>
-    <label>Salutation <input th:field="*{salutation}" maxlength="80" required></label><p th:if="${#fields.hasErrors('salutation')}" th:errors="*{salutation}" role="alert">Salutation error</p>
+    <label>Name <input th:field="*{displayName}" maxlength="160" required
+                       th:attr="aria-describedby=${#fields.hasErrors('displayName')} ? 'display-name-error' : null"></label>
+    <p id="display-name-error" th:if="${#fields.hasErrors('displayName')}" th:errors="*{displayName}" role="alert">Name error</p>
+    <label>Salutation <input th:field="*{salutation}" maxlength="80" required
+                             th:attr="aria-describedby=${#fields.hasErrors('salutation')} ? 'guest-salutation-error' : null"></label>
+    <p id="guest-salutation-error" th:if="${#fields.hasErrors('salutation')}" th:errors="*{salutation}" role="alert">Salutation error</p>
     <label>Phone country
-      <select th:field="*{phoneRegion}" required>
+      <select th:field="*{phoneRegion}" required
+              th:attr="aria-describedby=${#fields.hasErrors('phoneRegion')} ? 'phone-region-error' : null">
         <option th:each="region : ${phoneRegions}" th:value="${region.code}" th:text="${region.label}">Indonesia (+62)</option>
       </select>
     </label>
-    <p th:if="${#fields.hasErrors('phoneRegion')}" th:errors="*{phoneRegion}" role="alert">Country error</p>
-    <label>WhatsApp number <input th:field="*{whatsappNumber}" maxlength="40" inputmode="tel" required></label><p th:if="${#fields.hasErrors('whatsappNumber')}" th:errors="*{whatsappNumber}" role="alert">Number error</p>
+    <p id="phone-region-error" th:if="${#fields.hasErrors('phoneRegion')}" th:errors="*{phoneRegion}" role="alert">Country error</p>
+    <label>WhatsApp number <input th:field="*{whatsappNumber}" maxlength="40" inputmode="tel" required
+                                  th:attr="aria-describedby=${#fields.hasErrors('whatsappNumber')} ? 'whatsapp-number-error' : null"></label>
+    <p id="whatsapp-number-error" th:if="${#fields.hasErrors('whatsappNumber')}" th:errors="*{whatsappNumber}" role="alert">Number error</p>
     <p>Use a local number for the selected country, or start with + for an international number.</p>
     <label>Category <select th:field="*{categoryId}"><option value="">Uncategorized</option><option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.displayName}">Category</option></select></label>
     <label><input type="checkbox" th:field="*{plusOneAllowed}"> Plus one allowed</label>

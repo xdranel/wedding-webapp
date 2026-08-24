@@ -30,40 +30,42 @@
             <p id="partner-error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Partner
                 error</p>
             <label for="full-name">Full name</label>
-            <input id="full-name" th:field="*{fullName}" maxlength="160" required aria-describedby="full-name-error">
+            <input id="full-name" th:field="*{fullName}" maxlength="160" required
+                   th:attr="aria-describedby=${#fields.hasErrors('fullName')} ? 'full-name-error' : null">
             <p id="full-name-error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" role="alert">Full
                 name error</p>
             <label for="nickname">Nickname</label>
-            <input id="nickname" th:field="*{nickname}" maxlength="80" required aria-describedby="nickname-error">
+            <input id="nickname" th:field="*{nickname}" maxlength="80" required
+                   th:attr="aria-describedby=${#fields.hasErrors('nickname')} ? 'nickname-error' : null">
             <p id="nickname-error" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}" role="alert">
                 Nickname error</p>
             <label for="photo">Photo</label>
             <input id="photo" type="file" th:field="*{photo}" accept="image/jpeg,image/png,image/webp"
-                   aria-describedby="photo-error">
+                   th:attr="aria-describedby=${#fields.hasErrors('photo')} ? 'photo-error' : null">
             <p id="photo-error" th:if="${#fields.hasErrors('photo')}" th:errors="*{photo}" role="alert">Photo error</p>
             <label for="child-of-label-id">Child-of label (Indonesian)</label>
             <input id="child-of-label-id" th:field="*{childOfLabelId}" maxlength="120" required
-                   aria-describedby="child-of-label-id-error">
+                   th:attr="aria-describedby=${#fields.hasErrors('childOfLabelId')} ? 'child-of-label-id-error' : null">
             <p id="child-of-label-id-error" th:if="${#fields.hasErrors('childOfLabelId')}" th:errors="*{childOfLabelId}"
                role="alert">Child-of label error</p>
             <label for="child-of-label-en">Child-of label (English)</label>
             <input id="child-of-label-en" th:field="*{childOfLabelEn}" maxlength="120"
-                   aria-describedby="child-of-label-en-error">
+                   th:attr="aria-describedby=${#fields.hasErrors('childOfLabelEn')} ? 'child-of-label-en-error' : null">
             <p id="child-of-label-en-error" th:if="${#fields.hasErrors('childOfLabelEn')}" th:errors="*{childOfLabelEn}"
                role="alert">Child-of label error</p>
             <label for="parents-names-id">Parents (Indonesian)</label>
             <input id="parents-names-id" th:field="*{parentsNamesId}" maxlength="300" required
-                   aria-describedby="parents-names-id-error">
+                   th:attr="aria-describedby=${#fields.hasErrors('parentsNamesId')} ? 'parents-names-id-error' : null">
             <p id="parents-names-id-error" th:if="${#fields.hasErrors('parentsNamesId')}" th:errors="*{parentsNamesId}"
                role="alert">Parents error</p>
             <label for="parents-names-en">Parents (English)</label>
             <input id="parents-names-en" th:field="*{parentsNamesEn}" maxlength="300"
-                   aria-describedby="parents-names-en-error">
+                   th:attr="aria-describedby=${#fields.hasErrors('parentsNamesEn')} ? 'parents-names-en-error' : null">
             <p id="parents-names-en-error" th:if="${#fields.hasErrors('parentsNamesEn')}" th:errors="*{parentsNamesEn}"
                role="alert">Parents error</p>
             <label for="instagram-url">Instagram URL</label>
             <input id="instagram-url" th:field="*{instagramUrl}" maxlength="500" inputmode="url"
-                   aria-describedby="instagram-url-error">
+                   th:attr="aria-describedby=${#fields.hasErrors('instagramUrl')} ? 'instagram-url-error' : null">
             <p id="instagram-url-error" th:if="${#fields.hasErrors('instagramUrl')}" th:errors="*{instagramUrl}"
                role="alert">Instagram error</p>
             <button class="button" type="submit">Save partner</button>

@@ -22,17 +22,21 @@
             <label for="story-date">Date (optional)</label>
             <input id="story-date" type="date" th:field="*{date}">
             <label for="story-title-id">Title (Indonesian)</label>
-            <input id="story-title-id" th:field="*{titleId}" maxlength="200" required>
-            <p th:if="${#fields.hasErrors('titleId')}" th:errors="*{titleId}" role="alert">Title error</p>
+            <input id="story-title-id" th:field="*{titleId}" maxlength="200" required
+                   th:attr="aria-describedby=${#fields.hasErrors('titleId')} ? 'story-title-id-error' : null">
+            <p id="story-title-id-error" th:if="${#fields.hasErrors('titleId')}" th:errors="*{titleId}" role="alert">Title error</p>
             <label for="story-title-en">Title (English, falls back to Indonesian)</label>
-            <input id="story-title-en" th:field="*{titleEn}" maxlength="200">
-            <p th:if="${#fields.hasErrors('titleEn')}" th:errors="*{titleEn}" role="alert">English title error</p>
+            <input id="story-title-en" th:field="*{titleEn}" maxlength="200"
+                   th:attr="aria-describedby=${#fields.hasErrors('titleEn')} ? 'story-title-en-error' : null">
+            <p id="story-title-en-error" th:if="${#fields.hasErrors('titleEn')}" th:errors="*{titleEn}" role="alert">English title error</p>
             <label for="story-body-id">Story (Indonesian)</label>
-            <textarea id="story-body-id" th:field="*{bodyId}" maxlength="4000" required></textarea>
-            <p th:if="${#fields.hasErrors('bodyId')}" th:errors="*{bodyId}" role="alert">Story error</p>
+            <textarea id="story-body-id" th:field="*{bodyId}" maxlength="4000" required
+                      th:attr="aria-describedby=${#fields.hasErrors('bodyId')} ? 'story-body-id-error' : null"></textarea>
+            <p id="story-body-id-error" th:if="${#fields.hasErrors('bodyId')}" th:errors="*{bodyId}" role="alert">Story error</p>
             <label for="story-body-en">Story (English, falls back to Indonesian)</label>
-            <textarea id="story-body-en" th:field="*{bodyEn}" maxlength="4000"></textarea>
-            <p th:if="${#fields.hasErrors('bodyEn')}" th:errors="*{bodyEn}" role="alert">English story error</p>
+            <textarea id="story-body-en" th:field="*{bodyEn}" maxlength="4000"
+                      th:attr="aria-describedby=${#fields.hasErrors('bodyEn')} ? 'story-body-en-error' : null"></textarea>
+            <p id="story-body-en-error" th:if="${#fields.hasErrors('bodyEn')}" th:errors="*{bodyEn}" role="alert">English story error</p>
             <button class="button" type="submit">Add story entry</button>
         </form>
     </section>
@@ -45,17 +49,21 @@
                 <label for="story-date">Date (optional)</label>
                 <input id="story-date" type="date" th:field="*{date}">
                 <label for="story-title-id">Title (Indonesian)</label>
-                <input id="story-title-id" th:field="*{titleId}" maxlength="200" required>
-                <p th:if="${#fields.hasErrors('titleId')}" th:errors="*{titleId}" role="alert">Title error</p>
+                <input id="story-title-id" th:field="*{titleId}" maxlength="200" required
+                       th:attr="aria-describedby=${#fields.hasErrors('titleId')} ? 'story-title-id-error' : null">
+                <p id="story-title-id-error" th:if="${#fields.hasErrors('titleId')}" th:errors="*{titleId}" role="alert">Title error</p>
                 <label for="story-title-en">Title (English, falls back to Indonesian)</label>
-                <input id="story-title-en" th:field="*{titleEn}" maxlength="200">
-                <p th:if="${#fields.hasErrors('titleEn')}" th:errors="*{titleEn}" role="alert">English title error</p>
+                <input id="story-title-en" th:field="*{titleEn}" maxlength="200"
+                       th:attr="aria-describedby=${#fields.hasErrors('titleEn')} ? 'story-title-en-error' : null">
+                <p id="story-title-en-error" th:if="${#fields.hasErrors('titleEn')}" th:errors="*{titleEn}" role="alert">English title error</p>
                 <label for="story-body-id">Story (Indonesian)</label>
-                <textarea id="story-body-id" th:field="*{bodyId}" maxlength="4000" required></textarea>
-                <p th:if="${#fields.hasErrors('bodyId')}" th:errors="*{bodyId}" role="alert">Story error</p>
+                <textarea id="story-body-id" th:field="*{bodyId}" maxlength="4000" required
+                          th:attr="aria-describedby=${#fields.hasErrors('bodyId')} ? 'story-body-id-error' : null"></textarea>
+                <p id="story-body-id-error" th:if="${#fields.hasErrors('bodyId')}" th:errors="*{bodyId}" role="alert">Story error</p>
                 <label for="story-body-en">Story (English, falls back to Indonesian)</label>
-                <textarea id="story-body-en" th:field="*{bodyEn}" maxlength="4000"></textarea>
-                <p th:if="${#fields.hasErrors('bodyEn')}" th:errors="*{bodyEn}" role="alert">English story error</p>
+                <textarea id="story-body-en" th:field="*{bodyEn}" maxlength="4000"
+                          th:attr="aria-describedby=${#fields.hasErrors('bodyEn')} ? 'story-body-en-error' : null"></textarea>
+                <p id="story-body-en-error" th:if="${#fields.hasErrors('bodyEn')}" th:errors="*{bodyEn}" role="alert">English story error</p>
                 <button class="button" type="submit">Save story entry</button>
             </form>
             <form class="form-grid" method="post" th:action="@{/admin/wedding/story/{id}(id=${entry.id})}"

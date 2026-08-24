@@ -110,7 +110,9 @@ class GuestCategoryControllerTest {
 				.param("version", Long.toString(currentVersion))
 				.param("name", " FAMILY "))
 				.andExpect(status().isOk())
-				.andExpect(model().attributeHasFieldErrors("form", "name"));
+				.andExpect(model().attributeHasFieldErrors("form", "name"))
+				.andExpect(content().string(containsString("aria-describedby=\"category-edit-name-error\"")))
+				.andExpect(content().string(containsString("id=\"category-edit-name-error\"")));
 		assertThat(categories.findById(family.getId())).isPresent();
 	}
 
