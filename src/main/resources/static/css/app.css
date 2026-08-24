@@ -126,6 +126,15 @@ button, input, select, textarea { min-block-size: 44px; }
 .summary-grid dt { color: var(--color-muted); }
 .summary-grid dd { margin: 0 0 var(--space-1); font-size: 1.4rem; font-weight: 700; }
 
+.auth-shell {
+    display: grid;
+    min-block-size: 100vh;
+    place-items: center;
+    padding: var(--space-2);
+}
+
+.auth-card, .error-card { inline-size: min(100%, 32rem); }
+
 .button {
     display: inline-flex;
     align-items: center;
@@ -223,6 +232,7 @@ input[type="checkbox"], input[type="radio"] { inline-size: auto; }
     .staff-tabs .button { flex: 1; }
     .guest-summary { grid-template-columns: 1fr; }
     .guest-summary dd { margin-block-end: var(--space-1); }
+    .auth-card, .error-card { padding: var(--space-2); }
     .mobile-card-list, .mobile-card-list tbody, .mobile-card-list tr, .mobile-card-list td { display: block; }
     .mobile-card-list thead { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); }
     .mobile-card-list tr { margin-block-end: var(--space-2); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); }

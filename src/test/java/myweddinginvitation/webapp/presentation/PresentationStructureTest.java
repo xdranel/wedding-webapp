@@ -240,6 +240,13 @@ class PresentationStructureTest {
 				"setPointerCapture", "releasePointerCapture");
 	}
 
+	@Test
+	void accountAndErrorPagesUseInternalDesignSystem() throws IOException {
+		for (String page : new String[] {"login.html", "account/password.html", "error/403.html", "error/413.html", "error/500.html"}) {
+			assertThat(resource("templates/" + page)).as(page).contains("/css/app.css");
+		}
+	}
+
 	private String resource(String path) throws IOException {
 		try (var input = getClass().getClassLoader().getResourceAsStream(path)) {
 			assertThat(input).as(path).isNotNull();

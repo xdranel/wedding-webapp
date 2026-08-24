@@ -4,19 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sign in</title>
-    <style> :focus-visible {
-        outline: 3px solid #005fcc;
-        outline-offset: 2px;
-    } </style>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body>
-<main>
+<body class="auth-shell">
+<main class="auth-card card">
     <h1>Sign in</h1>
-    <p th:if="${param.error}" role="alert">Invalid username or password.</p>
-    <p th:if="${param.logout}" role="status">You have signed out.</p>
-    <p th:if="${param.expired}" role="alert">Your session has expired.</p>
-    <p th:if="${param.passwordChanged}" role="status">Password changed. Sign in again.</p>
-    <form method="post" th:action="@{/login}">
+    <p class="status status-error" th:if="${param.error}" role="alert">Invalid username or password.</p>
+    <p class="status" th:if="${param.logout}" role="status">You have signed out.</p>
+    <p class="status status-error" th:if="${param.expired}" role="alert">Your session has expired.</p>
+    <p class="status" th:if="${param.passwordChanged}" role="status">Password changed. Sign in again.</p>
+    <form class="form-grid" method="post" th:action="@{/login}">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <p>
             <label for="username">Username</label>
@@ -26,7 +23,7 @@
             <label for="password">Password</label>
             <input id="password" name="password" type="password" autocomplete="current-password" required>
         </p>
-        <button type="submit">Sign in</button>
+        <button class="button" type="submit">Sign in</button>
     </form>
 </main>
 </body>
