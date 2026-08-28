@@ -235,7 +235,7 @@ class Phase6dIntegrationJourneyTest {
 				.param("defaultPhoneCountry", "ID").param("accentColor", "#7A5C48")
 				.param("fontPreset", "CLASSIC").param("greetingsEnabled", "true")
 				.param("calendarDownloadsEnabled", "true"))
-				.andExpect(redirectedUrl("/admin/wedding?settingsSaved"));
+				.andExpect(redirectedUrl("/admin/wedding/settings?settingsSaved"));
 		mockMvc.perform(post("/admin/wedding/publish").session(admin).with(csrf())
 				.param("version", Long.toString(settingsVersion())))
 				.andExpect(redirectedUrl("/admin/wedding"));
@@ -404,7 +404,7 @@ class Phase6dIntegrationJourneyTest {
 	private void close() throws Exception {
 		mockMvc.perform(post("/admin/wedding/event-status/close").session(admin).with(csrf())
 				.param("version", Long.toString(eventStatus.view().version())).param("confirmed", "true"))
-				.andExpect(redirectedUrl("/admin/wedding/event-status?statusChanged"));
+				.andExpect(redirectedUrl("/admin/wedding?statusChanged"));
 		assertThat(eventStatus.view().closed()).isTrue();
 	}
 
@@ -437,7 +437,7 @@ class Phase6dIntegrationJourneyTest {
 	private void reopen() throws Exception {
 		mockMvc.perform(post("/admin/wedding/event-status/reopen").session(admin).with(csrf())
 				.param("version", Long.toString(eventStatus.view().version())).param("confirmed", "true"))
-				.andExpect(redirectedUrl("/admin/wedding/event-status?statusChanged"));
+				.andExpect(redirectedUrl("/admin/wedding?statusChanged"));
 	}
 
 	private Guest reload(Guest guest) {

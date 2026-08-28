@@ -214,7 +214,7 @@ class WeddingMediaJourneyTest {
 				.param("timeZone", "Asia/Jakarta").param("rsvpDeadline", "2030-01-01T00:00")
 				.param("defaultPhoneCountry", "ID").param("accentColor", "#7A5C48")
 				.param("fontPreset", "CLASSIC").param("greetingsEnabled", "true"))
-				.andExpect(redirectedUrl("/admin/wedding?settingsSaved"));
+				.andExpect(redirectedUrl("/admin/wedding/settings?settingsSaved"));
 		mockMvc.perform(post("/admin/wedding/publish").session(adminSession).with(csrf())
 				.param("version", Long.toString(settingsVersion())))
 				.andExpect(redirectedUrl("/admin/wedding"));

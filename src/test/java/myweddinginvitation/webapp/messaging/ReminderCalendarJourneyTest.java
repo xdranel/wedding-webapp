@@ -236,7 +236,7 @@ class ReminderCalendarJourneyTest {
 				.param("defaultPhoneCountry", "ID").param("accentColor", "#7A5C48")
 				.param("fontPreset", "CLASSIC").param("greetingsEnabled", "true")
 				.param("calendarDownloadsEnabled", "true"))
-				.andExpect(redirectedUrl("/admin/wedding?settingsSaved"));
+				.andExpect(redirectedUrl("/admin/wedding/settings?settingsSaved"));
 		assertThat(settings.getSingleton().orElseThrow().isCalendarDownloadsEnabled()).isTrue();
 	}
 

@@ -284,20 +284,20 @@ class ReportingStatusJourneyTest {
 				.param("version", Long.toString(form.getVersion()))
 				.param("titleId", form.getTitleId()).param("messageId", form.getMessageId())
 				.param("titleEn", form.getTitleEn()).param("messageEn", form.getMessageEn()))
-				.andExpect(redirectedUrl("/admin/wedding/event-status?messagesSaved"));
+				.andExpect(redirectedUrl("/admin/wedding?messagesSaved"));
 	}
 
 	private void closeEvent() throws Exception {
 		mockMvc.perform(post("/admin/wedding/event-status/close").session(admin).with(csrf())
 				.param("version", Long.toString(eventStatus.view().version())).param("confirmed", "true"))
-				.andExpect(redirectedUrl("/admin/wedding/event-status?statusChanged"));
+				.andExpect(redirectedUrl("/admin/wedding?statusChanged"));
 		assertThat(eventStatus.view().closed()).isTrue();
 	}
 
 	private void reopenEvent() throws Exception {
 		mockMvc.perform(post("/admin/wedding/event-status/reopen").session(admin).with(csrf())
 				.param("version", Long.toString(eventStatus.view().version())).param("confirmed", "true"))
-				.andExpect(redirectedUrl("/admin/wedding/event-status?statusChanged"));
+				.andExpect(redirectedUrl("/admin/wedding?statusChanged"));
 		assertThat(eventStatus.view().closed()).isFalse();
 	}
 

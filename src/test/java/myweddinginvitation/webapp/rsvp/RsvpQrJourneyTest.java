@@ -212,7 +212,7 @@ class RsvpQrJourneyTest {
 				.param("defaultPhoneCountry", "ID").param("accentColor", "#7A5C48")
 				.param("fontPreset", "CLASSIC").param("greetingsEnabled", "true")
 				.param("privateOrganizerNoteEnabled", "true"))
-				.andExpect(redirectedUrl("/admin/wedding?settingsSaved"));
+				.andExpect(redirectedUrl("/admin/wedding/settings?settingsSaved"));
 		mockMvc.perform(post("/admin/wedding/publish").session(adminSession).with(csrf())
 				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())))
 				.andExpect(redirectedUrl("/admin/wedding"));

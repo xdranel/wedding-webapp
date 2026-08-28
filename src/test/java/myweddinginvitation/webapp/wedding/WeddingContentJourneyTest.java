@@ -102,7 +102,7 @@ class WeddingContentJourneyTest {
 				.param("closingTextId", "Terima kasih").param("closingTextEn", "Thank you")
 				.param("timeZone", "Asia/Jakarta").param("defaultPhoneCountry", "ID")
 				.param("accentColor", "#7A5C48").param("fontPreset", "CLASSIC"))
-				.andExpect(redirectedUrl("/admin/wedding?settingsSaved"));
+				.andExpect(redirectedUrl("/admin/wedding/settings?settingsSaved"));
 	}
 
 	private void saveBothPartnersWithValidPhotos() throws Exception {
