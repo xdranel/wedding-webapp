@@ -21,8 +21,11 @@
                 <p><a th:href="@{/admin/guest-categories}">Manage guest categories</a></p>
                 <p><a th:href="@{/admin/reports}">Operational reports</a></p>
                 <p><a th:href="@{/admin/reminders}">Reminders</a></p>
-                <label for="guest-search">Search guests</label>
-                <input id="guest-search" type="search" placeholder="Search by guest name">
+                <form method="get" th:action="@{/admin/guests}" class="form-grid dashboard-search">
+                    <label for="guest-search">Search guests</label>
+                    <input id="guest-search" name="query" type="search" placeholder="Name or WhatsApp number">
+                    <button class="button" type="submit">Search</button>
+                </form>
             </section>
 
             <section class="summary-grid" aria-label="Wedding summaries">

@@ -142,6 +142,14 @@ class GuestControllerTest {
 	}
 
 	@Test
+	void guestListRendersContextForEachNavigationDestination() throws Exception {
+		assertGuestListContext(get("/admin/guests"), "guest-list", "All guests");
+		assertGuestListContext(get("/admin/guests").param("delivery", "UNSENT"), "invitations", "Unsent invitations");
+		assertGuestListContext(get("/admin/guests").param("rsvpStatus", "NONE"), "rsvp", "Guests awaiting RSVP");
+		assertGuestListContext(get("/admin/guests").param("checkedIn", "false"), "check-ins", "Guests not checked in");
+	}
+
+	@Test
 	void filtersAndDisplaysCurrentRsvpState() throws Exception {
 		Guest attending = service.create(form("Hadir Guest", "081234567891", true), false);
 		Guest declined = service.create(form("Declined Guest", "081234567892"), false);
@@ -431,5 +439,14 @@ class GuestControllerTest {
 
 	private void assertCurrentNavigation(String page, String currentLink) {
 		assertThat(page).containsOnlyOnce("aria-current=\"page\"").containsOnlyOnce(currentLink);
+	}
+
+	private void assertGuestListContext(org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder request,
+			String navigationPage, String heading) throws Exception {
+		mockMvc.perform(request.session(adminSession))
+				.andExpect(status().isOk())
+				.andExpect(model().attribute("navigationPage", navigationPage))
+				.andExpect(content().string(containsString(heading)))
+				.andExpect(content().string(containsString("href=\"/admin/guests\">Clear filters / View all guests</a>")));
 	}
 }

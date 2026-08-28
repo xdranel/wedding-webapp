@@ -98,7 +98,7 @@ class PresentationStructureTest {
 		}) {
 			assertThat(resource("templates/" + page[0])).as(page[0]).contains("sidebar('" + page[1] + "')");
 			assertThat(occurrences(navigation, "activePage == '" + page[1] + "'"))
-					.as(page[1] + " active navigation mapping").isEqualTo(1);
+					.as(page[1] + " active navigation mapping").isGreaterThanOrEqualTo(1);
 		}
 	}
 
@@ -107,37 +107,59 @@ class PresentationStructureTest {
 		String navigation = resource("templates/fragments/admin-navigation.html");
 		assertThat(navigation).containsSubsequence(
 				">Dashboard</a>",
-				"<p class=\"nav-heading\">Wedding</p>",
+				"<summary>Wedding</summary>",
+				">Publication &amp; Event Status</a>",
 				"th:href=\"@{/admin/wedding/settings}\"", ">Settings</a>",
 				"th:href=\"@{/admin/wedding/partners}\"", ">Partners</a>",
 				"th:href=\"@{/admin/wedding/events}\"", ">Events</a>",
 				"th:href=\"@{/admin/wedding/story}\"", ">Story</a>",
 				"th:href=\"@{/admin/wedding/media}\"", ">Media</a>",
 				"th:href=\"@{/admin/wedding/preview}\"", ">Preview</a>",
-				"<p class=\"nav-heading\">Guests</p>",
+				"<summary>Guests</summary>",
 				">Guest List</a>", ">Categories</a>", ">Import/Export</a>",
-				"<p class=\"nav-heading\">Communication</p>",
+				"<summary>Communication</summary>",
 				">Templates</a>",
 				">Invitations</a>",
 				">Reminders</a>",
-				"<p class=\"nav-heading\">Attendance</p>",
+				"<summary>Attendance</summary>",
 				">RSVP</a>",
 				">Greetings</a>",
 				">Check-ins</a>",
-				"<p class=\"nav-heading\">Operations</p>",
+				"<summary>Operations</summary>",
 				">Reports</a>",
 				">Staff Accounts</a>",
 				">System Status</a>")
 				.doesNotContain("@{/admin/wedding/event-status}", ">Event status</a>");
-		for (String activePage : new String[] {"overview", "wedding-settings", "wedding-partners",
+		for (String activePage : new String[] {"overview", "wedding-publication", "wedding-settings", "wedding-partners",
 				"wedding-events", "wedding-story", "wedding-media", "wedding-preview", "guest-list",
 				"guest-categories", "guest-import-export", "message-templates", "invitations", "reminders",
 				"rsvp", "greetings", "check-ins", "reports", "staff-accounts", "system-status"}) {
 			assertThat(occurrences(navigation, "activePage == '" + activePage + "'"))
-					.as(activePage + " active navigation mapping").isEqualTo(1);
+					.as(activePage + " active navigation mapping").isGreaterThanOrEqualTo(1);
 		}
 		assertThat(resource("templates/admin/guests/list.html")).contains("sidebar(${navigationPage})");
 		assertThat(resource("templates/admin/wedding/settings.html")).contains("@{/admin/wedding/event-status}");
+	}
+
+	@Test
+	void administratorNavigationUsesActiveGroupDisclosuresAndClosedMobileDrawer() throws IOException {
+		String navigation = resource("templates/fragments/admin-navigation.html");
+		assertThat(navigation)
+				.contains("class=\"app-navigation\"")
+				.doesNotContain("class=\"app-navigation\" open")
+				.contains("class=\"nav-group\"")
+				.contains("th:open=\"${activePage == 'wedding-publication' or activePage == 'wedding-settings' or activePage == 'wedding-partners' or activePage == 'wedding-events' or activePage == 'wedding-story' or activePage == 'wedding-media' or activePage == 'wedding-preview'}\"")
+				.contains("th:open=\"${activePage == 'guest-list' or activePage == 'guest-categories' or activePage == 'guest-import-export'}\"")
+				.contains("th:open=\"${activePage == 'message-templates' or activePage == 'invitations' or activePage == 'reminders'}\"")
+				.contains("th:open=\"${activePage == 'rsvp' or activePage == 'greetings' or activePage == 'check-ins'}\"")
+				.contains("th:open=\"${activePage == 'reports' or activePage == 'staff-accounts' or activePage == 'system-status'}\"");
+	}
+
+	@Test
+	void dashboardSearchSubmitsExistingGuestQuery() throws IOException {
+		assertThat(resource("templates/admin/home.html"))
+				.contains("method=\"get\"", "th:action=\"@{/admin/guests}\"",
+						"name=\"query\"", "type=\"submit\"");
 	}
 
 	@Test
@@ -145,10 +167,11 @@ class PresentationStructureTest {
 		String css = resource("static/css/app.css");
 		assertThat(css).contains(".filter-panel", ".action-cluster", ".mobile-card-list", "content: attr(data-label)",
 				".page-content img {", "max-inline-size: 100%;", "block-size: auto;",
+				".page-content > * { inline-size: 100%; max-inline-size: none; }", ".table-card { inline-size: 100%;",
 				".app-navigation", "position: sticky", ".navigation-toggle", ".filter-disclosure",
 				".action-overflow");
 		String navigation = resource("templates/fragments/admin-navigation.html");
-		assertThat(navigation).contains("<details th:fragment=\"sidebar(activePage)\" class=\"app-navigation\" open>",
+		assertThat(navigation).contains("<details th:fragment=\"sidebar(activePage)\" class=\"app-navigation\">",
 				"<summary class=\"navigation-toggle\">Administrator menu</summary>");
 		for (String page : new String[] {"admin/guests/list.html", "admin/reminders/list.html", "admin/reports/index.html"}) {
 			assertThat(resource("templates/" + page)).as(page)

@@ -6,9 +6,33 @@
 <div class="app-shell">
   <nav th:replace="~{fragments/admin-navigation :: sidebar(${navigationPage})}"></nav>
   <div>
-    <header class="app-header"><h1>Guests</h1><a class="button" th:href="@{/admin/guests/new}">Add guest</a></header>
+    <header class="app-header">
+      <div th:switch="${navigationPage}">
+        <h1 th:case="'invitations'">Unsent invitations</h1>
+        <h1 th:case="'rsvp'">Guests awaiting RSVP</h1>
+        <h1 th:case="'check-ins'">Guests not checked in</h1>
+        <h1 th:case="*">All guests</h1>
+      </div>
+      <a class="button" th:href="@{/admin/guests/new}">Add guest</a>
+    </header>
     <main id="main-content" class="page-content">
-  <p><a th:href="@{/admin}">Back to administrator home</a> · <a th:href="@{/admin/guests/import}">Import CSV</a> · <a th:href="@{/admin/guests/export.csv}">Export CSV</a></p>
+  <p><a th:href="@{/admin}">Back to administrator home</a> · <a class="button button-secondary" th:href="@{/admin/guests/import}">Import CSV</a> · <a class="button button-secondary" th:href="@{/admin/guests/export.csv}">Export CSV</a></p>
+  <p th:switch="${navigationPage}">
+    <span th:case="'invitations'">Showing guests whose initial invitation has not been sent.</span>
+    <span th:case="'rsvp'">Showing guests who have not replied to their invitation.</span>
+    <span th:case="'check-ins'">Showing guests who have not checked in.</span>
+    <span th:case="*">Search, filter, and manage every guest invitation.</span>
+  </p>
+  <p class="filter-badges" aria-label="Active filters">
+    <span class="badge" th:if="${filters.query != null and !filters.query.isBlank()}" th:text="|Search: ${filters.query}|">Search</span>
+    <span class="badge" th:if="${filters.delivery != null}" th:text="|Delivery: ${filters.delivery}|">Delivery</span>
+    <span class="badge" th:if="${filters.archived != null}" th:text="${filters.archived} ? 'Archived' : 'Active'">Archived</span>
+    <span class="badge" th:if="${filters.categoryId != null}" th:text="|Category: ${filters.categoryId}|">Category</span>
+    <span class="badge" th:if="${filters.noRsvp}" th:text="'RSVP: No RSVP'">RSVP</span>
+    <span class="badge" th:if="${filters.rsvp != null}" th:text="|RSVP: ${filters.rsvp}|">RSVP</span>
+    <span class="badge" th:if="${filters.checkedIn != null}" th:text="${filters.checkedIn} ? 'Checked in' : 'Not checked in'">Check-in</span>
+  </p>
+  <p><a th:href="@{/admin/guests}">Clear filters / View all guests</a></p>
   <p class="notice" role="status" th:if="${param.imported}" th:text="|Imported ${param.imported[0]} guests.|">Guests imported.</p>
   <p class="notice" th:if="${guestError}" th:text="${guestError}" role="alert">Guest error</p>
   <details class="filter-disclosure" open>
@@ -25,9 +49,11 @@
   </form>
   </details>
   <p class="card" th:if="${page.empty}">No guests found.</p>
-  <table class="data-table mobile-card-list" th:unless="${page.empty}"><thead><tr><th>Name</th><th>WhatsApp</th><th>Category</th><th>Delivery</th><th>RSVP</th><th>Planned attendees</th><th>Actual attendees</th><th>Checked in at</th><th>Archived</th><th>Action</th></tr></thead>
+  <section class="card table-card" th:unless="${page.empty}">
+  <table class="data-table mobile-card-list"><thead><tr><th>Name</th><th>WhatsApp</th><th>Category</th><th>Delivery</th><th>RSVP</th><th>Planned attendees</th><th>Actual attendees</th><th>Checked in at</th><th>Archived</th><th>Action</th></tr></thead>
     <tbody><tr th:each="guest : ${page.content}" th:with="rsvp=${rsvps[guest.id]},checkIn=${checkIns[guest.id]}"><td data-label="Name"><a th:href="@{/admin/guests/{id}(id=${guest.id})}" th:text="${guest.displayName}">Guest</a></td><td data-label="WhatsApp" th:text="${guest.normalizedWhatsappNumber}">+62</td><td data-label="Category" th:text="${guest.category == null ? 'Uncategorized' : guest.category.displayName}">Uncategorized</td><td data-label="Delivery"><span class="badge" th:text="${guest.deliveryState}">UNSENT</span></td><td data-label="RSVP" th:text="${rsvp == null ? 'No RSVP' : rsvp.response}">No RSVP</td><td data-label="Planned attendees" th:text="${rsvp == null ? '—' : rsvp.plannedAttendeeCount}">—</td><td data-label="Actual attendees" th:text="${checkIn == null ? '—' : checkIn.actualAttendeeCount}">—</td><td data-label="Checked in at" th:text="${checkIn == null ? '—' : checkIn.checkedInAt}">—</td><td data-label="Archived" th:text="${guest.archived ? 'Yes' : 'No'}">No</td><td data-label="Action"><a th:if="${!guest.archived}" th:href="@{/admin/guests/{id}/rsvp(id=${guest.id})}">Edit RSVP</a></td></tr></tbody>
   </table>
+  </section>
   <p th:if="${page.hasPrevious()}"><a th:href="@{/admin/guests(page=${page.number - 1},query=${filters.query},delivery=${filters.delivery},archived=${filters.archived},categoryId=${filters.categoryId},rsvpStatus=${filters.rsvpStatus},checkedIn=${filters.checkedIn},sort=${sort})}">Previous</a></p>
   <p th:if="${page.hasNext()}"><a th:href="@{/admin/guests(page=${page.number + 1},query=${filters.query},delivery=${filters.delivery},archived=${filters.archived},categoryId=${filters.categoryId},rsvpStatus=${filters.rsvpStatus},checkedIn=${filters.checkedIn},sort=${sort})}">Next</a></p>
     </main>
