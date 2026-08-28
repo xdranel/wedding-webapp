@@ -33,7 +33,8 @@ class Element {
     }
     getAttribute(name) { return this.attributes.get(name); }
     removeAttribute(name) { this.attributes.delete(name); }
-    focus() { this.focused = true; }
+    focus(options) { this.focused = true; this.focusOptions = options; }
+    scrollIntoView(options) { this.scrollOptions = options; }
     showModal() { this.open = true; }
     close() {
         this.open = false;
@@ -45,6 +46,7 @@ function fixture(overrides = {}) {
     const elements = {
         '#invitation': new Element(),
         '#open-invitation': new Element(),
+        '#welcome': new Element(),
         '#background-audio': null,
         '#audio-toggle': null,
         '#gallery-dialog': null,
@@ -58,14 +60,15 @@ function fixture(overrides = {}) {
         ...overrides.elements
     };
     const documentElement = { classList: new Set() };
-    const document = {
+    const document = new Element();
+    Object.assign(document, {
         documentElement,
         querySelector: selector => elements[selector],
         querySelectorAll: selector => selector === '[data-gallery-index]' ? (overrides.thumbnails || []) : []
-    };
+    });
     const context = { document, Promise };
     vm.runInNewContext(script, context);
-    return { elements, documentElement };
+    return { elements, document, documentElement };
 }
 
 test('opening remains usable when audio playback is rejected', async () => {
@@ -86,7 +89,9 @@ test('opening remains usable when audio playback is rejected', async () => {
     assert.equal(playCalls, 1);
     assert.equal(elements['#invitation'].classList.has('is-open'), true);
     assert.equal(elements['#open-invitation'].getAttribute('aria-expanded'), 'true');
-    assert.equal(elements['#invitation'].focused, true);
+    assert.equal(elements['#invitation'].focused, undefined);
+    assert.equal(elements['#welcome'].scrollOptions.behavior, 'smooth');
+    assert.equal(elements['#welcome'].focusOptions.preventScroll, true);
     assert.equal(toggle.textContent, 'Play music');
     assert.equal(toggle.getAttribute('aria-pressed'), 'false');
     assert.equal(documentElement.classList.has('js'), true);
@@ -99,6 +104,24 @@ test('opening remains usable when audio playback is rejected', async () => {
         assert.equal(toggle.textContent, 'Play music');
         assert.equal(toggle.getAttribute('aria-pressed'), 'false');
     }
+});
+
+test('hidden page pauses playing audio without resuming it', () => {
+    const audio = new Element();
+    audio.paused = false;
+    let pauseCalls = 0;
+    audio.pause = () => { pauseCalls++; audio.paused = true; };
+    const toggle = new Element({ playLabel: 'Play music', pauseLabel: 'Pause music' });
+    const { document } = fixture({
+        elements: { '#background-audio': audio, '#audio-toggle': toggle }
+    });
+
+    document.hidden = true;
+    document.fire('visibilitychange');
+    document.hidden = false;
+    document.fire('visibilitychange');
+
+    assert.equal(pauseCalls, 1);
 });
 
 test('gallery loads on open, supports keys, and restores thumbnail focus', () => {
@@ -133,11 +156,29 @@ test('gallery loads on open, supports keys, and restores thumbnail focus', () =>
     assert.equal(dialog.open, true);
     assert.equal(close.focused, true);
 
+    next.fire('click');
+    assert.equal(image.getAttribute('src'), '/image/2');
+    previous.fire('click');
+    assert.equal(image.getAttribute('src'), '/image/1');
+
     dialog.fire('keydown', { key: 'ArrowRight' });
     assert.equal(image.getAttribute('src'), '/image/2');
     assert.equal(caption.hidden, true);
     dialog.fire('keydown', { key: 'ArrowLeft' });
     assert.equal(image.getAttribute('src'), '/image/1');
+
+    dialog.fire('pointerdown', {
+        pointerId: 1, clientX: 100, clientY: 0,
+        target: { closest: selector => selector === '.gallery-controls' ? close : null }
+    });
+    dialog.fire('pointerup', { pointerId: 1, clientX: 0, clientY: 0 });
+    assert.equal(image.getAttribute('src'), '/image/1');
+
+    dialog.fire('pointerdown', {
+        pointerId: 2, clientX: 100, clientY: 0, target: { closest: () => null }
+    });
+    dialog.fire('pointerup', { pointerId: 2, clientX: 0, clientY: 0 });
+    assert.equal(image.getAttribute('src'), '/image/2');
 
     const escape = dialog.fire('keydown', { key: 'Escape' });
     assert.equal(escape.defaultPrevented, true);
@@ -152,11 +193,12 @@ test('preview language change submits without browser storage', () => {
     const language = new Element();
     let storageRead = false;
     const elements = { '#preview-form': form, '#language': language };
-    const document = {
+    const document = new Element();
+    Object.assign(document, {
         documentElement: { classList: new Set() },
         querySelector: selector => elements[selector] || null,
         querySelectorAll: () => []
-    };
+    });
     const context = { document, Promise };
     Object.defineProperty(context, 'localStorage', {
         get() { storageRead = true; throw new Error('storage must not be used'); }

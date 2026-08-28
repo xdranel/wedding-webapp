@@ -27,10 +27,23 @@
 </header>
 <main class="guest-presentation preview-presentation">
     <section id="cover" class="cover" aria-labelledby="invitation-title"
-             th:classappend="${preview.partners.empty or #strings.isEmpty(preview.partners[0].photoPath)} ? 'cover-fallback' : 'cover-photo'">
-        <img th:if="${!preview.partners.empty and !#strings.isEmpty(preview.partners[0].photoPath)}"
+             th:classappend="${media.coverUrl == null and (preview.partners.empty or #strings.isEmpty(preview.partners[0].photoPath))} ? 'cover-fallback' : 'cover-photo'">
+        <img th:if="${media.coverUrl != null}" class="cover-image" th:src="${media.coverUrl}" alt=""
+             fetchpriority="high">
+        <img th:if="${media.coverUrl == null and !preview.partners.empty and !#strings.isEmpty(preview.partners[0].photoPath)}"
              class="cover-image" th:src="@{/media/partner/{id}(id=${preview.partners[0].id})}" alt=""
              fetchpriority="high">
+        <details class="language-switch">
+            <summary th:aria-label="${form.language == 'EN'} ? 'Active language' : 'Bahasa aktif'"
+                     th:text="${form.language}">ID</summary>
+            <div class="language-options"
+                 role="group" th:aria-label="${form.language == 'EN'} ? 'Invitation language' : 'Bahasa undangan'">
+                <a th:href="@{/admin/wedding/preview/render(salutation=${form.salutation},guestName=${form.guestName},language='ID')}"
+                   lang="id" th:aria-current="${form.language == 'ID'} ? 'page'">Indonesia</a>
+                <a th:href="@{/admin/wedding/preview/render(salutation=${form.salutation},guestName=${form.guestName},language='EN')}"
+                   lang="en" th:aria-current="${form.language == 'EN'} ? 'page'">English</a>
+            </div>
+        </details>
         <div class="cover-content">
             <p class="cover-kicker" th:text="${form.language == 'EN'} ? 'Wedding invitation' : 'Undangan pernikahan'">
                 Wedding invitation
@@ -62,7 +75,7 @@
                th:text="${form.language == 'EN'} ? 'Gallery' : 'Galeri'">Gallery</a>
         </nav>
 
-        <section th:if="${!#strings.isEmpty(preview.openingText)}"
+        <section id="welcome" tabindex="-1" th:if="${!#strings.isEmpty(preview.openingText)}"
                  class="invitation-section opening-section" aria-labelledby="opening-title">
             <p class="section-eyebrow" th:text="${form.language == 'EN'} ? 'Together with our families' : 'Bersama keluarga kami'">
                 Together with our families

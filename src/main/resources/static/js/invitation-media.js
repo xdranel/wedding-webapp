@@ -1,6 +1,7 @@
 (() => {
     const invitation = document.querySelector('#invitation');
     const open = document.querySelector('#open-invitation');
+    const welcome = document.querySelector('#welcome');
     const audio = document.querySelector('#background-audio');
     const audioToggle = document.querySelector('#audio-toggle');
     const reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
@@ -18,7 +19,10 @@
             invitation.classList.add('is-open');
             document.body?.classList.add('invitation-open');
             open.setAttribute('aria-expanded', 'true');
-            invitation.focus();
+            if (welcome) {
+                welcome.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
+                welcome.focus({ preventScroll: true });
+            }
             if (audio) playAudio();
         });
     }
@@ -39,6 +43,9 @@
         audio.addEventListener('ended', () => updateAudioLabel(false));
         audio.addEventListener('error', () => updateAudioLabel(false));
     }
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && audio && !audio.paused) audio.pause();
+    });
 
     const dialog = document.querySelector('#gallery-dialog');
     const image = document.querySelector('#gallery-image');
@@ -71,16 +78,14 @@
         next.addEventListener('click', () => show(current + 1));
         close.addEventListener('click', () => dialog.close());
         dialog.addEventListener('pointerdown', event => {
-            if (event.isPrimary === false) return;
+            if (event.isPrimary === false || event.target.closest('.gallery-controls')) return;
             pointerStart = { id: event.pointerId, x: event.clientX, y: event.clientY };
-            dialog.setPointerCapture?.(event.pointerId);
         });
         dialog.addEventListener('pointerup', event => {
             if (!pointerStart || event.pointerId !== pointerStart.id) return;
             const x = event.clientX - pointerStart.x;
             const y = event.clientY - pointerStart.y;
             pointerStart = undefined;
-            dialog.releasePointerCapture?.(event.pointerId);
             if (Math.abs(x) > 48 && Math.abs(x) > Math.abs(y)) show(current + (x < 0 ? 1 : -1));
         });
         dialog.addEventListener('pointercancel', () => pointerStart = undefined);

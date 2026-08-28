@@ -64,7 +64,7 @@ class PublicInvitationControllerTest {
 				closed_title_id = null, closed_title_en = null, closed_message_id = null, closed_message_en = null,
 				greetings_enabled = true, private_organizer_note_enabled = false,
 				calendar_downloads_enabled = false, time_zone = 'Asia/Jakarta',
-				accent_color = '#7A5C48', font_preset = 'CLASSIC'
+				accent_color = '#7A5C48', font_preset = 'CLASSIC', invitation_cover_path = null
 				where id = 1
 				""");
 		seedWeddingContent();
@@ -92,6 +92,31 @@ class PublicInvitationControllerTest {
 				.andExpect(content().string(containsString("PIN")))
 				.andExpect(content().string(not(containsString("QRCode"))))
 				.andExpect(content().string(not(containsString("/admin/"))));
+	}
+
+	@Test
+	void invitationCoverAndLanguageDisclosureUseTheRequiredFallbackOrder() throws Exception {
+		Guest guest = savedActiveGuest(MessageLanguage.ID);
+		publishWedding();
+		String invitationPath = path(signer.urlFor(guest));
+
+		jdbc.update("update wedding_settings set invitation_cover_path = 'cover/invitation.webp' where id = 1");
+		String dedicatedCover = page(invitationPath);
+		assertThat(dedicatedCover)
+				.contains("<img class=\"cover-image\" src=\"/media/wedding/cover\"", "<details class=\"language-switch\"",
+						"<summary aria-label=\"Bahasa aktif\">ID</summary>", "href=\"" + invitationPath + "?language=ID\"",
+						"href=\"" + invitationPath + "?language=EN\"", "aria-current=\"page\"",
+						"id=\"rsvp\" class=\"invitation-section rsvp rsvp-card\"")
+				.containsOnlyOnce("<details class=\"language-switch\"")
+				.containsOnlyOnce("aria-current=\"page\"");
+
+		jdbc.update("update wedding_settings set invitation_cover_path = null where id = 1");
+		assertThat(page(invitationPath)).contains("<img class=\"cover-image\" src=\"/media/partner/");
+
+		jdbc.update("update partner set photo_path = null where display_order = 1");
+		assertThat(page(invitationPath))
+				.contains("<section id=\"cover\" class=\"cover cover-fallback\"")
+				.doesNotContain("<img class=\"cover-image\"");
 	}
 
 	@Test

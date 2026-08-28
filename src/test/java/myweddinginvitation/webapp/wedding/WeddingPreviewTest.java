@@ -69,7 +69,8 @@ class WeddingPreviewTest {
 				update wedding_settings set couple_title = null, opening_text_id = null, opening_text_en = null,
 				closing_text_id = null, closing_text_en = null, accent_color = '#7A5C48', font_preset = 'CLASSIC',
 				calendar_downloads_enabled = false,
-				gallery_enabled = false, background_audio_enabled = false, background_audio_path = null
+				gallery_enabled = false, background_audio_enabled = false, background_audio_path = null,
+				invitation_cover_path = null
 				where id = 1
 				""");
 		accounts.deleteAll();
@@ -118,6 +119,28 @@ class WeddingPreviewTest {
 		assertThat(jdbc.queryForMap("""
 				select couple_title, opening_text_id, closing_text_id, accent_color, font_preset from wedding_settings where id = 1
 				""")).isEqualTo(settingsBefore);
+	}
+
+	@Test
+	void previewCoverAndLanguageDisclosureUseTheRequiredFallbackOrder() throws Exception {
+		seedCompleteIndonesianContentWithEnglishMissing();
+		jdbc.update("update wedding_settings set invitation_cover_path = 'cover/invitation.webp' where id = 1");
+
+		String dedicatedCover = preview("EN");
+		assertThat(dedicatedCover)
+				.contains("<img class=\"cover-image\" src=\"/media/wedding/cover\"", "<details class=\"language-switch\"",
+						"<summary aria-label=\"Active language\">EN</summary>", "language=ID", "language=EN",
+						"aria-current=\"page\"")
+				.containsOnlyOnce("<details class=\"language-switch\"")
+				.containsOnlyOnce("aria-current=\"page\"");
+
+		jdbc.update("update wedding_settings set invitation_cover_path = null where id = 1");
+		assertThat(preview("EN")).contains("<img class=\"cover-image\" src=\"/media/partner/");
+
+		jdbc.update("update partner set photo_path = null where display_order = 1");
+		assertThat(preview("EN"))
+				.contains("<section id=\"cover\" class=\"cover cover-fallback\"")
+				.doesNotContain("<img class=\"cover-image\"");
 	}
 
 	@Test

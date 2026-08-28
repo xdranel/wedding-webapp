@@ -293,14 +293,17 @@ class PresentationStructureTest {
 	@Test
 	void invitationProvidesCinematicCoverAndProgressiveNavigation() throws IOException {
 		String html = resource("templates/guest/invitation.html");
-		assertThat(html).contains("guest-navigation", "cover-content", "section-heading", "noscript");
-		assertThat(html).contains("id=\"couple\"", "id=\"events\"", "id=\"rsvp\"");
+		assertThat(html).contains("guest-navigation", "cover-content", "section-heading", "noscript",
+				"<details class=\"language-switch\"", "id=\"welcome\" tabindex=\"-1\"");
+		assertThat(html).contains("id=\"couple\"", "id=\"events\"",
+				"id=\"rsvp\" class=\"invitation-section rsvp rsvp-card\"");
 	}
 
 	@Test
 	void invitationCssProvidesFallbackAndReducedMotion() throws IOException {
 		String css = resource("static/css/invitation.css");
-		assertThat(css).contains(".cover-fallback", "prefers-reduced-motion", ":focus-visible");
+		assertThat(css).contains(".cover-fallback", "prefers-reduced-motion", ":focus-visible",
+				".rsvp-card {\n    display: block;\n    margin-inline: auto;");
 	}
 
 	@Test
@@ -337,7 +340,10 @@ class PresentationStructureTest {
 				"box-shadow: 0 0 0 5px #111 !important",
 				"touch-action: pan-y", ".action-link", "min-height: 2.75rem");
 		assertThat(js).contains("prefers-reduced-motion", "pointerdown", "pointerup",
-				"setPointerCapture", "releasePointerCapture");
+				"document.addEventListener('visibilitychange'",
+				"if (document.hidden && audio && !audio.paused) audio.pause()",
+				"welcome.focus({ preventScroll: true })", "event.target.closest('.gallery-controls')")
+				.doesNotContain("dialog.setPointerCapture", "dialog.releasePointerCapture");
 	}
 
 	@Test

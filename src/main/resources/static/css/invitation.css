@@ -160,6 +160,7 @@ img {
     text-shadow: 0 2px 1rem rgb(0 0 0 / 55%);
 }
 
+.cover-photo .language-switch summary,
 .cover-photo .language-switch a {
     background: rgb(12 20 16 / 82%);
     color: white;
@@ -200,21 +201,53 @@ img {
 }
 
 .language-switch {
-    display: flex;
-    gap: .35rem;
     position: absolute;
     right: 1rem;
     top: 1rem;
+    z-index: 1;
 }
 
-.language-switch a {
+.language-switch summary {
     align-items: center;
+    background: var(--paper);
     border: 1px solid currentColor;
     border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    height: 2.75rem;
+    justify-content: center;
+    list-style: none;
+    width: 2.75rem;
+}
+
+.language-switch summary::-webkit-details-marker {
+    display: none;
+}
+
+.language-options {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: .75rem;
+    box-shadow: var(--shadow);
+    display: grid;
+    margin-top: .35rem;
+    min-width: 8rem;
+    overflow: hidden;
+    position: absolute;
+    right: 0;
+}
+
+.language-options a {
+    align-items: center;
     display: inline-flex;
     min-height: 2.75rem;
     padding: .45rem .75rem;
     text-decoration: none;
+}
+
+.language-options a[aria-current="page"] {
+    font-weight: 700;
+    text-decoration: underline;
 }
 
 .noscript-notice {
@@ -502,6 +535,11 @@ img {
     box-shadow: var(--shadow);
     margin-block: clamp(4.5rem, 10vw, 8rem);
     max-width: 44rem;
+}
+
+.rsvp-card {
+    display: block;
+    margin-inline: auto;
 }
 
 .rsvp-current,
