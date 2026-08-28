@@ -1,6 +1,6 @@
 # Presentation Refinement Design
 
-Date: 2026-08-28  
+Date: 2026-08-28
 Status: Approved design; implementation not started
 
 ## Purpose
@@ -198,4 +198,3 @@ available.
 - Automatic audio resume.
 - New frontend dependencies.
 - Changes to RSVP, invitation signing, QR, or check-in business rules.
-
