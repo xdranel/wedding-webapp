@@ -129,10 +129,11 @@ class WeddingPreviewTest {
 		String dedicatedCover = preview("EN");
 		assertThat(dedicatedCover)
 				.contains("<img class=\"cover-image\" src=\"/media/wedding/cover\"", "<details class=\"language-switch\"",
-						"<summary aria-label=\"Active language\">EN</summary>", "language=ID", "language=EN",
+						"<summary aria-label=\"Active language: EN\">EN</summary>", "language=ID", "language=EN",
 						"aria-current=\"page\"")
 				.containsOnlyOnce("<details class=\"language-switch\"")
 				.containsOnlyOnce("aria-current=\"page\"");
+		assertThat(preview("ID")).contains("<summary aria-label=\"Bahasa aktif: ID\">ID</summary>");
 
 		jdbc.update("update wedding_settings set invitation_cover_path = null where id = 1");
 		assertThat(preview("EN")).contains("<img class=\"cover-image\" src=\"/media/partner/");

@@ -104,11 +104,14 @@ class PublicInvitationControllerTest {
 		String dedicatedCover = page(invitationPath);
 		assertThat(dedicatedCover)
 				.contains("<img class=\"cover-image\" src=\"/media/wedding/cover\"", "<details class=\"language-switch\"",
-						"<summary aria-label=\"Bahasa aktif\">ID</summary>", "href=\"" + invitationPath + "?language=ID\"",
+						"<summary aria-label=\"Bahasa aktif: ID\">ID</summary>", "href=\"" + invitationPath + "?language=ID\"",
 						"href=\"" + invitationPath + "?language=EN\"", "aria-current=\"page\"",
 						"id=\"rsvp\" class=\"invitation-section rsvp rsvp-card\"")
 				.containsOnlyOnce("<details class=\"language-switch\"")
 				.containsOnlyOnce("aria-current=\"page\"");
+		String english = mockMvc.perform(get(invitationPath).param("language", "EN"))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		assertThat(english).contains("<summary aria-label=\"Active language: EN\">EN</summary>");
 
 		jdbc.update("update wedding_settings set invitation_cover_path = null where id = 1");
 		assertThat(page(invitationPath)).contains("<img class=\"cover-image\" src=\"/media/partner/");

@@ -19,7 +19,7 @@
              class="cover-image" th:src="@{/media/partner/{id}(id=${preview.partners[0].id})}" alt=""
              fetchpriority="high">
         <details class="language-switch">
-            <summary th:aria-label="${language == 'EN'} ? 'Active language' : 'Bahasa aktif'"
+            <summary th:aria-label="${(language == 'EN' ? 'Active language: ' : 'Bahasa aktif: ') + language}"
                      th:text="${language}">ID</summary>
             <div class="language-options"
                  role="group" th:aria-label="${language == 'EN'} ? 'Invitation language' : 'Bahasa undangan'">
