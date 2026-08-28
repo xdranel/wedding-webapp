@@ -17,18 +17,23 @@ public class WeddingContentController {
     private final WeddingContentService weddingContent;
     private final WeddingMediaService weddingMedia;
     private final CalendarService calendars;
+    private final EventStatusService eventStatus;
 
     public WeddingContentController(WeddingContentService weddingContent, WeddingMediaService weddingMedia,
-                                    CalendarService calendars) {
+                                    CalendarService calendars, EventStatusService eventStatus) {
         this.weddingContent = weddingContent;
         this.weddingMedia = weddingMedia;
         this.calendars = calendars;
+        this.eventStatus = eventStatus;
     }
 
     @GetMapping("/admin/wedding")
     String overview(Model model) {
         model.addAttribute("overview", weddingContent.overview());
         model.addAttribute("publication", weddingContent.checkPublication());
+        EventStatusView status = eventStatus.view();
+        model.addAttribute("status", status);
+        model.addAttribute("form", EventStatusAdminController.messageForm(status));
         return "admin/wedding/overview";
     }
 
@@ -54,7 +59,7 @@ public class WeddingContentController {
             model.addAttribute("fontPresets", FontPreset.values());
             return "admin/wedding/settings";
         }
-        return "redirect:/admin/wedding?settingsSaved";
+        return "redirect:/admin/wedding/settings?settingsSaved";
     }
 
     @PostMapping("/admin/wedding/publish")

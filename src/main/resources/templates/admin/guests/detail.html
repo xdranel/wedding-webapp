@@ -10,6 +10,7 @@
     <main id="main-content" class="page-content">
   <p><a th:href="@{/admin/guests}">Back to guests</a></p>
   <p class="notice" th:if="${guestError}" th:text="${guestError}" role="alert">Guest error</p>
+  <p th:if="${eventStatusRequired}"><a th:href="@{/admin/wedding}">Review Publication &amp; Event Status</a></p>
   <dl class="card">
     <dt>WhatsApp number</dt><dd th:text="${guest.normalizedWhatsappNumber}">+62</dd>
     <dt>Delivery</dt><dd th:text="${guest.deliveryState}">UNSENT</dd>

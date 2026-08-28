@@ -34,7 +34,7 @@ public class EventStatusAdminController {
 		if (!result.hasErrors()) {
 			try {
 				status.saveMessages(form);
-				return "redirect:/admin/wedding/event-status?messagesSaved";
+				return "redirect:/admin/wedding?messagesSaved";
 			} catch (OptimisticLockingFailureException exception) {
 				current = status.view();
 				rejectConflict(result, form, current);
@@ -73,7 +73,7 @@ public class EventStatusAdminController {
 		if (!result.hasErrors()) {
 			try {
 				status.change(closed, form.getVersion(), form.isConfirmed(), principal == null ? null : principal.getName());
-				return "redirect:/admin/wedding/event-status?statusChanged";
+				return "redirect:/admin/wedding?statusChanged";
 			} catch (OptimisticLockingFailureException exception) {
 				current = status.view();
 				rejectConflict(result, form, current);
@@ -105,7 +105,7 @@ public class EventStatusAdminController {
 		result.reject("eventStatus.conflict", "Wedding settings changed by another administrator. Reload and try again.");
 	}
 
-	private static EventStatusMessageForm messageForm(EventStatusView status) {
+	static EventStatusMessageForm messageForm(EventStatusView status) {
 		EventStatusMessageForm form = new EventStatusMessageForm();
 		form.setVersion(status.version());
 		form.setTitleId(status.titleId());
@@ -115,7 +115,7 @@ public class EventStatusAdminController {
 		return form;
 	}
 
-	private static EventStatusChangeForm changeForm(EventStatusView status) {
+	static EventStatusChangeForm changeForm(EventStatusView status) {
 		EventStatusChangeForm form = new EventStatusChangeForm();
 		form.setVersion(status.version());
 		return form;

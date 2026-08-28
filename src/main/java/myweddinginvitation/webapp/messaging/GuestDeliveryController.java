@@ -29,6 +29,9 @@ public class GuestDeliveryController {
 			return "redirect:" + delivery.whatsappUri(id, language);
 		} catch (IllegalStateException exception) {
 			redirectAttributes.addFlashAttribute("guestError", exception.getMessage());
+			if (exception.getMessage() != null && exception.getMessage().startsWith("Initial delivery requires")) {
+				redirectAttributes.addFlashAttribute("eventStatusRequired", true);
+			}
 			return detail(id);
 		}
 	}

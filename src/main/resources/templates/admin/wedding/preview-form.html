@@ -16,6 +16,7 @@
             <h1>Invitation preview</h1>
         </header>
         <main id="main-content" class="page-content">
+    <p><a th:href="@{/admin/wedding}">Back to Wedding Admin</a></p>
     <form class="card form-grid" method="get" th:action="@{/admin/wedding/preview/render}" th:object="${form}">
         <label for="salutation">Salutation</label>
         <input id="salutation" th:field="*{salutation}" required maxlength="120"
@@ -33,6 +34,7 @@
         </select>
         <p id="language-error" th:if="${#fields.hasErrors('language')}" th:errors="*{language}">Language error</p>
         <button class="button" type="submit">Render preview</button>
+        <button class="button button-secondary" type="submit" formtarget="_blank">Open in new tab</button>
     </form>
         </main>
     </div>

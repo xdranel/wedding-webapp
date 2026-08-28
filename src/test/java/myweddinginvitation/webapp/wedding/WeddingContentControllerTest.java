@@ -51,6 +51,9 @@ class WeddingContentControllerTest {
 	private WeddingContentService weddingContent;
 
 	@Autowired
+	private EventStatusService eventStatus;
+
+	@Autowired
 	private StoryEntryRepository stories;
 
 	@Autowired
@@ -87,7 +90,7 @@ class WeddingContentControllerTest {
 				.param("eventClosed", "true")
 				.param("_greetingsEnabled", "on")
 				.param("privateOrganizerNoteEnabled", "true"))
-				.andExpect(redirectedUrl("/admin/wedding?settingsSaved"));
+				.andExpect(redirectedUrl("/admin/wedding/settings?settingsSaved"));
 
 		WeddingSettings saved = settings.getSingleton().orElseThrow();
 		assertThat(saved.getCoupleTitle()).isEqualTo("Rama & Shinta");
@@ -118,6 +121,7 @@ class WeddingContentControllerTest {
 		mockMvc.perform(get("/admin/wedding").session(adminSession))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/wedding/overview"))
+				.andExpect(model().attributeExists("status", "form"))
 				.andExpect(content().string(containsString("/admin/wedding/settings")))
 				.andExpect(content().string(containsString("/admin/wedding/partners")))
 				.andExpect(content().string(containsString("/admin/wedding/events")))
@@ -127,17 +131,46 @@ class WeddingContentControllerTest {
 				.andExpect(content().string(containsString("Partner 1 needs attention")))
 				.andExpect(content().string(containsString("Ceremony needs attention")))
 				.andExpect(content().string(containsString("Story not included (optional)")))
-				.andExpect(content().string(containsString("Partner 1: full name is required")));
+				.andExpect(content().string(containsString("Partner 1: full name is required")))
+				.andExpect(content().string(containsString("Event is open")))
+				.andExpect(content().string(containsString("/admin/wedding/event-status/close")))
+				.andExpect(content().string(containsString("Completed-event messages")));
+
+		eventStatus.change(true, eventStatus.view().version(), true, "admin");
+		mockMvc.perform(get("/admin/wedding").session(adminSession))
+				.andExpect(content().string(containsString("Event is closed")))
+				.andExpect(content().string(containsString("/admin/wedding/event-status/reopen")));
 	}
 
 	@Test
-	void weddingOverviewAndSettingsUseTheSettingsNavigationState() throws Exception {
-		for (String path : new String[] {"/admin/wedding", "/admin/wedding/settings"}) {
-			String page = mockMvc.perform(get(path).session(adminSession))
-					.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-			assertThat(page).containsOnlyOnce("aria-current=\"page\"")
-					.containsOnlyOnce("<a href=\"/admin/wedding/settings\" aria-current=\"page\">Settings</a>");
-		}
+	void weddingOverviewAndSettingsUseTheirExactNavigationStates() throws Exception {
+		String overview = mockMvc.perform(get("/admin/wedding").session(adminSession))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		assertThat(overview).containsOnlyOnce("aria-current=\"page\"")
+				.containsOnlyOnce("<a href=\"/admin/wedding\" aria-current=\"page\">Publication &amp; Event Status</a>");
+
+		String settingsPage = mockMvc.perform(get("/admin/wedding/settings").session(adminSession)
+				.param("settingsSaved", ""))
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		assertThat(settingsPage).containsOnlyOnce("aria-current=\"page\"")
+				.containsOnlyOnce("<a href=\"/admin/wedding/settings\" aria-current=\"page\">Settings</a>")
+				.contains("Settings saved.");
+	}
+
+	@Test
+	void previewFormAndRenderOfferWeddingAdminAndNewTabActions() throws Exception {
+		mockMvc.perform(get("/admin/wedding/preview").session(adminSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Back to Wedding Admin")))
+				.andExpect(content().string(containsString("Open in new tab")))
+				.andExpect(content().string(containsString("formtarget=\"_blank\"")));
+
+		mockMvc.perform(get("/admin/wedding/preview/render").session(adminSession)
+				.param("salutation", "Ibu").param("guestName", "Sari").param("language", "ID"))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Back to Wedding Admin")))
+				.andExpect(content().string(containsString("Open in new tab")))
+				.andExpect(content().string(containsString("formtarget=\"_blank\"")));
 	}
 
 	@Test
@@ -257,6 +290,8 @@ class WeddingContentControllerTest {
 				update wedding_settings set publication_state = 'DRAFT', couple_title = null,
 				opening_text_id = null, opening_text_en = null, closing_text_id = null,
 				closing_text_en = null, time_zone = 'Asia/Jakarta', event_closed = false,
+				event_status_changed_at = null, event_status_changed_by = null,
+				closed_title_id = null, closed_title_en = null, closed_message_id = null, closed_message_en = null,
 				accent_color = '#7A5C48', font_preset = 'CLASSIC'
 				where id = 1
 				""");

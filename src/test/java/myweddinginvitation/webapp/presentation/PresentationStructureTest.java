@@ -73,7 +73,7 @@ class PresentationStructureTest {
 		String navigation = resource("templates/fragments/admin-navigation.html");
 		for (String[] page : new String[][] {
 				{"admin/home.html", "overview"},
-				{"admin/wedding/overview.html", "wedding-settings"},
+				{"admin/wedding/overview.html", "wedding-publication"},
 				{"admin/wedding/settings.html", "wedding-settings"},
 				{"admin/wedding/event-status.html", "wedding-settings"},
 				{"admin/wedding/event-status-confirm.html", "wedding-settings"},
@@ -319,6 +319,14 @@ class PresentationStructureTest {
 				.doesNotContain("<h2 th:id=\"${'event-' + event.type}\"", "th:srcset=", "sizes=\"");
 		assertThat(preview).contains("<h3 th:id=\"${'event-' + event.type}\"")
 				.doesNotContain("<h2 th:id=\"${'event-' + event.type}\"", "th:srcset=", "sizes=\"");
+	}
+
+	@Test
+	void previewPagesKeepAdminAndNewTabActions() throws IOException {
+		for (String page : new String[] {"preview-form.html", "preview.html"}) {
+			assertThat(resource("templates/admin/wedding/" + page)).as(page)
+					.contains("Back to Wedding Admin", "Open in new tab", "formtarget=\"_blank\"");
+		}
 	}
 
 	@Test

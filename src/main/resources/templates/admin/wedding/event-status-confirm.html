@@ -28,7 +28,7 @@
         <p id="confirmed-error" th:if="${#fields.hasErrors('confirmed')}" th:errors="*{confirmed}">Confirmation is required</p>
 		<button class="button" type="submit" th:text="${status.closed} ? 'Reopen event' : 'Close event'">Change status</button>
     </form>
-    <p><a th:href="@{/admin/wedding/event-status}">Back to event status</a></p>
+    <p><a th:href="@{/admin/wedding}">Back to Wedding Admin</a></p>
     </section>
         </main>
     </div>

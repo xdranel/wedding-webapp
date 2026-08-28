@@ -10,6 +10,7 @@
 </head>
 <body class="preview-page" th:attr="data-font=${preview.fontPreset}" th:style="|--accent: ${accentColor};|">
 <header class="preview-controls">
+    <a th:href="@{/admin/wedding}">Back to Wedding Admin</a>
     <form id="preview-form" method="get" th:action="@{/admin/wedding/preview/render}" th:object="${form}">
         <label for="salutation">Salutation</label>
         <input id="salutation" th:field="*{salutation}" required maxlength="120">
@@ -21,6 +22,7 @@
             <option value="EN">EN</option>
         </select>
         <button type="submit">Update preview</button>
+        <button type="submit" formtarget="_blank">Open in new tab</button>
     </form>
 </header>
 <main class="guest-presentation preview-presentation">

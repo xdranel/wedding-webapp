@@ -15,6 +15,7 @@
             <h1>Wedding settings</h1>
         </header>
         <main id="main-content" class="page-content">
+    <p class="notice" role="status" th:if="${param.settingsSaved}">Settings saved.</p>
     <p class="notice"><a th:href="@{/admin/wedding/event-status}">Review Event Status</a> before closing or reopening public access.</p>
     <form class="card form-grid" method="post" th:action="@{/admin/wedding/settings}" th:object="${form}">
         <p class="notice" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert">Settings error</p>

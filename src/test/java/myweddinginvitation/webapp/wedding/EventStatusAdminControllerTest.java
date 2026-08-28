@@ -73,16 +73,17 @@ class EventStatusAdminControllerTest {
 
 		mockMvc.perform(post("/admin/wedding/event-status/messages").session(adminSession).with(csrf())
 				.param("version", Long.toString(version)).param("titleId", "  Acara selesai  "))
-				.andExpect(redirectedUrl("/admin/wedding/event-status?messagesSaved"));
+				.andExpect(redirectedUrl("/admin/wedding?messagesSaved"));
 		mockMvc.perform(get("/admin/wedding/event-status/close").session(adminSession))
 				.andExpect(status().isOk())
 				.andExpect(view().name("admin/wedding/event-status-confirm"))
 				.andExpect(content().string(containsString("Block new invitations")))
-				.andExpect(content().string(containsString("name=\"confirmed\"")));
+				.andExpect(content().string(containsString("name=\"confirmed\"")))
+				.andExpect(content().string(containsString("Back to Wedding Admin")));
 
 		mockMvc.perform(post("/admin/wedding/event-status/close").session(adminSession).with(csrf())
 				.param("version", Long.toString(service.view().version())).param("confirmed", "true"))
-				.andExpect(redirectedUrl("/admin/wedding/event-status?statusChanged"));
+				.andExpect(redirectedUrl("/admin/wedding?statusChanged"));
 	}
 
 	@Test

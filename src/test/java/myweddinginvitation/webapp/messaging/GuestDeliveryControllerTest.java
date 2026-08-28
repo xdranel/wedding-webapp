@@ -80,7 +80,7 @@ class GuestDeliveryControllerTest {
 		jdbc.update("delete from guest");
 		jdbc.update("""
 				update wedding_settings set publication_state = 'PUBLISHED',
-				couple_title = 'Rama & Shinta', default_phone_country = 'ID' where id = 1
+				couple_title = 'Rama & Shinta', default_phone_country = 'ID', event_closed = false where id = 1
 				""");
 		jdbc.update("""
 				update message_template
@@ -185,6 +185,32 @@ class GuestDeliveryControllerTest {
 					.param("language", "ID").param("version", Long.toString(guest.getVersion())))
 					.andExpect(status().isForbidden());
 		}
+	}
+
+	@Test
+	void blockedInitialDeliveryPointsToPublicationAndEventStatus() throws Exception {
+		Guest guest = savedGuest();
+		jdbc.update("update wedding_settings set publication_state = 'DRAFT' where id = 1");
+
+		mockMvc.perform(post("/admin/guests/{id}/open-whatsapp", guest.getId())
+				.session(adminSession).with(csrf()).param("language", "ID"))
+				.andExpect(redirectedUrl("/admin/guests/" + guest.getId()));
+		mockMvc.perform(get("/admin/guests/{id}", guest.getId()).session(adminSession))
+				.andExpect(content().string(containsString("Initial delivery requires a published wedding.")))
+				.andExpect(content().string(containsString("Review Publication &amp; Event Status")));
+	}
+
+	@Test
+	void archivedDeliveryErrorDoesNotPointToEventStatus() throws Exception {
+		Guest guest = savedGuest();
+		guestService.archive(guest.getId(), guest.getVersion());
+
+		mockMvc.perform(post("/admin/guests/{id}/open-whatsapp", guest.getId())
+				.session(adminSession).with(csrf()).param("language", "ID"))
+				.andExpect(redirectedUrl("/admin/guests/" + guest.getId()));
+		mockMvc.perform(get("/admin/guests/{id}", guest.getId()).session(adminSession))
+				.andExpect(content().string(containsString("Delivery is disabled for archived guests.")))
+				.andExpect(content().string(not(containsString("Review Publication &amp; Event Status"))));
 	}
 
 	private Guest savedGuest() {

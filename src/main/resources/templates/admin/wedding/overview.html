@@ -3,22 +3,37 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Wedding content</title>
+    <title>Publication &amp; Event Status</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <div class="app-shell">
-    <nav th:replace="~{fragments/admin-navigation :: sidebar('wedding-settings')}"></nav>
+    <nav th:replace="~{fragments/admin-navigation :: sidebar('wedding-publication')}"></nav>
     <div>
         <header class="app-header">
-            <h1>Wedding content</h1>
+            <h1>Publication &amp; Event Status</h1>
         </header>
         <main id="main-content" class="page-content">
-    <p class="badge" role="status" th:text="${overview.publicationState}">DRAFT</p>
-    <p class="notice" role="status" th:if="${param.settingsSaved}">Settings saved.</p>
     <p class="notice" role="alert" th:if="${publicationConflict}" th:text="${publicationConflict}">Publication conflict</p>
     <p class="notice" role="status" th:if="${param.eventsSaved}">Event saved.</p>
+    <p class="notice" role="status" th:if="${param.statusChanged}">Event status updated.</p>
+    <p class="notice" role="status" th:if="${param.messagesSaved}">Completed-event messages saved.</p>
+    <section class="card">
+        <h2>Publication</h2>
+        <p class="badge" role="status" th:text="${overview.publicationState}">DRAFT</p>
+        <form th:if="${overview.publicationState.name() == 'DRAFT'}" method="post" th:action="@{/admin/wedding/publish}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="version" th:value="${overview.version}">
+            <button class="button" type="submit">Publish</button>
+        </form>
+        <form th:if="${overview.publicationState.name() == 'PUBLISHED'}" method="post"
+              th:action="@{/admin/wedding/return-to-draft}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="version" th:value="${overview.version}">
+            <button class="button" type="submit">Return to draft</button>
+        </form>
+    </section>
     <section class="card">
         <h2>Setup checklist</h2>
         <ul>
@@ -53,6 +68,30 @@
             <li th:each="warning : ${overview.translationWarnings}" th:text="${warning}">Warning</li>
         </ul>
     </section>
+    <section class="card">
+        <h2>Event status</h2>
+        <p class="badge" th:if="${status.closed}">Event is closed</p>
+        <p class="badge" th:unless="${status.closed}">Event is open</p>
+        <p th:if="${status.changedAt != null}">Last changed by <span th:text="${status.changedBy}">administrator</span>.</p>
+        <p th:unless="${status.closed}"><a class="button" th:href="@{/admin/wedding/event-status/close}">Close event</a></p>
+        <p th:if="${status.closed}"><a class="button" th:href="@{/admin/wedding/event-status/reopen}">Reopen event</a></p>
+    </section>
+    <section class="card">
+        <h2>Completed-event messages</h2>
+        <form class="form-grid" method="post" th:action="@{/admin/wedding/event-status/messages}" th:object="${form}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" th:field="*{version}">
+            <label for="closed-title-id">Title (Indonesian)</label>
+            <input id="closed-title-id" th:field="*{titleId}" maxlength="160">
+            <label for="closed-title-en">Title (English)</label>
+            <input id="closed-title-en" th:field="*{titleEn}" maxlength="160">
+            <label for="closed-message-id">Message (Indonesian)</label>
+            <textarea id="closed-message-id" th:field="*{messageId}" maxlength="1000"></textarea>
+            <label for="closed-message-en">Message (English)</label>
+            <textarea id="closed-message-en" th:field="*{messageEn}" maxlength="1000"></textarea>
+            <button class="button" type="submit">Save messages</button>
+        </form>
+    </section>
     <nav class="card" aria-label="Wedding content sections">
         <a th:href="@{/admin/wedding/settings}">General settings</a>
         <a th:href="@{/admin/wedding/partners}">Partners</a>
@@ -61,17 +100,6 @@
 		<a th:href="@{/admin/wedding/media}">Media</a>
         <a th:href="@{/admin/wedding/preview}">Preview</a>
     </nav>
-    <form th:if="${overview.publicationState.name() == 'DRAFT'}" method="post" th:action="@{/admin/wedding/publish}">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <input type="hidden" name="version" th:value="${overview.version}">
-        <button class="button" type="submit">Publish</button>
-    </form>
-    <form th:if="${overview.publicationState.name() == 'PUBLISHED'}" method="post"
-          th:action="@{/admin/wedding/return-to-draft}">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <input type="hidden" name="version" th:value="${overview.version}">
-        <button class="button" type="submit">Return to draft</button>
-    </form>
         </main>
     </div>
 </div>
