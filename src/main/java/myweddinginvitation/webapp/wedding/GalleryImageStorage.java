@@ -33,6 +33,7 @@ public class GalleryImageStorage {
     private static final int THUMBNAIL_MAX_SIDE = 480;
     private final Path mediaDirectory;
     private final Path galleryDirectory;
+    private final Path coverDirectory;
     private final BiConsumer<BufferedImage, Path> webpWriter;
 
     @Autowired
@@ -47,30 +48,43 @@ public class GalleryImageStorage {
     GalleryImageStorage(Path mediaDirectory, BiConsumer<BufferedImage, Path> webpWriter) {
         this.mediaDirectory = mediaDirectory.toAbsolutePath().normalize();
         this.galleryDirectory = this.mediaDirectory.resolve("gallery").normalize();
+        this.coverDirectory = this.mediaDirectory.resolve("cover").normalize();
         this.webpWriter = webpWriter;
     }
 
     public StoredGalleryImage store(MultipartFile file) {
+        return store(file, galleryDirectory, true);
+    }
+
+    public String storeCover(MultipartFile file) {
+        return store(file, coverDirectory, false).mainPath();
+    }
+
+    private StoredGalleryImage store(MultipartFile file, Path directory, boolean thumbnailRequired) {
         if (file == null || file.isEmpty() || file.getSize() > MAX_SIZE)
             throw new IllegalArgumentException("Image must be at most 10 MiB");
 
         String name = UUID.randomUUID().toString();
-        Path main = galleryDirectory.resolve(name + ".webp");
-        Path thumbnail = galleryDirectory.resolve(name + "-thumbnail.webp");
+        Path main = directory.resolve(name + ".webp");
+        Path thumbnail = thumbnailRequired ? directory.resolve(name + "-thumbnail.webp") : null;
         Path mainTemporary = null;
         Path thumbnailTemporary = null;
         try {
-            Files.createDirectories(galleryDirectory);
+            Files.createDirectories(directory);
             BufferedImage source = decode(file);
-            mainTemporary = Files.createTempFile(galleryDirectory, "upload-", ".webp");
+            mainTemporary = Files.createTempFile(directory, "upload-", ".webp");
             webpWriter.accept(resize(source, MAIN_MAX_SIDE), mainTemporary);
-            thumbnailTemporary = Files.createTempFile(galleryDirectory, "upload-", ".webp");
-            webpWriter.accept(resize(source, THUMBNAIL_MAX_SIDE), thumbnailTemporary);
+            if (thumbnailRequired) {
+                thumbnailTemporary = Files.createTempFile(directory, "upload-", ".webp");
+                webpWriter.accept(resize(source, THUMBNAIL_MAX_SIDE), thumbnailTemporary);
+            }
             move(mainTemporary, main);
             mainTemporary = null;
-            move(thumbnailTemporary, thumbnail);
-            thumbnailTemporary = null;
-            return new StoredGalleryImage(relative(main), relative(thumbnail));
+            if (thumbnailRequired) {
+                move(thumbnailTemporary, thumbnail);
+                thumbnailTemporary = null;
+            }
+            return new StoredGalleryImage(relative(main), thumbnailRequired ? relative(thumbnail) : null);
         } catch (IOException | RuntimeException exception) {
             deletePath(mainTemporary);
             deletePath(thumbnailTemporary);
@@ -82,9 +96,17 @@ public class GalleryImageStorage {
     }
 
     public Path resolve(String relativePath) {
-        if (relativePath == null || relativePath.isBlank()) throw new IllegalArgumentException("Invalid gallery image path");
+        return resolve(relativePath, galleryDirectory, "Invalid gallery image path");
+    }
+
+    public Path resolveCover(String relativePath) {
+        return resolve(relativePath, coverDirectory, "Invalid invitation cover path");
+    }
+
+    private Path resolve(String relativePath, Path directory, String message) {
+        if (relativePath == null || relativePath.isBlank()) throw new IllegalArgumentException(message);
         Path path = mediaDirectory.resolve(relativePath).normalize();
-        if (!path.startsWith(galleryDirectory)) throw new IllegalArgumentException("Invalid gallery image path");
+        if (!path.startsWith(directory)) throw new IllegalArgumentException(message);
         return path;
     }
 
@@ -99,6 +121,19 @@ public class GalleryImageStorage {
             delete(image);
         } catch (RuntimeException exception) {
             logger.warn("Could not delete obsolete gallery image {}", image, exception);
+        }
+    }
+
+    public void deleteCover(String relativePath) {
+        if (relativePath == null || relativePath.isBlank()) return;
+        deletePath(resolveCover(relativePath));
+    }
+
+    public void deleteCoverAfterCommit(String relativePath) {
+        try {
+            deleteCover(relativePath);
+        } catch (RuntimeException exception) {
+            logger.warn("Could not delete obsolete invitation cover {}", relativePath, exception);
         }
     }
 

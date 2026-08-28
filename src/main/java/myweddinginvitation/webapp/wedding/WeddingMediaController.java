@@ -52,6 +52,14 @@ public class WeddingMediaController {
 		return media(() -> audioStorage.resolve(wedding.getBackgroundAudioPath()), MP3);
 	}
 
+	@GetMapping("/media/wedding/cover")
+	ResponseEntity<FileSystemResource> cover() {
+		WeddingSettings wedding = settings.getSingleton().orElse(null);
+		if (wedding == null || wedding.getInvitationCoverPath() == null
+				|| wedding.getInvitationCoverPath().isBlank()) return notFound();
+		return media(() -> galleryStorage.resolveCover(wedding.getInvitationCoverPath()), WEBP);
+	}
+
 	@GetMapping("/media/partner/{id}")
 	ResponseEntity<FileSystemResource> partner(@PathVariable String id) {
 		Long partnerId = id(id);

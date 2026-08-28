@@ -5,6 +5,7 @@ import java.util.List;
 public record WeddingMediaView(
 		boolean galleryEnabled,
 		boolean audioEnabled,
+		String coverUrl,
 		long weddingVersion,
 		List<Photo> photos) {
 	public record Photo(

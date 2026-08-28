@@ -126,6 +126,27 @@ public class WeddingMediaService {
 	}
 
 	@Transactional
+	public void replaceCover(long weddingVersion, MultipartFile file) {
+		WeddingSettings wedding = lockWedding();
+		requireWeddingVersion(wedding, weddingVersion);
+		String oldPath = wedding.getInvitationCoverPath();
+		String newPath = storage.storeCover(file);
+		cleanUpAfterTransaction(() -> storage.deleteCover(newPath),
+				oldPath == null ? null : () -> storage.deleteCoverAfterCommit(oldPath));
+		wedding.replaceInvitationCover(newPath);
+		settings.saveAndFlush(wedding);
+	}
+
+	@Transactional
+	public void deleteCover(long weddingVersion) {
+		WeddingSettings wedding = lockWedding();
+		requireWeddingVersion(wedding, weddingVersion);
+		String oldPath = wedding.removeInvitationCover();
+		cleanUpAfterTransaction(null, oldPath == null ? null : () -> storage.deleteCoverAfterCommit(oldPath));
+		settings.saveAndFlush(wedding);
+	}
+
+	@Transactional
 	public void replaceAudio(long weddingVersion, MultipartFile file) {
 		WeddingSettings wedding = lockWedding();
 		requireWeddingVersion(wedding, weddingVersion);
@@ -158,7 +179,9 @@ public class WeddingMediaService {
 		WeddingSettings wedding = settings.getSingleton().orElseThrow();
 		boolean audioEnabled = wedding.isBackgroundAudioEnabled()
 				&& wedding.getBackgroundAudioPath() != null && !wedding.getBackgroundAudioPath().isBlank();
-		return new WeddingMediaView(wedding.isGalleryEnabled(), audioEnabled, wedding.getVersion(),
+		String coverUrl = wedding.getInvitationCoverPath() == null || wedding.getInvitationCoverPath().isBlank()
+				? null : "/media/wedding/cover";
+		return new WeddingMediaView(wedding.isGalleryEnabled(), audioEnabled, coverUrl, wedding.getVersion(),
 				photos.findAllByOrderByPositionAsc().stream().map(photo -> new WeddingMediaView.Photo(
 						photo.getId(), photo.getVersion(), photo.getAltText(), caption(photo, language),
 						photo.getCaptionId(), photo.getCaptionEn(),

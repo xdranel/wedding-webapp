@@ -73,7 +73,8 @@ class WeddingMediaServiceTest {
 		jdbc.update("delete from gallery_photo");
 		jdbc.update("""
 				update wedding_settings set gallery_enabled = false,
-				background_audio_enabled = false, background_audio_path = null, version = 0
+				background_audio_enabled = false, background_audio_path = null,
+				invitation_cover_path = null, version = 0
 				where id = 1
 				""");
 		Path gallery = mediaDirectory.resolve("gallery");
@@ -85,6 +86,12 @@ class WeddingMediaServiceTest {
 		Path audio = mediaDirectory.resolve("audio");
 		if (Files.exists(audio)) {
 			try (Stream<Path> paths = Files.list(audio)) {
+				paths.forEach(this::delete);
+			}
+		}
+		Path cover = mediaDirectory.resolve("cover");
+		if (Files.exists(cover)) {
+			try (Stream<Path> paths = Files.list(cover)) {
 				paths.forEach(this::delete);
 			}
 		}
@@ -275,6 +282,64 @@ class WeddingMediaServiceTest {
 	}
 
 	@Test
+	void replacesCoverAndRemovesOnlyCommittedObsoleteFile() throws IOException {
+		assertThat(service.adminView().coverUrl()).isNull();
+		service.replaceCover(wedding().getVersion(), image(1));
+		String oldPath = wedding().getInvitationCoverPath();
+		assertThat(coverPath(oldPath)).isRegularFile();
+		assertThat(service.publicView("EN").coverUrl()).isEqualTo("/media/wedding/cover");
+
+		AtomicReference<String> replacement = new AtomicReference<>();
+		new TransactionTemplate(transactions).executeWithoutResult(status -> {
+			service.replaceCover(wedding().getVersion(), image(2));
+			replacement.set(wedding().getInvitationCoverPath());
+			assertThat(coverPath(oldPath)).isRegularFile();
+		});
+		assertThat(coverPath(replacement.get())).isRegularFile();
+		assertThat(coverPath(oldPath)).doesNotExist();
+
+		AtomicReference<String> rolledBack = new AtomicReference<>();
+		new TransactionTemplate(transactions).executeWithoutResult(status -> {
+			service.replaceCover(wedding().getVersion(), image(3));
+			rolledBack.set(wedding().getInvitationCoverPath());
+			assertThat(coverPath(rolledBack.get())).isRegularFile();
+			status.setRollbackOnly();
+		});
+		assertThat(wedding().getInvitationCoverPath()).isEqualTo(replacement.get());
+		assertThat(coverPath(replacement.get())).isRegularFile();
+		assertThat(coverPath(rolledBack.get())).doesNotExist();
+	}
+
+	@Test
+	void staleCoverReplacementRejectsBeforeStorage() throws IOException {
+		service.replaceCover(wedding().getVersion(), image(1));
+		long staleVersion = wedding().getVersion();
+		service.replaceCover(staleVersion, image(2));
+		String currentPath = wedding().getInvitationCoverPath();
+
+		assertThatThrownBy(() -> service.replaceCover(staleVersion,
+				new MockMultipartFile("cover", "bad.jpg", "image/jpeg", new byte[] {1, 2})))
+				.isInstanceOf(OptimisticLockingFailureException.class);
+		assertThat(wedding().getInvitationCoverPath()).isEqualTo(currentPath);
+		assertThat(coverPath(currentPath)).isRegularFile();
+		try (Stream<Path> paths = Files.list(mediaDirectory.resolve("cover"))) {
+			assertThat(paths.filter(Files::isRegularFile)).containsExactly(coverPath(currentPath));
+		}
+	}
+
+	@Test
+	void deletesCoverAndSuppressesItsUrl() {
+		service.replaceCover(wedding().getVersion(), image(1));
+		String path = wedding().getInvitationCoverPath();
+
+		service.deleteCover(wedding().getVersion());
+
+		assertThat(wedding().getInvitationCoverPath()).isNull();
+		assertThat(coverPath(path)).doesNotExist();
+		assertThat(service.adminView().coverUrl()).isNull();
+	}
+
+	@Test
 	void failedAudioReplacementPreservesOldFile() {
 		service.replaceAudio(wedding().getVersion(), audio(1));
 		String oldPath = wedding().getBackgroundAudioPath();
@@ -446,6 +511,10 @@ class WeddingMediaServiceTest {
 	}
 
 	private Path audioPath(String relativePath) {
+		return mediaDirectory.resolve(relativePath);
+	}
+
+	private Path coverPath(String relativePath) {
 		return mediaDirectory.resolve(relativePath);
 	}
 

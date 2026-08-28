@@ -121,6 +121,31 @@ public class WeddingMediaAdminController {
 		}
 	}
 
+	@PostMapping("/admin/wedding/media/cover")
+	String replaceCover(@RequestParam long version, @RequestParam("cover") MultipartFile cover, Model model,
+			HttpServletResponse response) {
+		try {
+			media.replaceCover(version, cover);
+			return "redirect:/admin/wedding/media?coverReplaced";
+		} catch (OptimisticLockingFailureException exception) {
+			return conflict(model, emptyForm(), null);
+		} catch (IllegalArgumentException exception) {
+			return badRequest(response, model, exception.getMessage());
+		}
+	}
+
+	@PostMapping("/admin/wedding/media/cover/delete")
+	String deleteCover(@RequestParam long version, @RequestParam(defaultValue = "false") boolean confirm, Model model,
+			HttpServletResponse response) {
+		if (!confirm) return badRequest(response, model, "Confirm deletion before removing the invitation cover.");
+		try {
+			media.deleteCover(version);
+			return "redirect:/admin/wedding/media?coverDeleted";
+		} catch (OptimisticLockingFailureException exception) {
+			return conflict(model, emptyForm(), null);
+		}
+	}
+
 	@PostMapping("/admin/wedding/media/audio/delete")
 	String deleteAudio(@RequestParam long version, @RequestParam(defaultValue = "false") boolean confirm, Model model,
 			HttpServletResponse response) {

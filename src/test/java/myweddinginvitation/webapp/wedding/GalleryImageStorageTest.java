@@ -58,6 +58,30 @@ class GalleryImageStorageTest {
 	}
 
 	@Test
+	void storesCoverAsOneBoundedWebp() throws IOException {
+		GalleryImageStorage storage = new GalleryImageStorage(mediaDirectory);
+
+		String stored = storage.storeCover(file("cover.png", "PNG", image(2000, 1000, true)));
+
+		assertThat(stored).matches("cover/[0-9a-f-]{36}\\.webp");
+		assertDimensions(webp(storage.resolveCover(stored)), 1920, 960);
+		assertThat(countFiles(mediaDirectory.resolve("cover"))).isEqualTo(1);
+	}
+
+	@Test
+	void confinesAndDeletesCoverPaths() throws IOException {
+		GalleryImageStorage storage = new GalleryImageStorage(mediaDirectory);
+		String stored = storage.storeCover(file("cover.png", "PNG", image(20, 10, false)));
+
+		assertThatIllegalArgumentException().isThrownBy(() -> storage.resolveCover("../outside.webp"));
+		assertThatIllegalArgumentException().isThrownBy(() -> storage.resolveCover("gallery/outside.webp"));
+
+		storage.deleteCover(stored);
+
+		assertThat(mediaDirectory.resolve(stored)).doesNotExist();
+	}
+
+	@Test
 	void preservesTransparency() throws IOException {
 		BufferedImage image = image(800, 400, true);
 		image.setRGB(0, 0, new Color(10, 20, 30, 0).getRGB());

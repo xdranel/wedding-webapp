@@ -78,7 +78,7 @@ class WeddingMediaAdminControllerTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		jdbc.update("delete from gallery_photo");
-		jdbc.update("update wedding_settings set gallery_enabled = false, background_audio_enabled = false, background_audio_path = null, version = 0 where id = 1");
+		jdbc.update("update wedding_settings set gallery_enabled = false, background_audio_enabled = false, background_audio_path = null, invitation_cover_path = null, version = 0 where id = 1");
 		accounts.deleteAll();
 		accounts.save(new UserAccount("admin", "{noop}" + PASSWORD, AccountRole.ADMIN));
 		accountSecurity.changePassword("admin", PASSWORD, PASSWORD);
@@ -94,6 +94,8 @@ class WeddingMediaAdminControllerTest {
 				.andExpect(view().name("admin/wedding/media"))
 				.andExpect(model().attributeExists("media", "photoForm"))
 				.andExpect(content().string(containsString("/admin/wedding/media/photos/" + id + "/replace")))
+				.andExpect(content().string(containsString("/admin/wedding/media/cover")))
+				.andExpect(content().string(containsString("/admin/wedding/media/cover/delete")))
 				.andExpect(content().string(containsString("/admin/wedding/media/audio")))
 				.andExpect(content().string(not(containsString("C:/private/engagement.png"))))
 				.andReturn().getResponse().getContentAsString();
@@ -168,7 +170,7 @@ class WeddingMediaAdminControllerTest {
 	void addPhotoStorageFailureReturnsSafeBadRequest() throws Exception {
 		WeddingMediaService failingMedia = org.mockito.Mockito.mock(WeddingMediaService.class);
 		org.mockito.Mockito.when(failingMedia.adminView())
-				.thenReturn(new WeddingMediaView(false, false, 0, java.util.List.of()));
+				.thenReturn(new WeddingMediaView(false, false, null, 0, java.util.List.of()));
 		org.mockito.Mockito.doThrow(new IllegalStateException("Could not process gallery image"))
 				.when(failingMedia).addPhoto(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
 		WeddingMediaAdminController controller = new WeddingMediaAdminController(failingMedia);
@@ -180,6 +182,36 @@ class WeddingMediaAdminControllerTest {
 
 		assertThat(page).isEqualTo("admin/wedding/media");
 		assertThat(response.getStatus()).isEqualTo(400);
+	}
+
+	@Test
+	void administratorCanReplaceAndConfirmedDeleteCoverWithPrgAndCsrf() throws Exception {
+		MockMultipartFile cover = cover("cover.png", Color.BLUE);
+		mockMvc.perform(multipart("/admin/wedding/media/cover").session(adminSession).file(cover)
+				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())))
+				.andExpect(status().isForbidden());
+		mockMvc.perform(multipart("/admin/wedding/media/cover").with(csrf()).file(cover)
+				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())))
+				.andExpect(status().is3xxRedirection());
+
+		mockMvc.perform(multipart("/admin/wedding/media/cover").session(adminSession).with(csrf()).file(cover)
+				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())))
+				.andExpect(redirectedUrl("/admin/wedding/media?coverReplaced"));
+		String path = settings.getSingleton().orElseThrow().getInvitationCoverPath();
+		assertThat(mediaDirectory.resolve(path)).isRegularFile();
+
+		mockMvc.perform(post("/admin/wedding/media/cover/delete").session(adminSession).with(csrf())
+				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().string(containsString("Confirm deletion")));
+		assertThat(settings.getSingleton().orElseThrow().getInvitationCoverPath()).isEqualTo(path);
+
+		mockMvc.perform(post("/admin/wedding/media/cover/delete").session(adminSession).with(csrf())
+				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion()))
+				.param("confirm", "true"))
+				.andExpect(redirectedUrl("/admin/wedding/media?coverDeleted"));
+		assertThat(settings.getSingleton().orElseThrow().getInvitationCoverPath()).isNull();
+		assertThat(mediaDirectory.resolve(path)).doesNotExist();
 	}
 
 	@Test
@@ -303,6 +335,11 @@ class WeddingMediaAdminControllerTest {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		ImageIO.write(image, "png", output);
 		return new MockMultipartFile("image", name, "image/png", output.toByteArray());
+	}
+
+	private static MockMultipartFile cover(String name, Color color) throws Exception {
+		MockMultipartFile image = image(name, color);
+		return new MockMultipartFile("cover", name, image.getContentType(), image.getBytes());
 	}
 
 	private static MockMultipartFile audio(int value) {

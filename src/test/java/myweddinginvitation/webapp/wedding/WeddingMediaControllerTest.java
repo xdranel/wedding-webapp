@@ -53,7 +53,7 @@ class WeddingMediaControllerTest {
 		photos.deleteAll();
 		photos.flush();
 		jdbc.update("update partner set photo_path = null");
-		jdbc.update("update wedding_settings set background_audio_enabled = false, background_audio_path = null where id = 1");
+		jdbc.update("update wedding_settings set background_audio_enabled = false, background_audio_path = null, invitation_cover_path = null where id = 1");
 	}
 
 	@Test
@@ -62,9 +62,11 @@ class WeddingMediaControllerTest {
 		write("gallery/main.webp", WEBP);
 		write("gallery/thumbnail.webp", WEBP);
 		write("audio/song.mp3", MP3);
+		write("cover/invitation.webp", WEBP);
 		WeddingSettings wedding = settings.getSingleton().orElseThrow();
 		wedding.replaceBackgroundAudio("audio/song.mp3");
 		wedding.setBackgroundAudioEnabled(true);
+		wedding.replaceInvitationCover("cover/invitation.webp");
 		settings.saveAndFlush(wedding);
 		Partner partner = partners.findAllByOrderByDisplayOrderAsc().getFirst();
 		partner.replacePhoto("portrait.jpg");
@@ -80,6 +82,9 @@ class WeddingMediaControllerTest {
 		mockMvc.perform(get("/media/wedding/audio"))
 				.andExpect(status().isOk()).andExpect(content().contentType(MediaType.valueOf("audio/mpeg")))
 				.andExpect(content().bytes(MP3)).andExpect(safeHeaders());
+		mockMvc.perform(get("/media/wedding/cover"))
+				.andExpect(status().isOk()).andExpect(content().contentType(MediaType.valueOf("image/webp")))
+				.andExpect(content().bytes(WEBP)).andExpect(safeHeaders());
 		mockMvc.perform(get("/media/partner/{id}", partner.getId()))
 				.andExpect(status().isOk()).andExpect(content().contentType(MediaType.IMAGE_JPEG))
 				.andExpect(content().bytes(JPEG)).andExpect(safeHeaders());
@@ -101,6 +106,13 @@ class WeddingMediaControllerTest {
 				.andExpect(status().isNotFound());
 		mockMvc.perform(get("/media/wedding/audio"))
 				.andExpect(status().isNotFound());
+		mockMvc.perform(get("/media/wedding/cover"))
+				.andExpect(status().isNotFound());
+		WeddingSettings wedding = settings.getSingleton().orElseThrow();
+		wedding.replaceInvitationCover("cover/missing.webp");
+		settings.saveAndFlush(wedding);
+		mockMvc.perform(get("/media/wedding/cover"))
+				.andExpect(status().isNotFound());
 		mockMvc.perform(get("/media/gallery"))
 				.andExpect(status().isNotFound());
 	}
@@ -115,6 +127,7 @@ class WeddingMediaControllerTest {
 			WeddingSettings wedding = settings.getSingleton().orElseThrow();
 			wedding.replaceBackgroundAudio(escape);
 			wedding.setBackgroundAudioEnabled(true);
+			wedding.replaceInvitationCover(escape);
 			settings.saveAndFlush(wedding);
 			Partner partner = partners.findAllByOrderByDisplayOrderAsc().getFirst();
 			partner.replacePhoto(escape);
@@ -123,6 +136,7 @@ class WeddingMediaControllerTest {
 			mockMvc.perform(get("/media/gallery/{id}/image", photo.getId())).andExpect(status().isNotFound());
 			mockMvc.perform(get("/media/gallery/{id}/thumbnail", photo.getId())).andExpect(status().isNotFound());
 			mockMvc.perform(get("/media/wedding/audio")).andExpect(status().isNotFound());
+			mockMvc.perform(get("/media/wedding/cover")).andExpect(status().isNotFound());
 			mockMvc.perform(get("/media/partner/{id}", partner.getId())).andExpect(status().isNotFound());
 			mockMvc.perform(get("/media/gallery/../thumbnail")).andExpect(status().isNotFound());
 		} finally {

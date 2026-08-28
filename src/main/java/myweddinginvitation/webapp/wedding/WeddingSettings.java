@@ -95,6 +95,9 @@ public class WeddingSettings {
     @Column(name = "background_audio_path", length = 500)
     private String backgroundAudioPath;
 
+    @Column(name = "invitation_cover_path", length = 500)
+    private String invitationCoverPath;
+
     protected WeddingSettings() {
     }
 
@@ -206,6 +209,10 @@ public class WeddingSettings {
         return backgroundAudioPath;
     }
 
+    public String getInvitationCoverPath() {
+        return invitationCoverPath;
+    }
+
     void publish() {
         publicationState = PublicationState.PUBLISHED;
     }
@@ -232,6 +239,16 @@ public class WeddingSettings {
         String removed = backgroundAudioPath;
         backgroundAudioPath = null;
         backgroundAudioEnabled = false;
+        return removed;
+    }
+
+    void replaceInvitationCover(String relativePath) {
+        invitationCoverPath = relativePath;
+    }
+
+    String removeInvitationCover() {
+        String removed = invitationCoverPath;
+        invitationCoverPath = null;
         return removed;
     }
 

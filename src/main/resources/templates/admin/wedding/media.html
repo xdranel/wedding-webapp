@@ -25,6 +25,26 @@
     <p class="notice" role="status" th:if="${param.audioReplaced}">Audio uploaded.</p>
     <p class="notice" role="status" th:if="${param.audioDeleted}">Audio deleted.</p>
     <p class="notice" role="status" th:if="${param.audioVisibilityChanged}">Audio visibility updated.</p>
+    <p class="notice" role="status" th:if="${param.coverReplaced}">Invitation cover uploaded.</p>
+    <p class="notice" role="status" th:if="${param.coverDeleted}">Invitation cover deleted.</p>
+
+    <section class="card" aria-labelledby="cover-heading">
+        <h2 id="cover-heading">Invitation cover</h2>
+        <img th:if="${media.coverUrl != null}" th:src="${media.coverUrl}" alt="Current invitation cover">
+        <form class="form-grid" method="post" enctype="multipart/form-data" th:action="@{/admin/wedding/media/cover}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="version" th:value="${media.weddingVersion}">
+            <label for="cover-file">Cover image</label>
+            <input id="cover-file" type="file" name="cover" accept="image/jpeg,image/png,image/webp" required>
+            <button class="button" type="submit" th:text="${media.coverUrl != null} ? 'Replace cover' : 'Upload cover'">Upload cover</button>
+        </form>
+        <form class="notice form-grid" method="post" th:action="@{/admin/wedding/media/cover/delete}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="version" th:value="${media.weddingVersion}">
+            <label for="confirm-cover"><input id="confirm-cover" type="checkbox" name="confirm" value="true"> Confirm deletion</label>
+            <button class="button" type="submit">Delete cover</button>
+        </form>
+    </section>
 
     <section class="card" aria-labelledby="add-photo-heading">
         <h2 id="add-photo-heading">Add photo</h2>
