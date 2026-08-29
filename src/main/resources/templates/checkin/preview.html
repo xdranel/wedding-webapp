@@ -34,10 +34,10 @@
     <fieldset>
       <legend>Actual attendees</legend>
       <input th:unless="${preview.plusOneAllowed}" type="hidden" th:field="*{actualCount}" value="1">
-      <label><input th:if="${preview.plusOneAllowed}" type="radio" th:field="*{actualCount}" value="1"> 1</label>
-      <label th:if="${preview.plusOneAllowed}"><input type="radio" th:field="*{actualCount}" value="2"> 2</label>
+      <label class="segmented-choice"><input th:if="${preview.plusOneAllowed}" type="radio" th:field="*{actualCount}" value="1"> 1</label>
+      <label class="segmented-choice" th:if="${preview.plusOneAllowed}"><input type="radio" th:field="*{actualCount}" value="2"> 2</label>
     </fieldset>
-    <label th:if="${preview.rsvpChangeRequired}"><input type="checkbox" th:field="*{acceptRsvpChange}"> I accept the RSVP change</label>
+    <label class="check-control" th:if="${preview.rsvpChangeRequired}"><input type="checkbox" th:field="*{acceptRsvpChange}"> I accept the RSVP change</label>
     <button class="button button-primary" type="submit">Confirm check-in</button>
   </form>
   <a th:if="${preview.currentCheckIn != null}" class="button" th:href="@{/check-in}">Check in another guest</a>

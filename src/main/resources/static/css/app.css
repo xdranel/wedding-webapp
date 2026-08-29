@@ -227,6 +227,8 @@ input:focus, select:focus, textarea:focus,
 .staff-identity { color: #d4e5df; }
 .staff-header .status { margin: 0; }
 .staff-main { max-inline-size: 62rem; margin-inline: auto; padding: var(--space-4); }
+.administrator-password { border-block-start: .3rem solid var(--color-primary); }
+.staff-password { border-block-start: .3rem solid #287a5c; }
 .staff-tabs { display: flex; gap: var(--space-1); margin-block: var(--space-3) var(--space-2); }
 .staff-tabs [aria-selected="true"] { background: var(--color-primary); color: #fff; }
 .staff-tabs [aria-selected="false"] { background: transparent; color: var(--color-primary-strong); }
@@ -236,6 +238,10 @@ input:focus, select:focus, textarea:focus,
 .search-results li { display: grid; gap: .25rem; }
 .result-name { display: flex; align-items: center; min-block-size: 44px; font-size: 1.125rem; font-weight: 700; }
 .checkin-result { max-inline-size: 42rem; margin-inline: auto; }
+.checkin-result fieldset { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.segmented-choice, .check-control { min-block-size: 44px; }
+.segmented-choice { justify-content: center; min-inline-size: 4rem; padding-inline: var(--space-2); border: 1px solid var(--color-border); border-radius: .25rem; }
+.segmented-choice input[type="radio"], .check-control input[type="checkbox"] { inline-size: 1.25rem; block-size: 1.25rem; min-block-size: 0; }
 .guest-summary { display: grid; grid-template-columns: minmax(9rem, 1fr) 2fr; gap: var(--space-1) var(--space-2); }
 .guest-summary dt { color: var(--color-muted); }
 .guest-summary dd { margin: 0; font-weight: 700; }

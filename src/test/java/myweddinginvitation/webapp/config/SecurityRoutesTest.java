@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -277,10 +278,28 @@ class SecurityRoutesTest {
 				.param("newPassword", "New-Password-2026")
 				.param("confirmPassword", "Different-Password-2026"))
 				.andExpect(status().isOk())
+				.andExpect(model().attribute("accountRole", AccountRole.ADMIN))
+				.andExpect(content().string(containsString("administrator-password")))
 				.andExpect(content().string(containsString("aria-describedby=\"confirm-password-error\"")))
 				.andExpect(content().string(containsString("id=\"confirm-password-error\"")))
 				.andExpect(content().string(not(containsString("id=\"current-password-error\""))))
 				.andExpect(content().string(not(containsString("id=\"new-password-error\""))));
+	}
+
+	@Test
+	void administratorPasswordPageProvidesAdministratorShell() throws Exception {
+		mockMvc.perform(get("/account/password").session(login("admin")))
+				.andExpect(status().isOk())
+				.andExpect(model().attribute("accountRole", AccountRole.ADMIN))
+				.andExpect(content().string(containsString("administrator-password")));
+	}
+
+	@Test
+	void staffPasswordPageProvidesStaffShell() throws Exception {
+		mockMvc.perform(get("/account/password").session(login("staff")))
+				.andExpect(status().isOk())
+				.andExpect(model().attribute("accountRole", AccountRole.STAFF))
+				.andExpect(content().string(containsString("staff-password")));
 	}
 
 	@Test

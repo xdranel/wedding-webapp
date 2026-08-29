@@ -22,14 +22,15 @@ public class PasswordController {
     }
 
     @GetMapping("/account/password")
-    String form(Model model) {
+    String form(Model model, Authentication authentication) {
         model.addAttribute("passwordChangeForm", new PasswordChangeForm("", "", ""));
+        page(model, authentication);
         return "account/password";
     }
 
     @PostMapping("/account/password")
     String change(@Valid @ModelAttribute PasswordChangeForm form, BindingResult errors,
-                  Authentication authentication, HttpServletRequest request) {
+                  Authentication authentication, Model model, HttpServletRequest request) {
         if (!Objects.equals(form.newPassword(), form.confirmPassword())) {
             errors.rejectValue("confirmPassword", "password.mismatch",
                     "Passwords do not match.");
@@ -41,11 +42,18 @@ public class PasswordController {
                     "Current password is incorrect.");
         }
         if (errors.hasErrors()) {
+            page(model, authentication);
             return "account/password";
         }
 
         SecurityContextHolder.clearContext();
         request.getSession(false).invalidate();
         return "redirect:/login?passwordChanged";
+    }
+
+    private void page(Model model, Authentication authentication) {
+        model.addAttribute("accountRole", authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))
+                ? AccountRole.ADMIN : AccountRole.STAFF);
     }
 }
