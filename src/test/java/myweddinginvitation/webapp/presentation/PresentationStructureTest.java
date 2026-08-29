@@ -380,10 +380,14 @@ class PresentationStructureTest {
 		String css = resource("static/css/invitation.css");
 		for (String html : new String[] {guest, preview}) {
 			assertThat(html).contains("id=\"audio-toggle\"", "aria-label=",
-					"data-play-label=", "data-pause-label=", ">🔇</button>");
+					"data-play-label=", "data-pause-label=", "class=\"audio-icon audio-icon-on\"",
+					"class=\"audio-icon audio-icon-off\"")
+					.doesNotContain("🔊", "🔇");
 		}
 		assertThat(css).contains("#audio-toggle {", "display: none;",
-				".invitation-open #audio-toggle {\n    display: inline-flex;");
+				".invitation-open #audio-toggle {\n    display: inline-flex;",
+				"#audio-toggle[aria-pressed=\"true\"] .audio-icon-on",
+				"#audio-toggle[aria-pressed=\"true\"] .audio-icon-off");
 	}
 
 	@Test

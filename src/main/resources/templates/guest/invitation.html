@@ -322,7 +322,11 @@
             aria-pressed="false"
             th:aria-label="${language == 'EN'} ? 'Play music' : 'Putar musik'"
             th:attr="data-play-label=${language == 'EN' ? 'Play music' : 'Putar musik'},data-pause-label=${language == 'EN' ? 'Pause music' : 'Jeda musik'}"
-            >🔇</button>
+            ><svg class="audio-icon audio-icon-on" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5 9v6h4l5 4V5L9 9H5"></path><path d="M17 9a4 4 0 0 1 0 6"></path><path d="M19 6a8 8 0 0 1 0 12"></path>
+            </svg><svg class="audio-icon audio-icon-off" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5 9v6h4l5 4V5L9 9H5"></path><path d="m17 10 4 4m0-4-4 4"></path>
+            </svg></button>
 </main>
 <script th:src="@{/js/invitation-media.js}" defer></script>
 </body>

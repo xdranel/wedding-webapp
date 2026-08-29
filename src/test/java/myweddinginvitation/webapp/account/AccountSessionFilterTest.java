@@ -105,6 +105,25 @@ class AccountSessionFilterTest {
 		assertThat(chain.getRequest()).isNull();
 	}
 
+	@Test
+	void firstLoginCanLoadPasswordPagePresentationAssets() throws Exception {
+		UserAccount admin = new UserAccount("admin", "hash", AccountRole.ADMIN);
+		AccountSessionFilter filter = new AccountSessionFilter(repositoryReturning(admin));
+		authenticate("admin", "ROLE_ADMIN");
+
+		for (String path : new String[] {"/css/app.css", "/js/admin-navigation.js", "/images/mark.svg",
+				"/webjars/library/file.js"}) {
+			MockHttpServletRequest request = authenticatedRequest(path, admin);
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			MockFilterChain chain = new MockFilterChain();
+
+			filter.doFilter(request, response, chain);
+
+			assertThat(response.getRedirectedUrl()).as(path).isNull();
+			assertThat(chain.getRequest()).as(path).isSameAs(request);
+		}
+	}
+
 	private UserAccount readyAccount(String username, AccountRole role) {
 		UserAccount account = new UserAccount(username, "hash", role);
 		account.changePassword("hash");

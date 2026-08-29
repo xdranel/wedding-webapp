@@ -658,6 +658,28 @@ img {
     z-index: 11;
 }
 
+.audio-icon {
+    fill: none;
+    height: 1.5rem;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+    width: 1.5rem;
+}
+
+.audio-icon-on {
+    display: none;
+}
+
+#audio-toggle[aria-pressed="true"] .audio-icon-on {
+    display: block;
+}
+
+#audio-toggle[aria-pressed="true"] .audio-icon-off {
+    display: none;
+}
+
 .invitation-open #audio-toggle {
     display: inline-flex;
 }

@@ -92,18 +92,18 @@ test('opening remains usable when audio playback is rejected', async () => {
     assert.equal(elements['#invitation'].focused, undefined);
     assert.equal(elements['#welcome'].scrollOptions.behavior, 'smooth');
     assert.equal(elements['#welcome'].focusOptions.preventScroll, true);
-	assert.equal(toggle.textContent, '🔇');
+	assert.equal(toggle.textContent, '');
 	assert.equal(toggle.getAttribute('aria-label'), 'Play music');
     assert.equal(toggle.getAttribute('aria-pressed'), 'false');
     assert.equal(documentElement.classList.has('js'), true);
 
     audio.fire('play');
-	assert.equal(toggle.textContent, '🔊');
+	assert.equal(toggle.textContent, '');
 	assert.equal(toggle.getAttribute('aria-label'), 'Pause music');
     assert.equal(toggle.getAttribute('aria-pressed'), 'true');
     for (const event of ['pause', 'ended', 'error']) {
         audio.fire(event);
-		assert.equal(toggle.textContent, '🔇');
+		assert.equal(toggle.textContent, '');
 		assert.equal(toggle.getAttribute('aria-label'), 'Play music');
         assert.equal(toggle.getAttribute('aria-pressed'), 'false');
     }

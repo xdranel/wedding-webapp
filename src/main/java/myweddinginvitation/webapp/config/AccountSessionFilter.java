@@ -46,7 +46,7 @@ public class AccountSessionFilter extends OncePerRequestFilter {
             expire(session, response);
             return;
         }
-        if (account.isPasswordChangeRequired() && !passwordChangeOrLogout(request)) {
+        if (account.isPasswordChangeRequired() && !allowedDuringPasswordChange(request)) {
             response.sendRedirect("/account/password");
             return;
         }
@@ -68,9 +68,11 @@ public class AccountSessionFilter extends OncePerRequestFilter {
                 || System.currentTimeMillis() - loginTime.longValue() < STAFF_LIFETIME_MILLIS;
     }
 
-    private boolean passwordChangeOrLogout(HttpServletRequest request) {
-        return request.getRequestURI().equals("/account/password")
-                || request.getRequestURI().equals("/logout");
+    private boolean allowedDuringPasswordChange(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.equals("/account/password") || path.equals("/logout")
+                || path.startsWith("/css/") || path.startsWith("/js/")
+                || path.startsWith("/images/") || path.startsWith("/webjars/");
     }
 
     private void expire(HttpSession session, HttpServletResponse response) throws IOException {

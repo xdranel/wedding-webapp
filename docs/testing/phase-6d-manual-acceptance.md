@@ -297,3 +297,9 @@ memberi Change Password identitas visual sesuai role.
 
 Kelima poin tersebut tetap **PENDING retest** pada desktop dan mobile sebelum
 branch diterima. Physical USB scanner tetap **DEFERRED** dan tidak memblokir.
+
+Retest awal menemukan Change Password masih tampil native karena filter sesi
+mengalihkan request stylesheet selama password wajib diganti. Aset statis kini
+tetap dapat dimuat tanpa membuka route aplikasi lain. Emoji audio juga diganti
+dengan ikon SVG outline monochrome yang mengikuti warna kontrol. Kedua poin
+ini tetap **PENDING retest**.
