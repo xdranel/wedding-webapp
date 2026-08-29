@@ -213,7 +213,7 @@ class PresentationStructureTest {
 	void checkInControlsUseCompactLabelsWithoutChangingBindings() throws IOException {
 		String preview = resource("templates/checkin/preview.html");
 		assertThat(preview).contains(
-				"<label class=\"segmented-choice\"><input th:if=\"${preview.plusOneAllowed}\" type=\"radio\" th:field=\"*{actualCount}\" value=\"1\"> 1</label>",
+				"<label class=\"segmented-choice\" th:if=\"${preview.plusOneAllowed}\"><input type=\"radio\" th:field=\"*{actualCount}\" value=\"1\"> 1</label>",
 				"<label class=\"segmented-choice\" th:if=\"${preview.plusOneAllowed}\"><input type=\"radio\" th:field=\"*{actualCount}\" value=\"2\"> 2</label>",
 				"<input th:unless=\"${preview.plusOneAllowed}\" type=\"hidden\" th:field=\"*{actualCount}\" value=\"1\">",
 				"<label class=\"check-control\" th:if=\"${preview.rsvpChangeRequired}\"><input type=\"checkbox\" th:field=\"*{acceptRsvpChange}\"> I accept the RSVP change</label>");

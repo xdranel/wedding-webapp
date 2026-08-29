@@ -206,6 +206,17 @@ class CheckInControllerTest {
 	}
 
 	@Test
+	void noPlusOnePreviewKeepsHiddenCountWithoutSegmentedChoice() throws Exception {
+		Guest guest = attendingGuest("No plus one preview", false, "+62811115556");
+
+		mockMvc.perform(get("/check-in/preview/guest/{id}", guest.getId()).session(staffSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(not(containsString("segmented-choice"))))
+				.andExpect(content().string(containsString("name=\"actualCount\"")))
+				.andExpect(content().string(containsString("value=\"1\"")));
+	}
+
+	@Test
 	void knownDuplicatePreviewIsReadOnly() throws Exception {
 		Guest guest = attendingGuest("Already checked in", false, "+62811117777");
 		mockMvc.perform(post("/check-in/confirm/guest/{id}", guest.getId()).session(staffSession).with(csrf())
