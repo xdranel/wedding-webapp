@@ -6,10 +6,10 @@ mencatat hasil nyata, bukan inferensi dari pengujian otomatis. Bukti otomatis
 final saat itu: 2 pemeriksaan sintaks JavaScript terlacak dan 78 suite / 431
 test dengan 0 kegagalan, error, atau skip pada MySQL/Flyway V1-V13.
 
-Status penerimaan visual redesign presentasi: **PENDING — menunggu pemeriksaan
-manual dan persetujuan pemilik**. Hasil otomatis tidak menandai pemeriksaan
-browser, perangkat, Lighthouse, atau kontras sebagai lulus. Phase 7 tidak
-dimulai sebelum matriks redesign di bawah diterima pemilik.
+Status penerimaan visual redesign presentasi: **DITERIMA pada 2026-08-29**.
+Pemilik menyelesaikan pemeriksaan desktop/mobile dan mengonfirmasi seluruh
+retest temuan presentasi berjalan benar. Physical USB scanner tetap DEFERRED
+karena perangkat belum tersedia dan tidak memblokir penerimaan.
 
 ## Persiapan
 
@@ -306,5 +306,6 @@ ini tetap **PENDING retest**.
 
 Follow-up retest meminta ikon audio dipusatkan di dalam tombol serta jarak aman
 antara Change Password dan Sign Out. Ikon kini memakai centering flex; Sign Out
-menjadi aksi sekunder setelah pemisah dan jarak tersendiri. Keduanya tetap
-**PENDING retest**.
+menjadi aksi sekunder setelah pemisah dan jarak tersendiri. Pemilik kemudian
+mengonfirmasi keduanya **PASS** pada 2026-08-29; penerimaan presentation
+refinement selesai dengan USB scanner fisik tetap **DEFERRED**.
