@@ -311,6 +311,16 @@ class WeddingMediaServiceTest {
 	}
 
 	@Test
+	void missingOrInvalidCoverPathDoesNotExposeCoverUrl() {
+		jdbc.update("update wedding_settings set invitation_cover_path = 'cover/missing.webp' where id = 1");
+		assertThat(service.adminView().coverUrl()).isNull();
+		assertThat(service.publicView("EN").coverUrl()).isNull();
+
+		jdbc.update("update wedding_settings set invitation_cover_path = 'gallery/not-cover.webp' where id = 1");
+		assertThat(service.adminView().coverUrl()).isNull();
+	}
+
+	@Test
 	void staleCoverReplacementRejectsBeforeStorage() throws IOException {
 		service.replaceCover(wedding().getVersion(), image(1));
 		long staleVersion = wedding().getVersion();

@@ -659,6 +659,9 @@ img {
     max-width: 68rem;
 }
 
+.preview-controls a { color: white; }
+.preview-controls button { background: white; color: #17201c; }
+
 .preview-page .guest-navigation {
     bottom: auto;
     position: sticky;

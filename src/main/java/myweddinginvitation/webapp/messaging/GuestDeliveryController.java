@@ -28,10 +28,7 @@ public class GuestDeliveryController {
 		try {
 			return "redirect:" + delivery.whatsappUri(id, language);
 		} catch (IllegalStateException exception) {
-			redirectAttributes.addFlashAttribute("guestError", exception.getMessage());
-			if (exception.getMessage() != null && exception.getMessage().startsWith("Initial delivery requires")) {
-				redirectAttributes.addFlashAttribute("eventStatusRequired", true);
-			}
+			deliveryRejected(redirectAttributes, exception);
 			return detail(id);
 		}
 	}
@@ -44,7 +41,7 @@ public class GuestDeliveryController {
 		} catch (OptimisticLockingFailureException exception) {
 			redirectAttributes.addFlashAttribute("guestError", CONFLICT);
 		} catch (IllegalStateException exception) {
-			redirectAttributes.addFlashAttribute("guestError", exception.getMessage());
+			deliveryRejected(redirectAttributes, exception);
 		}
 		return detail(id);
 	}
@@ -64,5 +61,12 @@ public class GuestDeliveryController {
 
 	private String detail(long id) {
 		return "redirect:/admin/guests/" + id;
+	}
+
+	private void deliveryRejected(RedirectAttributes redirectAttributes, IllegalStateException exception) {
+		redirectAttributes.addFlashAttribute("guestError", exception.getMessage());
+		if (exception.getMessage() != null && exception.getMessage().startsWith("Initial delivery requires")) {
+			redirectAttributes.addFlashAttribute("eventStatusRequired", true);
+		}
 	}
 }

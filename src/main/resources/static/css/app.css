@@ -203,6 +203,7 @@ input, select, textarea {
 
 input[type="checkbox"], input[type="radio"] { inline-size: 1.25rem; block-size: 1.25rem; min-block-size: 0; }
 label:has(input[type="checkbox"], input[type="radio"]) { display: flex; align-items: center; min-block-size: 44px; gap: var(--space-1); }
+input[type="checkbox"] + label, input[type="radio"] + label { display: flex; align-items: center; min-block-size: 44px; }
 input:hover, select:hover, textarea:hover,
 .button-secondary:hover { border-color: var(--color-primary-strong); }
 input:focus, select:focus, textarea:focus,

@@ -72,8 +72,9 @@ Active event sections provide standard downloadable calendar entries.
 The administrator dashboard favors summary cards and category filters over
 charts.
 
-The guest invitation has an `ID | EN` switch with Indonesian as the default;
-administrator and check-in interfaces are English-only.
+The guest invitation has a native disclosure language switch with Indonesian as
+the default; `language=ID` and `language=EN` query links select the rendered
+language. Administrator and check-in interfaces are English-only.
 
 All interfaces retain keyboard access, readable contrast, labelled controls,
 image alternative text, and reduced-motion behavior.
@@ -101,9 +102,10 @@ The invitation is a single mobile-first page:
 6. PIN-protected QR display/save when RSVP is `Hadir`
 7. Approved greetings and help contacts
 
-Disabled optional sections are not rendered. Guest language is selected with
-an `ID | EN` switch and stored on the device. Missing English narrative text
-falls back to Indonesian.
+Disabled optional sections are not rendered. Guest language is selected with a
+native disclosure menu whose links reload the current invitation with
+`language=ID` or `language=EN`; no browser storage persistence is used. Missing
+English narrative text falls back to Indonesian.
 
 RSVP remains unavailable until an administrator configures a future deadline.
 After the deadline, the current response is read-only while accepted guests

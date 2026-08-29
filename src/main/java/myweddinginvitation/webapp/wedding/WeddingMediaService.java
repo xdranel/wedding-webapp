@@ -1,5 +1,6 @@
 package myweddinginvitation.webapp.wedding;
 
+import java.nio.file.Files;
 import java.util.List;
 
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -179,14 +180,22 @@ public class WeddingMediaService {
 		WeddingSettings wedding = settings.getSingleton().orElseThrow();
 		boolean audioEnabled = wedding.isBackgroundAudioEnabled()
 				&& wedding.getBackgroundAudioPath() != null && !wedding.getBackgroundAudioPath().isBlank();
-		String coverUrl = wedding.getInvitationCoverPath() == null || wedding.getInvitationCoverPath().isBlank()
-				? null : "/media/wedding/cover";
-		return new WeddingMediaView(wedding.isGalleryEnabled(), audioEnabled, coverUrl, wedding.getVersion(),
+		return new WeddingMediaView(wedding.isGalleryEnabled(), audioEnabled, coverUrl(wedding), wedding.getVersion(),
 				photos.findAllByOrderByPositionAsc().stream().map(photo -> new WeddingMediaView.Photo(
 						photo.getId(), photo.getVersion(), photo.getAltText(), caption(photo, language),
 						photo.getCaptionId(), photo.getCaptionEn(),
 						"/media/gallery/" + photo.getId() + "/thumbnail",
 						"/media/gallery/" + photo.getId() + "/image")).toList());
+	}
+
+	private String coverUrl(WeddingSettings wedding) {
+		String path = wedding.getInvitationCoverPath();
+		if (path == null || path.isBlank()) return null;
+		try {
+			return Files.isRegularFile(storage.resolveCover(path)) ? "/media/wedding/cover" : null;
+		} catch (RuntimeException exception) {
+			return null;
+		}
 	}
 
 	private WeddingSettings lockWedding() {

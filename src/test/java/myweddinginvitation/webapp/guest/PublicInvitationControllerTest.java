@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
@@ -34,6 +36,7 @@ class PublicInvitationControllerTest {
 	private static final String GUEST_NAME = "Sari";
 	private static final String WHATSAPP = "+628123456789";
 	private static final String INTERNAL_NOTE = "private-note-probe";
+	private static final Path TEST_MEDIA = Path.of("target/test-media");
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -100,7 +103,8 @@ class PublicInvitationControllerTest {
 		publishWedding();
 		String invitationPath = path(signer.urlFor(guest));
 
-		jdbc.update("update wedding_settings set invitation_cover_path = 'cover/invitation.webp' where id = 1");
+		writeCover("cover/invitation-public.webp");
+		jdbc.update("update wedding_settings set invitation_cover_path = 'cover/invitation-public.webp' where id = 1");
 		String dedicatedCover = page(invitationPath);
 		assertThat(dedicatedCover)
 				.contains("<img class=\"cover-image\" src=\"/media/wedding/cover\"", "<details class=\"language-switch\"",
@@ -113,7 +117,8 @@ class PublicInvitationControllerTest {
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		assertThat(english).contains("<summary aria-label=\"Active language: EN\">EN</summary>");
 
-		jdbc.update("update wedding_settings set invitation_cover_path = null where id = 1");
+		Files.deleteIfExists(TEST_MEDIA.resolve("cover/missing-public.webp"));
+		jdbc.update("update wedding_settings set invitation_cover_path = 'cover/missing-public.webp' where id = 1");
 		assertThat(page(invitationPath)).contains("<img class=\"cover-image\" src=\"/media/partner/");
 
 		jdbc.update("update partner set photo_path = null where display_order = 1");
@@ -329,6 +334,12 @@ class PublicInvitationControllerTest {
 	private String page(String invitationPath) throws Exception {
 		return mockMvc.perform(get(invitationPath).param("language", "ID"))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+	}
+
+	private void writeCover(String relativePath) throws Exception {
+		Path path = TEST_MEDIA.resolve(relativePath);
+		Files.createDirectories(path.getParent());
+		Files.write(path, new byte[] {1});
 	}
 
 	private void publishWedding() {

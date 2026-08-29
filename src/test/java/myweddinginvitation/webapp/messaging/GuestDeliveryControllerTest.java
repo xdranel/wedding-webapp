@@ -201,6 +201,20 @@ class GuestDeliveryControllerTest {
 	}
 
 	@Test
+	void blockedConfirmSentPointsToPublicationAndEventStatus() throws Exception {
+		Guest guest = savedGuest();
+		jdbc.update("update wedding_settings set publication_state = 'DRAFT' where id = 1");
+
+		mockMvc.perform(post("/admin/guests/{id}/confirm-sent", guest.getId())
+				.session(adminSession).with(csrf())
+				.param("version", Long.toString(guest.getVersion())))
+				.andExpect(redirectedUrl("/admin/guests/" + guest.getId()));
+		mockMvc.perform(get("/admin/guests/{id}", guest.getId()).session(adminSession))
+				.andExpect(content().string(containsString("Initial delivery requires a published wedding.")))
+				.andExpect(content().string(containsString("Review Publication &amp; Event Status")));
+	}
+
+	@Test
 	void archivedDeliveryErrorDoesNotPointToEventStatus() throws Exception {
 		Guest guest = savedGuest();
 		guestService.archive(guest.getId(), guest.getVersion());

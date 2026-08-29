@@ -95,9 +95,10 @@ class WeddingMediaAdminControllerTest {
 				.andExpect(model().attributeExists("media", "photoForm"))
 				.andExpect(content().string(containsString("/admin/wedding/media/photos/" + id + "/replace")))
 				.andExpect(content().string(containsString("/admin/wedding/media/cover")))
-				.andExpect(content().string(containsString("/admin/wedding/media/cover/delete")))
 				.andExpect(content().string(containsString("/admin/wedding/media/audio")))
 				.andExpect(content().string(not(containsString("C:/private/engagement.png"))))
+				.andExpect(content().string(not(containsString("/admin/wedding/media/cover/delete"))))
+				.andExpect(content().string(not(containsString("Delete cover"))))
 				.andReturn().getResponse().getContentAsString();
 		int audioForm = page.indexOf("action=\"/admin/wedding/media/audio\"");
 		assertThat(audioForm).isNotNegative();
@@ -199,6 +200,9 @@ class WeddingMediaAdminControllerTest {
 				.andExpect(redirectedUrl("/admin/wedding/media?coverReplaced"));
 		String path = settings.getSingleton().orElseThrow().getInvitationCoverPath();
 		assertThat(mediaDirectory.resolve(path)).isRegularFile();
+		mockMvc.perform(get("/admin/wedding/media").session(adminSession))
+				.andExpect(content().string(containsString("/admin/wedding/media/cover/delete")))
+				.andExpect(content().string(containsString("Delete cover")));
 
 		mockMvc.perform(post("/admin/wedding/media/cover/delete").session(adminSession).with(csrf())
 				.param("version", Long.toString(settings.getSingleton().orElseThrow().getVersion())))

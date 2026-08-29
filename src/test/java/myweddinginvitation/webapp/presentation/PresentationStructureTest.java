@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
 class PresentationStructureTest {
@@ -75,8 +77,8 @@ class PresentationStructureTest {
 				{"admin/home.html", "overview"},
 				{"admin/wedding/overview.html", "wedding-publication"},
 				{"admin/wedding/settings.html", "wedding-settings"},
-				{"admin/wedding/event-status.html", "wedding-settings"},
-				{"admin/wedding/event-status-confirm.html", "wedding-settings"},
+				{"admin/wedding/event-status.html", "wedding-publication"},
+				{"admin/wedding/event-status-confirm.html", "wedding-publication"},
 				{"admin/wedding/partners.html", "wedding-partners"},
 				{"admin/wedding/events.html", "wedding-events"},
 				{"admin/wedding/story.html", "wedding-story"},
@@ -195,12 +197,27 @@ class PresentationStructureTest {
 	}
 
 	@Test
+	void passwordPageRendersRoleIdentityText() throws IOException {
+		assertThat(resource("templates/account/password.html"))
+				.contains("auth-identity",
+						"th:text=\"${accountRole == T(myweddinginvitation.webapp.account.AccountRole).ADMIN} ? 'Administrator' : 'Staff Check-in'\"");
+	}
+
+	@Test
 	void internalControlBordersMeetStableContrastContract() throws IOException {
 		String css = resource("static/css/app.css");
 		assertThat(css).contains("--color-border: #6b7280;",
 				".button-secondary { background: transparent; border-color: var(--color-border); color: inherit; }",
 				"input:hover, select:hover, textarea:hover,",
 				"input:focus, select:focus, textarea:focus");
+	}
+
+	@Test
+	void nativeChoiceControlsKeepCompactVisualsAndSeparateLabelTouchTargets() throws IOException {
+		assertThat(resource("static/css/app.css"))
+				.contains("input[type=\"checkbox\"], input[type=\"radio\"] { inline-size: 1.25rem; block-size: 1.25rem; min-block-size: 0; }",
+						"label:has(input[type=\"checkbox\"], input[type=\"radio\"])",
+						"input[type=\"checkbox\"] + label, input[type=\"radio\"] + label { display: flex; align-items: center; min-block-size: 44px;");
 	}
 
 	@Test
@@ -343,6 +360,13 @@ class PresentationStructureTest {
 	}
 
 	@Test
+	void previewControlsUseReadableDarkHeaderContrast() throws IOException {
+		assertThat(resource("static/css/invitation.css"))
+				.contains(".preview-controls a { color: white; }",
+						".preview-controls button { background: white; color: #17201c; }");
+	}
+
+	@Test
 	void invitationInteractionStylesProtectContrastTouchAndMotion() throws IOException {
 		String css = resource("static/css/invitation.css");
 		String js = resource("static/js/invitation-media.js");
@@ -368,6 +392,14 @@ class PresentationStructureTest {
 		assertThat(resource("templates/account/password.html"))
 				.contains("<button class=\"button\" type=\"submit\">Sign out</button>")
 				.doesNotContain("<button class=\"button button-secondary\" type=\"submit\">Sign out</button>");
+	}
+
+	@Test
+	void designDocumentsNativeLanguageDisclosureWithoutBrowserStorage() throws IOException {
+		String design = Files.readString(Path.of("docs/DESIGN.md"));
+		assertThat(design)
+				.contains("native disclosure", "language=ID", "language=EN")
+				.doesNotContain("ID | EN switch", "stored on the device");
 	}
 
 	private String resource(String path) throws IOException {

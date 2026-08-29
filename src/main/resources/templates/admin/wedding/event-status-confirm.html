@@ -9,7 +9,7 @@
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <div class="app-shell">
-    <nav th:replace="~{fragments/admin-navigation :: sidebar('wedding-settings')}"></nav>
+    <nav th:replace="~{fragments/admin-navigation :: sidebar('wedding-publication')}"></nav>
     <div>
         <header class="app-header">
             <h1 th:text="${status.closed} ? 'Reopen event' : 'Close event'">Change event status</h1>

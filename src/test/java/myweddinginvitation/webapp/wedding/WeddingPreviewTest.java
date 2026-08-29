@@ -11,13 +11,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import myweddinginvitation.webapp.account.AccountRole;
 import myweddinginvitation.webapp.account.AccountSecurityService;
 import myweddinginvitation.webapp.account.UserAccount;
 import myweddinginvitation.webapp.account.UserAccountRepository;
 import myweddinginvitation.webapp.support.MySqlTestConfiguration;
-import java.util.Map;
-import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +39,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import(MySqlTestConfiguration.class)
 class WeddingPreviewTest {
 	private static final String PASSWORD = "Test-Password-2026";
+	private static final Path TEST_MEDIA = Path.of("target/test-media");
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -124,7 +128,8 @@ class WeddingPreviewTest {
 	@Test
 	void previewCoverAndLanguageDisclosureUseTheRequiredFallbackOrder() throws Exception {
 		seedCompleteIndonesianContentWithEnglishMissing();
-		jdbc.update("update wedding_settings set invitation_cover_path = 'cover/invitation.webp' where id = 1");
+		writeCover("cover/invitation-preview.webp");
+		jdbc.update("update wedding_settings set invitation_cover_path = 'cover/invitation-preview.webp' where id = 1");
 
 		String dedicatedCover = preview("EN");
 		assertThat(dedicatedCover)
@@ -135,7 +140,8 @@ class WeddingPreviewTest {
 				.containsOnlyOnce("aria-current=\"page\"");
 		assertThat(preview("ID")).contains("<summary aria-label=\"Bahasa aktif: ID\">ID</summary>");
 
-		jdbc.update("update wedding_settings set invitation_cover_path = null where id = 1");
+		Files.deleteIfExists(TEST_MEDIA.resolve("cover/missing-preview.webp"));
+		jdbc.update("update wedding_settings set invitation_cover_path = 'cover/missing-preview.webp' where id = 1");
 		assertThat(preview("EN")).contains("<img class=\"cover-image\" src=\"/media/partner/");
 
 		jdbc.update("update partner set photo_path = null where display_order = 1");
@@ -317,6 +323,12 @@ class WeddingPreviewTest {
 		return mockMvc.perform(get("/admin/wedding/preview/render").session(adminSession)
 				.param("salutation", "Bapak/Ibu").param("guestName", "Nama Tamu").param("language", language))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+	}
+
+	private void writeCover(String relativePath) throws Exception {
+		Path path = TEST_MEDIA.resolve(relativePath);
+		Files.createDirectories(path.getParent());
+		Files.write(path, new byte[] {1});
 	}
 
 	private Pattern disabledCalendarButton(String label) {

@@ -38,7 +38,8 @@
             <input id="cover-file" type="file" name="cover" accept="image/jpeg,image/png,image/webp" required>
             <button class="button" type="submit" th:text="${media.coverUrl != null} ? 'Replace cover' : 'Upload cover'">Upload cover</button>
         </form>
-        <form class="notice form-grid" method="post" th:action="@{/admin/wedding/media/cover/delete}">
+        <form class="notice form-grid" method="post" th:if="${media.coverUrl != null}"
+              th:action="@{/admin/wedding/media/cover/delete}">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <input type="hidden" name="version" th:value="${media.weddingVersion}">
             <label for="confirm-cover"><input id="confirm-cover" type="checkbox" name="confirm" value="true"> Confirm deletion</label>
