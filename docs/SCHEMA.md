@@ -1,12 +1,12 @@
 # Data Schema
 
-Status: accepted through Phase 6D on 2026-08-23 by Flyway V1-V13. Phase 6D adds
-no schema change; V1-V13 remains unchanged. Its final MySQL/Flyway suite passed
-78 suites / 431 tests with 0 failures, errors, or skips; Phase 7 is pending.
+Status: accepted through Phase 6D and the presentation refinement. Flyway
+V1–V14 is current. Final merged `main` verification passed on 2026-08-29 with
+79 suites / 485 tests and no failures, errors, or skips; Phase 7 may begin.
 
 Database target: MySQL 8.4 LTS.
 
-Flyway migrations V1-V13 implement the schema required through Phase 6C:
+Flyway migrations V1–V14 implement the current schema:
 `user_account`, `wedding_settings`, `partner`, `event_part`, `story_entry`,
 `gallery_photo`, `guest_category`, `guest`, `message_template`, `rsvp`,
 `check_in`, and `check_in_correction`. V11 adds gallery/audio state to
@@ -18,8 +18,10 @@ non-null default-false `wedding_settings.event_closed`. V13 adds exactly six
 nullable columns to the same singleton: `event_status_changed_at timestamp(6)`,
 `event_status_changed_by varchar(100)`, `closed_title_id varchar(160)`,
 `closed_title_en varchar(160)`, `closed_message_id varchar(1000)`, and
-`closed_message_en varchar(1000)`. Applied migrations are immutable; later
-schema changes require a new migration.
+`closed_message_en varchar(1000)`. V14 adds nullable
+`wedding_settings.invitation_cover_path varchar(500)` for the optional guest
+cover image. Applied migrations are immutable; later schema changes require a
+new migration.
 
 V8 creates `message_template` and seeds its `RSVP_REMINDER` and
 `EVENT_REMINDER` rows; Phase 6B reuses those rows without a new history or

@@ -151,14 +151,10 @@ history. Automated MySQL coverage is implemented; physical LAN, scanner,
 camera, and multi-device acceptance is complete except for the still-pending
 physical USB scanner check.
 
-Phase 6B reminder/calendar implementation and automated MySQL verification are
-complete. Manual ID/EN WhatsApp, Confirm/Next, and phone/laptop calendar-import
-acceptance passed on 2026-08-17. The separate Phase 5 physical USB scanner
-check is still pending. Phase 6C functionality has real-MySQL journey and
-focused verification coverage. After correcting stale fixtures exposed by the
-first clean run, its final clean suite passed all 429 tests against Flyway
-V1-V13. The phone/laptop checklist passed on 2026-08-23. Phase 6D acceptance
-also passed on 2026-08-23: 2 tracked JavaScript syntax checks and the final
-clean MySQL/Flyway V1-V13 suite (78 suites, 431 tests, 0 failures, errors, or
-skips). It adds no production feature, dependency, or migration. Phase 7
-deployment, backup, Cloudflare, and hardening remain pending and separate.
+Phases 6A–6D and the presentation redesign are implemented and manually
+accepted. The final merged `main` verification on 2026-08-29 passed 79 suites /
+485 tests against MySQL/Flyway V1–V14 plus 5/5 JavaScript tests, with no
+failures, errors, or skips. The physical USB scanner remains deferred until
+hardware is available and does not block Phase 7. Production packaging,
+backup/restore/erasure, Cloudflare, accessibility/performance, and security
+verification remain Phase 7 work.

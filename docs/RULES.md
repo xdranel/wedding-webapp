@@ -1,9 +1,10 @@
 # Business Rules
 
-Status: implemented and accepted through Phase 6D on 2026-08-23. Final Phase 6D
-evidence: 2 tracked JavaScript syntax checks and 78 MySQL/Flyway V1-V13 suites
-(431 tests, 0 failures, errors, or skips). The Phase 5 physical USB scanner
-check remains deferred and non-blocking; Phase 7 is pending.
+Status: implemented and accepted through Phase 6D and the presentation
+refinement. Final merged `main` evidence on 2026-08-29: 79 suites / 485 tests
+against MySQL/Flyway V1–V14 plus 5/5 JavaScript tests, with no failures, errors,
+or skips. The Phase 5 physical USB scanner check remains deferred and
+non-blocking; Phase 7 may begin.
 
 1. An invitation belongs to one named primary guest.
 2. An invitation may optionally allow one unnamed companion.

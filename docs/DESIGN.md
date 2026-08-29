@@ -1,11 +1,10 @@
 # Product Design
 
-Status: implemented and accepted through Phase 6D on 2026-08-23. The default
-presentation redesign and its 2026-08-28 refinement are implemented; their
-automated gate passed on 2026-08-29. Owner browser/device visual acceptance is
-PENDING. The Phase 5 physical USB scanner check remains DEFERRED and
-non-blocking. Phase 7 must not begin until the owner accepts the presentation
-checklist.
+Status: implemented and accepted through Phase 6D. The default presentation
+redesign and its 2026-08-28 refinement passed owner browser/device acceptance
+on 2026-08-29. The final merged `main` gate passed 79 suites / 485 tests against
+MySQL/Flyway V1–V14 plus 5/5 JavaScript tests. The Phase 5 physical USB scanner
+check remains DEFERRED and non-blocking. Phase 7 may begin.
 
 ## Presentation redesign
 
@@ -233,18 +232,9 @@ alternative image text, visible audio controls, and reduced-motion behavior.
   bilingual closure and every guarded/allowed boundary, reopen, System Status,
   and unchanged RSVP/token/delivery/QR/history state against real MySQL.
 
-Phase 6A and Phase 6B manual acceptance are complete. Phase 6C functionality
-and automated verification are complete, including a 429-test clean suite
-against Flyway V1-V13. Its phone/laptop checklist passed on 2026-08-23. Phase
-6D acceptance passed on 2026-08-23: 2 tracked JavaScript syntax checks and the
-final clean MySQL/Flyway V1-V13 suite (78 suites, 431 tests, 0 failures, errors,
-or skips). It adds no production feature, dependency, or migration. The
-presentation redesign and refinement add focused structural, controller,
-migration, service, and zero-dependency JavaScript regressions. The current
-resource-safe serial gate passed on 2026-08-29 with 79 suites / 477 tests and
-0 failures, errors, or skips; the standalone invitation-media Node test also
-passed 4/4. Commands and cleanup audits are recorded in the linked manual
-checklist. Owner browser/device/Lighthouse acceptance remains PENDING. The
-Phase 5 physical USB scanner check remains separately DEFERRED and
-non-blocking; Phase 7 deployment, backup, Cloudflare, and hardening may begin
-only after that owner visual gate passes.
+Phases 6A–6D and the presentation redesign/refinement are implemented and
+manually accepted. The final merged `main` regression passed on 2026-08-29 with
+79 suites / 485 tests against MySQL/Flyway V1–V14 and 5/5 standalone JavaScript
+tests, with no failures, errors, or skips. Commands and cleanup audits are
+recorded in the linked manual checklist. The Phase 5 physical USB scanner
+check remains separately DEFERRED and non-blocking; Phase 7 may begin.

@@ -101,8 +101,9 @@ karena perangkat belum tersedia dan tidak memblokir penerimaan.
 
 ## Matriks penerimaan manual redesign presentasi
 
-Semua item berikut tetap **PENDING** sampai pemilik menjalankannya pada data uji
-tanpa rahasia atau data pribadi dan mencatat hasil nyata.
+Daftar berikut adalah matriks yang digunakan selama acceptance. Status akhir
+dan retest temuan dicatat pada bagian akhir dokumen; presentation refinement
+telah diterima pemilik pada 2026-08-29.
 
 ### Guest
 
@@ -281,8 +282,8 @@ node --test src/test/js/invitation-media.test.js
 
 `graphify update .` dan `git diff --check` lulus setelah pembaruan dokumentasi.
 
-Bukti otomatis ini melengkapi, tetapi tidak menggantikan, seluruh item manual
-**PENDING** di atas.
+Bukti otomatis ini melengkapi, tetapi tidak menggantikan hasil acceptance
+manual yang dicatat di bawah.
 
 ## Retest presentation refinement 2026-08-29
 
@@ -309,3 +310,8 @@ antara Change Password dan Sign Out. Ikon kini memakai centering flex; Sign Out
 menjadi aksi sekunder setelah pemisah dan jarak tersendiri. Pemilik kemudian
 mengonfirmasi keduanya **PASS** pada 2026-08-29; penerimaan presentation
 refinement selesai dengan USB scanner fisik tetap **DEFERRED**.
+
+Setelah branch digabungkan ke `main`, regresi penuh final lulus pada 2026-08-29:
+**79 suite / 485 test Java** terhadap MySQL/Flyway V1–V14 dan **5/5 test
+JavaScript**, tanpa kegagalan, error, atau skip. Tidak ada proses Maven,
+Surefire, `mysqld`, atau container Testcontainers yang tertinggal.

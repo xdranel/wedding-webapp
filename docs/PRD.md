@@ -1,7 +1,10 @@
 # Product Requirements
 
-Status: implemented and accepted through Phase 6D on 2026-08-23; the Phase 5
-physical USB scanner check remains deferred and non-blocking.
+Status: implemented and accepted through Phase 6D and the presentation
+refinement. Final merged `main` verification passed on 2026-08-29 with 79
+suites / 485 tests against MySQL/Flyway V1–V14 plus 5/5 JavaScript tests. The
+Phase 5 physical USB scanner check remains deferred and non-blocking; Phase 7
+may begin.
 
 ## Implementation status — 2026-08-23
 
