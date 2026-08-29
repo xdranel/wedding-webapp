@@ -537,8 +537,17 @@ img {
     max-width: 44rem;
 }
 
-.rsvp-card {
+.rsvp-card,
+.qr-card {
     display: block;
+    margin-inline: auto;
+}
+
+.qr-card {
+    text-align: center;
+}
+
+.qr-card img {
     margin-inline: auto;
 }
 
@@ -638,9 +647,19 @@ img {
 #audio-toggle {
     bottom: 5rem;
     box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / 22%);
+    display: none;
+    font-size: 1.25rem;
+    height: 3rem;
+    justify-content: center;
+    padding: 0;
     position: fixed;
     right: 1rem;
+    width: 3rem;
     z-index: 11;
+}
+
+.invitation-open #audio-toggle {
+    display: inline-flex;
 }
 
 .preview-controls {
@@ -661,6 +680,7 @@ img {
 
 .preview-controls a { color: white; }
 .preview-controls button { background: white; color: #17201c; }
+.preview-page { background: var(--ink); }
 
 .preview-page .guest-navigation {
     bottom: auto;

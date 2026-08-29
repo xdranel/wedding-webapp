@@ -198,8 +198,9 @@
            th:aria-label="${form.language == 'EN'} ? 'Background music' : 'Musik latar'"></audio>
     <button th:if="${media.audioEnabled}" type="button" id="audio-toggle" aria-controls="background-audio"
             aria-pressed="false"
+            th:aria-label="${form.language == 'EN'} ? 'Play music' : 'Putar musik'"
             th:attr="data-play-label=${form.language == 'EN' ? 'Play music' : 'Putar musik'},data-pause-label=${form.language == 'EN' ? 'Pause music' : 'Jeda musik'}"
-            th:text="${form.language == 'EN'} ? 'Play music' : 'Putar musik'">Play music</button>
+            >🔇</button>
 </main>
 <script th:src="@{/js/invitation-media.js}" defer></script>
 </body>

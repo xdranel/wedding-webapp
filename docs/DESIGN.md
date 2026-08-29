@@ -65,7 +65,9 @@ Both partner profiles are part of the main invitation. An optional
 chronological story uses simple ordered entries.
 
 A personalized cover gates the main invitation and provides the user
-interaction needed to start optional audio.
+interaction needed to start optional audio. The compact speaker control is
+hidden until the invitation opens, then exposes localized Play/Pause labels
+while using a speaker icon for its visible state.
 
 Active event sections provide standard downloadable calendar entries.
 

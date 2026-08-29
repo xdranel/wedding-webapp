@@ -8,7 +8,8 @@
 
     const updateAudioLabel = playing => {
         if (!audioToggle) return;
-        audioToggle.textContent = playing ? audioToggle.dataset.pauseLabel : audioToggle.dataset.playLabel;
+        audioToggle.textContent = playing ? '🔊' : '🔇';
+        audioToggle.setAttribute('aria-label', playing ? audioToggle.dataset.pauseLabel : audioToggle.dataset.playLabel);
         audioToggle.setAttribute('aria-pressed', String(playing));
     };
     const playAudio = () => audio.play().catch(() => updateAudioLabel(false));

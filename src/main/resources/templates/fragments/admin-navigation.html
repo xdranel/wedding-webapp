@@ -1,4 +1,4 @@
-<details th:fragment="sidebar(activePage)" class="app-navigation">
+<details th:fragment="sidebar(activePage)" class="app-navigation" open>
     <summary class="navigation-toggle">Administrator menu</summary>
     <nav class="app-sidebar" aria-label="Administrator navigation">
         <a class="brand" th:href="@{/admin}">Wedding Admin</a>
@@ -48,4 +48,5 @@
             <button type="submit" class="button button-secondary">Sign out</button>
         </form>
     </nav>
+    <script th:src="@{/js/admin-navigation.js}" defer></script>
 </details>

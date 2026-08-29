@@ -320,8 +320,9 @@
            th:aria-label="${language == 'EN'} ? 'Background music' : 'Musik latar'"></audio>
     <button th:if="${media.audioEnabled}" type="button" id="audio-toggle" aria-controls="background-audio"
             aria-pressed="false"
+            th:aria-label="${language == 'EN'} ? 'Play music' : 'Putar musik'"
             th:attr="data-play-label=${language == 'EN' ? 'Play music' : 'Putar musik'},data-pause-label=${language == 'EN' ? 'Pause music' : 'Jeda musik'}"
-            th:text="${language == 'EN'} ? 'Play music' : 'Putar musik'">Putar musik</button>
+            >🔇</button>
 </main>
 <script th:src="@{/js/invitation-media.js}" defer></script>
 </body>

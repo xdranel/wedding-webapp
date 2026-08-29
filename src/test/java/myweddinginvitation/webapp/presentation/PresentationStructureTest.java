@@ -144,17 +144,19 @@ class PresentationStructureTest {
 	}
 
 	@Test
-	void administratorNavigationUsesActiveGroupDisclosuresAndClosedMobileDrawer() throws IOException {
+	void administratorNavigationIsVisibleOnDesktopAndClosesTheMobileDrawer() throws IOException {
 		String navigation = resource("templates/fragments/admin-navigation.html");
 		assertThat(navigation)
-				.contains("class=\"app-navigation\"")
-				.doesNotContain("class=\"app-navigation\" open")
+				.contains("class=\"app-navigation\" open", "/js/admin-navigation.js")
 				.contains("class=\"nav-group\"")
 				.contains("th:open=\"${activePage == 'wedding-publication' or activePage == 'wedding-settings' or activePage == 'wedding-partners' or activePage == 'wedding-events' or activePage == 'wedding-story' or activePage == 'wedding-media' or activePage == 'wedding-preview'}\"")
 				.contains("th:open=\"${activePage == 'guest-list' or activePage == 'guest-categories' or activePage == 'guest-import-export'}\"")
 				.contains("th:open=\"${activePage == 'message-templates' or activePage == 'invitations' or activePage == 'reminders'}\"")
 				.contains("th:open=\"${activePage == 'rsvp' or activePage == 'greetings' or activePage == 'check-ins'}\"")
 				.contains("th:open=\"${activePage == 'reports' or activePage == 'staff-accounts' or activePage == 'system-status'}\"");
+		assertThat(resource("static/js/admin-navigation.js"))
+				.contains("matchMedia('(min-width: 48.001rem)')", "navigation.open = desktop.matches",
+						"desktop.addEventListener?.('change', sync)");
 	}
 
 	@Test
@@ -173,7 +175,7 @@ class PresentationStructureTest {
 				".app-navigation", "position: sticky", ".navigation-toggle", ".filter-disclosure",
 				".action-overflow");
 		String navigation = resource("templates/fragments/admin-navigation.html");
-		assertThat(navigation).contains("<details th:fragment=\"sidebar(activePage)\" class=\"app-navigation\">",
+		assertThat(navigation).contains("<details th:fragment=\"sidebar(activePage)\" class=\"app-navigation\" open>",
 				"<summary class=\"navigation-toggle\">Administrator menu</summary>");
 		for (String page : new String[] {"admin/guests/list.html", "admin/reminders/list.html", "admin/reports/index.html"}) {
 			assertThat(resource("templates/" + page)).as(page)
@@ -198,9 +200,12 @@ class PresentationStructureTest {
 
 	@Test
 	void passwordPageRendersRoleIdentityText() throws IOException {
-		assertThat(resource("templates/account/password.html"))
-				.contains("auth-identity",
+		String password = resource("templates/account/password.html");
+		assertThat(password)
+				.contains("password-page", "password-brand", "auth-identity",
 						"th:text=\"${accountRole == T(myweddinginvitation.webapp.account.AccountRole).ADMIN} ? 'Administrator' : 'Staff Check-in'\"");
+		assertThat(resource("static/css/app.css"))
+				.contains(".password-page", ".password-brand");
 	}
 
 	@Test
@@ -330,7 +335,8 @@ class PresentationStructureTest {
 	void invitationCssProvidesFallbackAndReducedMotion() throws IOException {
 		String css = resource("static/css/invitation.css");
 		assertThat(css).contains(".cover-fallback", "prefers-reduced-motion", ":focus-visible",
-				".rsvp-card {\n    display: block;\n    margin-inline: auto;");
+				".rsvp-card,\n.qr-card {\n    display: block;\n    margin-inline: auto;",
+				".qr-card {\n    text-align: center;", ".qr-card img {\n    margin-inline: auto;");
 	}
 
 	@Test
@@ -363,7 +369,21 @@ class PresentationStructureTest {
 	void previewControlsUseReadableDarkHeaderContrast() throws IOException {
 		assertThat(resource("static/css/invitation.css"))
 				.contains(".preview-controls a { color: white; }",
-						".preview-controls button { background: white; color: #17201c; }");
+						".preview-controls button { background: white; color: #17201c; }",
+						".preview-page { background: var(--ink); }");
+	}
+
+	@Test
+	void musicControlAppearsAfterRevealAsAnAccessibleIcon() throws IOException {
+		String guest = resource("templates/guest/invitation.html");
+		String preview = resource("templates/admin/wedding/preview.html");
+		String css = resource("static/css/invitation.css");
+		for (String html : new String[] {guest, preview}) {
+			assertThat(html).contains("id=\"audio-toggle\"", "aria-label=",
+					"data-play-label=", "data-pause-label=", ">🔇</button>");
+		}
+		assertThat(css).contains("#audio-toggle {", "display: none;",
+				".invitation-open #audio-toggle {\n    display: inline-flex;");
 	}
 
 	@Test

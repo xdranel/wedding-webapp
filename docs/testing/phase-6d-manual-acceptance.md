@@ -283,3 +283,17 @@ node --test src/test/js/invitation-media.test.js
 
 Bukti otomatis ini melengkapi, tetapi tidak menggantikan, seluruh item manual
 **PENDING** di atas.
+
+## Retest presentation refinement 2026-08-29
+
+Pemilik melaporkan seluruh perjalanan lain berjalan lancar dan menemukan lima
+inkonsistensi presentasi: sidebar Administrator hilang pada desktop, ruang
+putih setelah footer Preview, kartu QR tidak berada di tengah, kontrol musik
+bertumpuk dengan tombol pembuka, dan Change Password Staff masih terlalu
+generik. Perbaikannya menjaga sidebar terbuka pada desktop/tertutup pada
+mobile, menyamakan background bawah Preview, memusatkan kartu dan isi QR,
+menampilkan kontrol musik berikon hanya setelah invitation dibuka, serta
+memberi Change Password identitas visual sesuai role.
+
+Kelima poin tersebut tetap **PENDING retest** pada desktop dan mobile sebelum
+branch diterima. Physical USB scanner tetap **DEFERRED** dan tidak memblokir.
