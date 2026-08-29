@@ -384,7 +384,7 @@ class PresentationStructureTest {
 					"class=\"audio-icon audio-icon-off\"")
 					.doesNotContain("🔊", "🔇");
 		}
-		assertThat(css).contains("#audio-toggle {", "display: none;",
+		assertThat(css).contains("#audio-toggle {\n    align-items: center;", "display: none;",
 				".invitation-open #audio-toggle {\n    display: inline-flex;",
 				"#audio-toggle[aria-pressed=\"true\"] .audio-icon-on",
 				"#audio-toggle[aria-pressed=\"true\"] .audio-icon-off");
@@ -412,10 +412,12 @@ class PresentationStructureTest {
 	}
 
 	@Test
-	void passwordSignOutUsesPrimaryButton() throws IOException {
+	void passwordSignOutIsSeparatedAsASecondaryAction() throws IOException {
 		assertThat(resource("templates/account/password.html"))
-				.contains("<button class=\"button\" type=\"submit\">Sign out</button>")
-				.doesNotContain("<button class=\"button button-secondary\" type=\"submit\">Sign out</button>");
+				.contains("password-sign-out",
+						"<button class=\"button button-secondary\" type=\"submit\">Sign out</button>");
+		assertThat(resource("static/css/app.css"))
+				.contains(".password-sign-out {", "border-block-start:", "margin-block-start:");
 	}
 
 	@Test

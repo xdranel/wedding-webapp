@@ -645,6 +645,7 @@ img {
 }
 
 #audio-toggle {
+    align-items: center;
     bottom: 5rem;
     box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / 22%);
     display: none;

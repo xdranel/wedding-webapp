@@ -150,6 +150,7 @@ button, input, select, textarea { min-block-size: 44px; }
 .password-brand .auth-identity { color: #d4e5df; font-weight: 700; }
 .password-card > .notice, .password-card > form { margin-inline: var(--space-3); }
 .password-card > form:last-child { margin-block-end: var(--space-3); }
+.password-sign-out { margin-block-start: var(--space-3); padding-block-start: var(--space-3); border-block-start: 1px solid var(--color-border); }
 
 .button {
     display: inline-flex;

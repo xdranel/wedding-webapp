@@ -303,3 +303,8 @@ mengalihkan request stylesheet selama password wajib diganti. Aset statis kini
 tetap dapat dimuat tanpa membuka route aplikasi lain. Emoji audio juga diganti
 dengan ikon SVG outline monochrome yang mengikuti warna kontrol. Kedua poin
 ini tetap **PENDING retest**.
+
+Follow-up retest meminta ikon audio dipusatkan di dalam tombol serta jarak aman
+antara Change Password dan Sign Out. Ikon kini memakai centering flex; Sign Out
+menjadi aksi sekunder setelah pemisah dan jarak tersendiri. Keduanya tetap
+**PENDING retest**.
