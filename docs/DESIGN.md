@@ -1,10 +1,11 @@
 # Product Design
 
 Status: implemented and accepted through Phase 6D on 2026-08-23. The default
-presentation redesign is implemented; owner browser/device visual acceptance
-is pending. The Phase 5 physical USB scanner check remains deferred and
+presentation redesign and its 2026-08-28 refinement are implemented; their
+automated gate passed on 2026-08-29. Owner browser/device visual acceptance is
+PENDING. The Phase 5 physical USB scanner check remains DEFERRED and
 non-blocking. Phase 7 must not begin until the owner accepts the presentation
-redesign checklist.
+checklist.
 
 ## Presentation redesign
 
@@ -16,12 +17,14 @@ staff Thymeleaf fragments. JavaScript remains progressive enhancement for the
 invitation, media/gallery, mobile navigation, and scanner behavior; report
 printing remains independent.
 
-The canonical details and acceptance criteria live in the
-[presentation redesign design](superpowers/specs/2026-08-23-presentation-redesign-design.md),
+The default direction is defined by the
+[presentation redesign design](superpowers/specs/2026-08-23-presentation-redesign-design.md).
+The current corrections and acceptance criteria live in the
+[presentation refinement design](superpowers/specs/2026-08-28-presentation-refinement-design.md),
 with the executed sequence in the
-[presentation redesign implementation plan](superpowers/plans/2026-08-23-presentation-redesign.md).
-Implementation is complete through the account/error surfaces. Automated and
-manual acceptance status is recorded in the
+[presentation refinement implementation plan](superpowers/plans/2026-08-28-presentation-refinement.md).
+Implementation is complete through the refined account/check-in surfaces.
+Automated and manual acceptance status is recorded in the
 [Phase 6D and presentation manual checklist](testing/phase-6d-manual-acceptance.md);
 manual owner approval remains a gate rather than an inferred automated result.
 
@@ -232,10 +235,12 @@ against Flyway V1-V13. Its phone/laptop checklist passed on 2026-08-23. Phase
 6D acceptance passed on 2026-08-23: 2 tracked JavaScript syntax checks and the
 final clean MySQL/Flyway V1-V13 suite (78 suites, 431 tests, 0 failures, errors,
 or skips). It adds no production feature, dependency, or migration. The
-presentation redesign adds focused structural and controller regressions. Its
-resource-safe serial suite passed on 2026-08-24 with 79 suites / 449 tests and
-0 failures, errors, or skips; commands and cleanup audits are recorded in the
-linked manual checklist. Owner browser/device/Lighthouse acceptance remains
-PENDING. The Phase 5 physical USB scanner check remains separately deferred
-and non-blocking; Phase 7 deployment, backup, Cloudflare, and hardening may
-begin only after that owner visual gate passes.
+presentation redesign and refinement add focused structural, controller,
+migration, service, and zero-dependency JavaScript regressions. The current
+resource-safe serial gate passed on 2026-08-29 with 79 suites / 476 tests and
+0 failures, errors, or skips; the standalone invitation-media Node test also
+passed 4/4. Commands and cleanup audits are recorded in the linked manual
+checklist. Owner browser/device/Lighthouse acceptance remains PENDING. The
+Phase 5 physical USB scanner check remains separately DEFERRED and
+non-blocking; Phase 7 deployment, backup, Cloudflare, and hardening may begin
+only after that owner visual gate passes.

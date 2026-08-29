@@ -46,7 +46,7 @@ class ReportingEventStatusMigrationTest {
 		assertThat(migrationJdbc().queryForList("""
 				select version from %s.flyway_schema_history where success = true order by installed_rank
 				""".formatted(STAGED_SCHEMA), String.class))
-				.containsExactlyElementsOf(List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"));
+				.containsExactlyElementsOf(List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"));
 		assertThat(migrationJdbc().queryForMap("""
 				select event_closed, event_status_changed_at, event_status_changed_by,
 				closed_title_id, closed_title_en, closed_message_id, closed_message_en

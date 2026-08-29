@@ -58,7 +58,7 @@ class ReminderCalendarMigrationTest {
 		assertThat(migrationJdbc().queryForList("""
 				select version from %s.flyway_schema_history where success = true order by installed_rank
 				""".formatted(STAGED_SCHEMA), String.class))
-				.containsExactlyElementsOf(List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"));
+				.containsExactlyElementsOf(List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"));
 		assertThat(migrationJdbc().queryForMap("""
 				select display_name, last_rsvp_reminder_sent_at, last_event_reminder_sent_at
 				from %s.guest where display_name = 'Existing Guest'

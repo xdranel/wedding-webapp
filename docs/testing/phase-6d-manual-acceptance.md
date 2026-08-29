@@ -93,7 +93,8 @@ dimulai sebelum matriks redesign di bawah diterima pemilik.
 
 ## Perangkat keras yang ditunda
 
-- [ ] Uji pemindai USB fisik secara terpisah.
+- [ ] **DEFERRED — physical USB scanner:** uji pemindai USB fisik secara
+  terpisah saat perangkat tersedia.
   **Hasil yang diharapkan:** perangkat bertindak sebagai input keyboard,
   menghasilkan pratinjau, dan tetap memerlukan konfirmasi. Ini tetap pengingat
   Phase 5 yang ditunda dan tidak memblokir penerimaan Phase 6D.
@@ -105,6 +106,22 @@ tanpa rahasia atau data pribadi dan mencatat hasil nyata.
 
 ### Guest
 
+- [ ] **PENDING — cover/fallback:** unggah cover undangan khusus, ganti dan
+  hapus cover, lalu verifikasi urutan fallback cover khusus → foto pasangan
+  pertama → fallback terbuat tanpa memblokir isi undangan atau RSVP.
+- [ ] **PENDING — initial reveal/navigation:** buka undangan dan Preview pada
+  desktop; konten Welcome/Sapaan pertama harus terlihat tanpa lompatan ke
+  Events dan fokus keyboard tetap dapat digunakan.
+- [ ] **PENDING — desktop gallery controls:** gunakan mouse dan keyboard pada
+  Previous, Next, dan Close; setiap tombol harus aktif tanpa dicegat gesture
+  galeri.
+- [ ] **PENDING — desktop RSVP centering:** periksa kartu RSVP pada viewport
+  desktop lebar dan pastikan tetap berada di tengah.
+- [ ] **PENDING — language disclosure:** tombol bahasa tunggal menampilkan
+  `ID` atau `EN`, membuka pilihan Indonesia/English lewat mouse dan keyboard,
+  serta mengidentifikasi bahasa aktif.
+- [ ] **PENDING — hidden audio:** mulai audio lalu sembunyikan tab atau pindah
+  aplikasi; audio harus berhenti dan tidak mulai kembali tanpa memilih Play.
 - [ ] **PENDING — ID/EN:** jalankan perjalanan undangan dalam bahasa Indonesia
   dan Inggris, termasuk pergantian bahasa dan fallback teks.
 - [ ] **PENDING — photo/no-photo:** bandingkan cover dengan foto dan fallback
@@ -126,6 +143,29 @@ tanpa rahasia atau data pribadi dan mencatat hasil nyata.
 
 ### Administrator
 
+- [ ] **PENDING — Dashboard Search Guests:** tekan Enter dan gunakan tombol
+  Search; keduanya harus membuka Guest list dengan filter `query` yang sama.
+- [ ] **PENDING — accordion/active group:** hanya grup navigasi tujuan aktif
+  yang terbuka pada desktop; tujuan aktif langsung terlihat setelah navigasi.
+- [ ] **PENDING — mobile drawer state:** drawer Administrator mulai tertutup,
+  lalu saat dibuka hanya grup aktif yang terbuka dan seluruh tujuan tetap dapat
+  dicapai.
+- [ ] **PENDING — filtered Guest list context:** buka Guest List, Invitations,
+  RSVP, dan Check-ins; judul, penjelasan, badge filter, serta Clear filters /
+  View all guests harus menjelaskan konteks setiap shortcut.
+- [ ] **PENDING — full-width cards/tables:** kartu utama dan tabel desktop
+  mengisi area konten yang tersedia; kartu tabel seluler tidak overflow.
+- [ ] **PENDING — action styling:** tautan navigasi tetap berupa tautan,
+  tindakan utama/pendukung memakai tombol yang konsisten, dan tindakan
+  destruktif tetap jelas serta terkonfirmasi.
+- [ ] **PENDING — Publication & Event Status:** tujuan permanen menampilkan
+  status publikasi/acara, persyaratan, Publish/Return to Draft, Open/Close, dan
+  salinan selesai ID/EN; panduan aksi terblokir mengarah ke tujuan ini.
+- [ ] **PENDING — Wedding Settings redirect:** simpan Settings dan pastikan
+  kembali ke Wedding Settings dengan pesan `Settings saved`.
+- [ ] **PENDING — Preview controls:** verifikasi Back to Wedding Admin,
+  sapaan/nama/bahasa saat ini, Open in new tab, dan pembukaan konten
+  Welcome/Sapaan pertama.
 - [ ] **PENDING — desktop/sidebar:** periksa seluruh grup navigasi, status aktif,
   tindakan utama, dan logout pada viewport desktop.
 - [ ] **PENDING — mobile/drawer:** periksa drawer, urutan fokus, penutupan, dan
@@ -146,6 +186,12 @@ tanpa rahasia atau data pribadi dan mencatat hasil nyata.
 
 ### Staff
 
+- [ ] **PENDING — role-aware password:** halaman penggantian kata sandi wajib
+  menampilkan identitas Staff Check-in untuk staf dan Administrator untuk
+  administrator tanpa mengubah form atau validasi.
+- [ ] **PENDING — compact check-in controls:** pilihan jumlah hadir `1`/`2`
+  tampil sebagai pilihan segmented ringkas dan konfirmasi perubahan RSVP
+  sebagai checkbox normal dengan target label ramah sentuh.
 - [ ] **PENDING — camera:** mulai/hentikan kamera, pindah ke Search, dan pastikan
   track kamera berhenti serta fallback manual tetap tersedia.
 - [ ] **PENDING — pasted payload:** tempel payload scanner ke input native dan
@@ -173,42 +219,35 @@ tanpa rahasia atau data pribadi dan mencatat hasil nyata.
   dengan sedikitnya satu warna aksen yang dapat dikonfigurasi dan pastikan
   foreground terang/gelap tetap aman.
 
-## Regresi otomatis redesign presentasi
+## Regresi otomatis refinement presentasi
 
-Selesai pada 2026-08-24 dengan hanya satu proses Maven pada satu waktu. Semua
-perintah Maven memakai lingkungan berikut agar Testcontainers menggunakan
-Podman rootless dan tidak memulai Ryuk:
+Gate terakhir selesai pada 2026-08-29 dengan hanya satu proses Maven pada satu
+waktu. Semua perintah Maven memakai lingkungan berikut agar Testcontainers
+menggunakan Podman rootless dan tidak memulai Ryuk:
 
 ```bash
 DOCKER_HOST=unix:///run/user/1000/podman/podman.sock \
 TESTCONTAINERS_RYUK_DISABLED=true ./mvnw ... test
 ```
 
-`git diff --check` lulus sebelum regresi. Pemeriksaan fokus berikut juga lulus:
-
-```bash
-DOCKER_HOST=unix:///run/user/1000/podman/podman.sock \
-TESTCONTAINERS_RYUK_DISABLED=true \
-./mvnw -Dtest=PresentationStructureTest test
-```
-
-Hasil fokus: 1 suite / 15 test, 0 kegagalan, error, atau skip. Setelah cleanup
-fokus, suite final dijalankan dalam tujuh batch serial berikut. Daftar di kolom
-perintah adalah seluruh keanggotaan batch; setiap kelas test tercakup tepat
-satu kali.
+Ledger dihitung ulang langsung dari `src/test/java/**/*Test.java` dan
+`*Tests.java`: 79 kelas sumber dipetakan ke tujuh batch (4, 9, 8, 11, 10, 12,
+25), tanpa nama sumber duplikat, penugasan duplikat, kelas hilang, atau kelas
+tambahan. Daftar di kolom perintah adalah seluruh keanggotaan batch; setiap
+kelas test tercakup tepat satu kali.
 
 | Batch | Perintah `./mvnw` setelah dua environment variable di atas | Hasil |
 |---|---|---|
-| Root + acceptance + presentation | `-Dtest=DatabaseMigrationTest,MyweddinginvitationWebappApplicationTests,Phase6dIntegrationJourneyTest,PresentationStructureTest test` | 4 suite / 19 test |
-| Account + config | `-Dtest=AccountSessionFilterTest,AdminBootstrapTest,SecurityRoutesTest,StaffAccountControllerTest,StaffAccountServiceTest,SystemStatusAdminControllerTest,SystemStatusServiceTest,UserAccountSecurityTest,WebErrorHandlerTest test` | 9 suite / 43 test |
-| Check-in | `-Dtest=AdminCheckInControllerTest,AdminCheckInServiceTest,CheckInConcurrencyTest,CheckInControllerTest,CheckInJourneyTest,CheckInMigrationTest,CheckInSearchTest,CheckInServiceTest test` | 8 suite / 44 test |
-| Guest | `-Dtest=GuestCategoryControllerTest,GuestControllerTest,GuestCsvControllerTest,GuestCsvServiceTest,GuestDeliveryJourneyTest,GuestDeliveryMigrationTest,GuestServiceTest,InvitationLinkSignerTest,Phase6dScaleTest,PublicInvitationControllerTest,WhatsappNumberServiceTest test` | 11 suite / 86 test |
-| Messaging + reporting | `-Dtest=GuestDeliveryControllerTest,GuestDeliveryServiceTest,MessageTemplateControllerTest,MessageTemplateServiceTest,ReminderAdminControllerTest,ReminderCalendarJourneyTest,ReminderServiceTest,ReportAdminControllerTest,ReportServiceTest,ReportingStatusJourneyTest test` | 10 suite / 48 test |
+| Root + acceptance + presentation | `-Dtest=DatabaseMigrationTest,MyweddinginvitationWebappApplicationTests,Phase6dIntegrationJourneyTest,PresentationStructureTest test` | 4 suite / 26 test |
+| Account + config | `-Dtest=AccountSessionFilterTest,AdminBootstrapTest,SecurityRoutesTest,StaffAccountControllerTest,StaffAccountServiceTest,SystemStatusAdminControllerTest,SystemStatusServiceTest,UserAccountSecurityTest,WebErrorHandlerTest test` | 9 suite / 46 test |
+| Check-in | `-Dtest=AdminCheckInControllerTest,AdminCheckInServiceTest,CheckInConcurrencyTest,CheckInControllerTest,CheckInJourneyTest,CheckInMigrationTest,CheckInSearchTest,CheckInServiceTest test` | 8 suite / 46 test |
+| Guest | `-Dtest=GuestCategoryControllerTest,GuestControllerTest,GuestCsvControllerTest,GuestCsvServiceTest,GuestDeliveryJourneyTest,GuestDeliveryMigrationTest,GuestServiceTest,InvitationLinkSignerTest,Phase6dScaleTest,PublicInvitationControllerTest,WhatsappNumberServiceTest test` | 11 suite / 90 test |
+| Messaging + reporting | `-Dtest=GuestDeliveryControllerTest,GuestDeliveryServiceTest,MessageTemplateControllerTest,MessageTemplateServiceTest,ReminderAdminControllerTest,ReminderCalendarJourneyTest,ReminderServiceTest,ReportAdminControllerTest,ReportServiceTest,ReportingStatusJourneyTest test` | 10 suite / 50 test |
 | RSVP | `-Dtest=AdminRsvpControllerTest,AdminRsvpSummaryTest,CheckInQrSignerTest,GreetingModerationControllerTest,GuestPinServiceTest,GuestVerificationSessionTest,PublicQrControllerTest,PublicRsvpControllerTest,QrImageServiceTest,RsvpMigrationTest,RsvpQrJourneyTest,RsvpServiceTest test` | 12 suite / 65 test |
-| Wedding | `-Dtest=AdminHomeControllerTest,CalendarControllerTest,CalendarServiceTest,EventPartControllerTest,EventStatusAdminControllerTest,EventStatusServiceTest,GalleryImageStorageTest,PartnerControllerTest,PartnerPhotoStorageTest,ReminderCalendarMigrationTest,ReportingEventStatusMigrationTest,StoryControllerTest,WebpImageIoSmokeTest,WeddingAudioStorageTest,WeddingContentControllerTest,WeddingContentJourneyTest,WeddingContentMigrationTest,WeddingContentServiceTest,WeddingMediaAdminControllerTest,WeddingMediaControllerTest,WeddingMediaJourneyTest,WeddingMediaMigrationTest,WeddingMediaRenderingTest,WeddingMediaServiceTest,WeddingPreviewTest test` | 25 suite / 144 test |
+| Wedding | `-Dtest=AdminHomeControllerTest,CalendarControllerTest,CalendarServiceTest,EventPartControllerTest,EventStatusAdminControllerTest,EventStatusServiceTest,GalleryImageStorageTest,PartnerControllerTest,PartnerPhotoStorageTest,ReminderCalendarMigrationTest,ReportingEventStatusMigrationTest,StoryControllerTest,WebpImageIoSmokeTest,WeddingAudioStorageTest,WeddingContentControllerTest,WeddingContentJourneyTest,WeddingContentMigrationTest,WeddingContentServiceTest,WeddingMediaAdminControllerTest,WeddingMediaControllerTest,WeddingMediaJourneyTest,WeddingMediaMigrationTest,WeddingMediaRenderingTest,WeddingMediaServiceTest,WeddingPreviewTest test` | 25 suite / 154 test |
 
-Setelah **setiap** batch, termasuk pemeriksaan fokus, cleanup dan audit berikut
-dijalankan sebelum memulai Maven berikutnya:
+Setelah **setiap** eksekusi batch, cleanup dan audit berikut dijalankan sebelum
+memulai Maven berikutnya:
 
 ```bash
 DOCKER_HOST=unix:///run/user/1000/podman/podman.sock \
@@ -220,17 +259,27 @@ DOCKER_HOST=unix:///run/user/1000/podman/podman.sock \
 podman ps -a --filter label=org.testcontainers=true
 ```
 
-Seluruh delapan audit cleanup kosong: tidak ada proses Maven, Surefire,
-Testcontainers, atau `mysqld` yang tertinggal dan tidak ada container berlabel
-Testcontainers. Compose MySQL tidak disentuh.
+Batch Wedding pertama dihentikan saat dua assertion riwayat migrasi lama
+mengharapkan V1–V13, sedangkan Flyway secara sah menerapkan V14 Invitation
+Cover. Hanya expected list pada `ReminderCalendarMigrationTest` dan
+`ReportingEventStatusMigrationTest` yang diperbarui menjadi V1–V14; batch
+Wedding kemudian diulang sendiri dan lulus. Batch 1–6 tidak diulang.
 
-Agregasi langsung dari 79 XML Surefire final menghasilkan **79 suite / 449
-test, 0 kegagalan, 0 error, dan 0 skip**. Total ini tiga lebih tinggi daripada
-perkiraan 431 + 15 pada brief: selain 15 test baru
-`PresentationStructureTest`, redesign menambahkan masing-masing satu test ke
-`GuestControllerTest`, `AdminRsvpControllerTest`, dan
-`EventStatusAdminControllerTest`. Dengan demikian total terverifikasi adalah
-431 + 15 + 3 = 449, bukan 446.
+Setelah setiap eksekusi Maven—enam batch hijau awal, batch Wedding RED, dan
+rerun Wedding hijau—cleanup hanya menarget container berlabel
+`org.testcontainers=true`. Seluruh delapan audit kosong: tidak ada proses
+Maven, Surefire, Testcontainers, atau `mysqld` yang tertinggal dan tidak ada
+container berlabel Testcontainers. Compose MySQL tidak disentuh.
+
+Agregasi dari XML Surefire segar tiap batch hijau menghasilkan **79 suite / 476
+test, 0 kegagalan, 0 error, dan 0 skip**. JavaScript produksi yang tidak masuk
+Maven juga diperiksa sekali dengan perintah berikut dan lulus 4/4:
+
+```bash
+node --test src/test/js/invitation-media.test.js
+```
+
+`graphify update .` dan `git diff --check` lulus setelah pembaruan dokumentasi.
 
 Bukti otomatis ini melengkapi, tetapi tidak menggantikan, seluruh item manual
 **PENDING** di atas.
