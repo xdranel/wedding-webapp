@@ -271,7 +271,7 @@ rerun Wedding hijau—cleanup hanya menarget container berlabel
 Maven, Surefire, Testcontainers, atau `mysqld` yang tertinggal dan tidak ada
 container berlabel Testcontainers. Compose MySQL tidak disentuh.
 
-Agregasi dari XML Surefire segar tiap batch hijau menghasilkan **79 suite / 476
+Agregasi dari XML Surefire segar tiap batch hijau menghasilkan **79 suite / 477
 test, 0 kegagalan, 0 error, dan 0 skip**. JavaScript produksi yang tidak masuk
 Maven juga diperiksa sekali dengan perintah berikut dan lulus 4/4:
 

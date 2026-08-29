@@ -237,7 +237,7 @@ final clean MySQL/Flyway V1-V13 suite (78 suites, 431 tests, 0 failures, errors,
 or skips). It adds no production feature, dependency, or migration. The
 presentation redesign and refinement add focused structural, controller,
 migration, service, and zero-dependency JavaScript regressions. The current
-resource-safe serial gate passed on 2026-08-29 with 79 suites / 476 tests and
+resource-safe serial gate passed on 2026-08-29 with 79 suites / 477 tests and
 0 failures, errors, or skips; the standalone invitation-media Node test also
 passed 4/4. Commands and cleanup audits are recorded in the linked manual
 checklist. Owner browser/device/Lighthouse acceptance remains PENDING. The
