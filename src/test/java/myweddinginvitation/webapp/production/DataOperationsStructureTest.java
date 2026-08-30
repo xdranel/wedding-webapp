@@ -61,4 +61,27 @@ class DataOperationsStructureTest {
 		assertThat(shell.indexOf("compose pull app"))
 				.isLessThan(shell.indexOf("mv --"));
 	}
+
+	@Test
+	void erasureIsExplicitTransactionalAndLeavesOnlyACleanBaseline() throws IOException {
+		String shell = Files.readString(Path.of("scripts/production/erase-guests.sh"));
+		String sql = Files.readString(Path.of("scripts/production/sql/erase-guests.sql"));
+		assertThat(shell).contains("ERASE ALL GUEST DATA", "acquire_operation_lock",
+				"compose stop app", "erase-guests.sql", "commit_succeeded=1",
+				"post-erasure", "--lock-held", "clean baseline", "find",
+				"-mindepth 1", "-maxdepth 1", "logger --tag wedding-erasure",
+				"operator=${SUDO_USER:-root}", "image=$image", "corrections=$correction_count",
+				"check_ins=$check_in_count", "rsvps=$rsvp_count", "guests=$guest_count",
+				"categories=$category_count")
+				.doesNotContain("--yes", "pre-erasure", "set -x", "rm -rf /",
+						"full_name", "phone_number", "email", "internal_note");
+		assertThat(shell.indexOf("commit_succeeded=1"))
+				.isLessThan(shell.indexOf("rm -r --"));
+		assertThat(sql).containsSubsequence("START TRANSACTION",
+				"DELETE FROM check_in_correction", "DELETE FROM check_in",
+				"DELETE FROM rsvp", "DELETE FROM guest", "DELETE FROM guest_category",
+				"COMMIT");
+		assertThat(sql).doesNotContain("user_account", "wedding_settings", "partner",
+				"event_part", "story_entry", "gallery_photo", "message_template");
+	}
 }
