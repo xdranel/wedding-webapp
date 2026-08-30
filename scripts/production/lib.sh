@@ -22,6 +22,14 @@ require_root() {
 	[[ ${EUID:-$(id -u)} -eq 0 ]] || die "run with sudo"
 }
 
+env_value() {
+	local name="${1:-}" count
+	[[ "$name" =~ ^[A-Z][A-Z0-9_]*$ ]] || die "invalid environment name"
+	count="$(grep -c "^${name}=" "$ENV_FILE" || true)"
+	[[ "$count" == 1 ]] || die "environment name must occur exactly once: $name"
+	sed -n "s/^${name}=//p" "$ENV_FILE"
+}
+
 load_env() {
 	require_root
 	local canonical owner mode name
@@ -37,7 +45,7 @@ load_env() {
 		INVITATION_SIGNING_SECRET MEDIA_DIRECTORY; do
 		grep -Eq "^${name}=.+$" "$ENV_FILE" || die "missing required environment name: $name"
 	done
-	APP_BIND_ADDRESS_VALUE="$(sed -n 's/^APP_BIND_ADDRESS=//p' "$ENV_FILE")"
+	APP_BIND_ADDRESS_VALUE="$(env_value APP_BIND_ADDRESS)"
 	[[ "$APP_BIND_ADDRESS_VALUE" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || die "APP_BIND_ADDRESS must be one IPv4 address"
 	local octet
 	for octet in ${APP_BIND_ADDRESS_VALUE//./ }; do
