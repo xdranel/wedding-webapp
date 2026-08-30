@@ -29,4 +29,19 @@ class ProductionOperationsTest {
 				.contains("localhost:8080/login");
 		assertThat(shell).doesNotContain("8081:8081", "set -x");
 	}
+
+	@Test
+	void quickTunnelIsPinnedTemporaryAndCannotAcceptACustomDomain() throws IOException {
+		String shell = Files.readString(Path.of("scripts/production/quick-tunnel.sh"));
+		assertThat(shell).contains("set -Eeuo pipefail", "TESTING ONLY",
+				"--add-host=host.docker.internal:host-gateway",
+				"cloudflare/cloudflared:2026.8.1", "tunnel --no-autoupdate --url",
+				"http://host.docker.internal:8080");
+		assertThat(shell).doesNotContain("hostname", "--token", "trycloudflare.com");
+
+		String compose = Files.readString(Path.of("compose.production.yaml"));
+		assertThat(compose).contains("cloudflare/cloudflared:2026.8.1",
+				"tunnel", "--no-autoupdate", "run", "--token",
+				"${CLOUDFLARE_TUNNEL_TOKEN}");
+	}
 }
