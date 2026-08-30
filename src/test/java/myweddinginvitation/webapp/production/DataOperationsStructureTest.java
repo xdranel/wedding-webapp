@@ -31,4 +31,20 @@ class DataOperationsStructureTest {
 				"RandomizedDelaySec=5m", "Unit=wedding-backup.service",
 				"WantedBy=timers.target");
 	}
+
+	@Test
+	void restoreIsChecksumGatedAndRequiresExactConfirmation() throws IOException {
+		String shell = Files.readString(Path.of("scripts/production/restore.sh"));
+		assertThat(shell).contains("^[0-9]{8}T[0-9]{6}Z$", "sha256sum --check",
+				"gzip -t", "tar -tzf", "RESTORE $timestamp", "backup.sh",
+				"--reason pre-restore", "compose stop app", "staging",
+				"compose up -d app", "wait_for_health", "/var/backups/wedding",
+				"backup_owner", "backup_mode", "gzip -dc", "tar -tvzf",
+				"/var/lib/mysql", "database_uncompressed_bytes", "media_uncompressed_bytes")
+				.doesNotContain("--yes", "rm -rf /", "set -x");
+		assertThat(shell.indexOf("sha256sum --check"))
+				.isLessThan(shell.indexOf("compose stop app"));
+		assertThat(shell.indexOf("--reason pre-restore"))
+				.isLessThan(shell.indexOf("compose stop app"));
+	}
 }
