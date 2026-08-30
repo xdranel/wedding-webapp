@@ -12,7 +12,7 @@ test('administrator navigation follows desktop state without overriding mobile i
         addEventListener(type, listener) { this.listener = listener; }
     };
     const context = {
-        document: { querySelector: () => navigation },
+        document: { querySelector: () => navigation, addEventListener() {} },
         matchMedia: () => media
     };
     context.globalThis = context;
@@ -26,4 +26,27 @@ test('administrator navigation follows desktop state without overriding mobile i
 
     navigation.open = true;
     assert.equal(navigation.open, true);
+});
+
+test('data-confirm cancels submission when the operator declines', () => {
+    const navigation = { open: false };
+    const listeners = {};
+    const context = {
+        document: {
+            querySelector: () => navigation,
+            addEventListener: (type, listener) => listeners[type] = listener
+        },
+        matchMedia: () => ({ matches: false, addEventListener() {} }),
+        confirm: () => false
+    };
+    context.globalThis = context;
+
+    vm.runInNewContext(script, context);
+    let prevented = false;
+    listeners.submit({
+        target: { dataset: { confirm: 'Delete this guest?' } },
+        preventDefault: () => prevented = true
+    });
+
+    assert.equal(prevented, true);
 });

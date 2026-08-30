@@ -78,6 +78,12 @@ class SecurityRoutesTest {
 	}
 
 	@Test
+	void loginResponseEnforcesSelfHostedScripts() throws Exception {
+		mockMvc.perform(get("/login"))
+				.andExpect(header().string("Content-Security-Policy", containsString("script-src 'self'")));
+	}
+
+	@Test
 	void staffCannotAccessAdministrationButCanAccessCheckIn() throws Exception {
 		MockHttpSession session = login("staff");
 		mockMvc.perform(get("/admin").session(session))

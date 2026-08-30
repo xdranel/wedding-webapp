@@ -108,7 +108,7 @@
       <button class="button button-secondary" type="submit">Confirm sent</button>
     </form>
     <form class="notice" method="post" th:action="@{/admin/guests/{id}/regenerate-invitation(id=${guest.id})}"
-          onsubmit="return confirm('Regenerate the invitation link? The previous link will stop working.');">
+          data-confirm="Regenerate the invitation link? The previous link will stop working.">
       <input type="hidden" name="version" th:value="${guest.version}">
       <button class="button" type="submit">Regenerate invitation link</button>
     </form>
@@ -122,7 +122,7 @@
   <div>
   <form th:if="${!guest.archived}" method="post" th:action="@{/admin/guests/{id}/archive(id=${guest.id})}"><input type="hidden" name="version" th:value="${guest.version}"><button class="button button-secondary" type="submit">Archive guest</button></form>
   <form th:if="${guest.archived}" method="post" th:action="@{/admin/guests/{id}/restore(id=${guest.id})}"><input type="hidden" name="version" th:value="${guest.version}"><button class="button button-secondary" type="submit">Restore guest</button></form>
-  <form method="post" th:action="@{/admin/guests/{id}/delete(id=${guest.id})}" onsubmit="return confirm('Permanently delete this guest?');"><input type="hidden" name="version" th:value="${guest.version}"><button class="button" type="submit">Permanently delete</button></form>
+  <form method="post" th:action="@{/admin/guests/{id}/delete(id=${guest.id})}" data-confirm="Permanently delete this guest?"><input type="hidden" name="version" th:value="${guest.version}"><button class="button" type="submit">Permanently delete</button></form>
   </div>
   </details>
   </section>

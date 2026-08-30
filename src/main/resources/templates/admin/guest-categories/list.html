@@ -57,7 +57,7 @@
             <button class="button" type="submit">Rename</button>
           </form>
           <form class="notice" method="post" th:action="@{/admin/guest-categories/{id}/delete(id=${category.id})}"
-                onsubmit="return confirm('Delete this category? Guests will remain without a category.');">
+                data-confirm="Delete this category? Guests will remain without a category.">
             <input type="hidden" name="version" th:value="${category.version}">
             <button class="button" type="submit">Delete</button>
           </form>

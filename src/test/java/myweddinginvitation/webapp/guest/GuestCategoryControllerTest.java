@@ -180,7 +180,7 @@ class GuestCategoryControllerTest {
 				.andExpect(content().string(containsString("/admin/guest-categories/" + category.getId())))
 				.andExpect(content().string(containsString("Rename")))
 				.andExpect(content().string(containsString("Delete")))
-				.andExpect(content().string(containsString("confirm(")))
+				.andExpect(content().string(containsString("data-confirm=")))
 				.andReturn().getResponse().getContentAsString();
 		assertThat(page.split("name=\"_csrf\"", -1)).hasSize(6);
 

@@ -38,6 +38,11 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/check-in/**").hasAnyRole("ADMIN", "STAFF")
                         .anyRequest().denyAll())
+                .headers(headers -> headers.contentSecurityPolicy(csp -> csp.policyDirectives(
+                        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+                                + "img-src 'self' data:; media-src 'self'; font-src 'self'; "
+                                + "connect-src 'self'; object-src 'none'; base-uri 'self'; "
+                                + "frame-ancestors 'none'; form-action 'self'")))
                 .csrf(Customizer.withDefaults())
                 .formLogin(form -> form
                         .loginPage("/login")

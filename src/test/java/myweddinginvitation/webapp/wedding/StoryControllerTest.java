@@ -167,7 +167,7 @@ class StoryControllerTest {
 				.andExpect(content().string(containsString("/admin/wedding/story/" + first + "/up")))
 				.andExpect(content().string(containsString("Move up")))
 				.andExpect(content().string(containsString("disabled")))
-				.andExpect(content().string(containsString("confirm(")))
+				.andExpect(content().string(containsString("data-confirm=")))
 				.andReturn().getResponse().getContentAsString();
 
 		assertThat(page.split("name=\"_csrf\"", -1)).hasSize(12);

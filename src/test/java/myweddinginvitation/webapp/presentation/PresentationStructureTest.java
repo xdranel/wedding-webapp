@@ -160,6 +160,14 @@ class PresentationStructureTest {
 	}
 
 	@Test
+	void administratorDestructiveActionsUseSharedConfirmationData() throws IOException {
+		for (String page : new String[] {"admin/wedding/story.html", "admin/guest-categories/list.html",
+				"admin/guests/detail.html"}) {
+			assertThat(resource("templates/" + page)).as(page).contains("data-confirm=").doesNotContain("onsubmit=");
+		}
+	}
+
+	@Test
 	void dashboardSearchSubmitsExistingGuestQuery() throws IOException {
 		assertThat(resource("templates/admin/home.html"))
 				.contains("method=\"get\"", "th:action=\"@{/admin/guests}\"",

@@ -92,7 +92,7 @@
                 <button class="button button-secondary" type="submit" th:disabled="${state.last}">Move down</button>
             </form>
             <form class="notice" method="post" th:action="@{/admin/wedding/story/{id}/delete(id=${entry.id})}"
-                  onsubmit="return confirm('Delete this story entry?');">
+                  data-confirm="Delete this story entry?">
                 <button class="button" type="submit">Delete story entry</button>
             </form>
         </li>
