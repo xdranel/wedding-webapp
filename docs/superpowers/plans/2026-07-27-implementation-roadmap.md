@@ -22,7 +22,8 @@ tagged GHCR publication/public visibility remain pending. Phase 7B scripts,
 Ubuntu/Cloudflare/runbook documentation, isolated core boot, and real Quick
 Tunnel HTTPS transport are locally accepted; clean Ubuntu, fresh-device,
 new-domain, and remotely-managed Tunnel checks remain owner-run gates. Phase
-7C–7D remain pending.
+7C–7D remain pending. The Phase 7B final serial gate passed 499 Java tests and
+6 JavaScript tests with no failures, errors, or skips.
 
 Detailed plans are written and executed one phase at a time. A phase must pass
 its tests and review before the next phase begins.

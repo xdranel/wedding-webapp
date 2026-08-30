@@ -180,10 +180,11 @@ camera, and multi-device acceptance is complete except for the still-pending
 physical USB scanner check.
 
 Phases 6A–6D and the presentation redesign are implemented and manually
-accepted. Phase 7A production packaging is implemented and locally accepted:
-the 2026-08-30 serial regression passed 496 Java tests against MySQL/Flyway
-V1–V14 plus 6/6 JavaScript tests, and the linux/amd64 image and core Compose
-stack validated healthy. First tagged GHCR publication/public visibility,
-Ubuntu/Cloudflare installation, data operations, and final verification remain
-Phase 7B–7D work. The physical USB scanner remains deferred until hardware is
-available and is non-blocking.
+accepted. Phase 7A production packaging and Phase 7B installation/ingress
+implementation are locally accepted. The final 2026-08-30 serial regression
+passed 499 Java tests against MySQL/Flyway V1–V14 plus 6/6 JavaScript tests;
+the linux/amd64 image, isolated core stack, and real Quick Tunnel HTTPS
+transport validated successfully. First tagged GHCR publication/public
+visibility, clean Ubuntu/fresh-device/new-domain owner checks, Phase 7C data
+operations, and Phase 7D final verification remain. The physical USB scanner
+remains deferred until hardware is available and is non-blocking.

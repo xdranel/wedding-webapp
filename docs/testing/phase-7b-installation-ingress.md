@@ -9,6 +9,8 @@ checked on the Ubuntu server and new domain.
 - [x] Bash syntax: `lib.sh`, `health-check.sh`, and `quick-tunnel.sh`.
 - [x] Health `--help` succeeds and extra arguments are rejected.
 - [x] Production operation/packaging contracts: 8 tests, 0 failures/errors.
+- [x] Final serial regression: 499 Java tests and 6 JavaScript tests, no
+  failures, errors, or skips; no Testcontainers remained afterward.
 - [x] Core and public-profile Compose configuration render successfully.
 - [x] Port 8080 requires explicit `APP_BIND_ADDRESS`; 3306/8081 stay internal.
 - [x] Quick Tunnel uses the Compose network origin `http://app:8080` and accepts
