@@ -1,0 +1,22 @@
+server:
+  shutdown: graceful
+  servlet:
+    session:
+      timeout: 8h
+      cookie:
+        http-only: true
+        same-site: lax
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
