@@ -47,4 +47,18 @@ class DataOperationsStructureTest {
 		assertThat(shell.indexOf("--reason pre-restore"))
 				.isLessThan(shell.indexOf("compose stop app"));
 	}
+
+	@Test
+	void deploymentUsesImmutableTagsAndBacksUpBeforeChangingEnvironment() throws IOException {
+		String shell = Files.readString(Path.of("scripts/production/deploy.sh"));
+		assertThat(shell).contains("^v[0-9]+\\.[0-9]+\\.[0-9]+$", "acquire_operation_lock",
+				"--reason pre-deploy", "--lock-held", "previous_image",
+				"previous_flyway_version", "mv --", "compose pull app",
+				"wait_for_health", "restore.sh")
+				.doesNotContain("latest", "set -x", "docker image prune");
+		assertThat(shell.indexOf("--reason pre-deploy"))
+				.isLessThan(shell.indexOf("mv --"));
+		assertThat(shell.indexOf("compose pull app"))
+				.isLessThan(shell.indexOf("mv --"));
+	}
 }
