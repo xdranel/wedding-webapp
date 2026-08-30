@@ -30,4 +30,29 @@ class ProductionPackagingTest {
 				"no-new-privileges:true", "cap_drop:", "- ALL");
 		assertThat(compose).doesNotContain("3306:3306", "8081:8081");
 	}
+
+	@Test
+	void githubWorkflowsTestBeforePublishingVerifiedImages() throws IOException {
+		String ci = Files.readString(Path.of(".github/workflows/ci.yml"));
+		assertThat(ci).contains("permissions:", "contents: read", "cancel-in-progress: true",
+				"./mvnw -B test", "admin-navigation.test.js", "invitation-media.test.js");
+
+		String release = Files.readString(Path.of(".github/workflows/release.yml"));
+		assertThat(release).contains("git merge-base --is-ancestor HEAD origin/main",
+				"packages: write", "attestations: write", "platforms: linux/amd64",
+				"sbom: true", "provenance: mode=max", "aquasecurity/trivy-action@v0.36.0",
+				"ignore-unfixed: true", "severity: HIGH,CRITICAL", "exit-code: 1",
+				"IMAGE: ghcr.io/xdranel/wedding-webapp", "type=raw,value=latest");
+		assertThat(release.indexOf("aquasecurity/trivy-action@v0.36.0"))
+				.isLessThan(release.indexOf("push: true"));
+	}
+
+	@Test
+	void dependabotChecksEveryBuildEcosystemWeekly() throws IOException {
+		String dependabot = Files.readString(Path.of(".github/dependabot.yml"));
+		assertThat(dependabot).contains("package-ecosystem: maven",
+				"package-ecosystem: github-actions", "package-ecosystem: docker",
+				"interval: weekly");
+		assertThat(dependabot).doesNotContain("automerge");
+	}
 }
