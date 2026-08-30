@@ -34,7 +34,7 @@ class ProductionOperationsTest {
 	void quickTunnelIsPinnedTemporaryAndCannotAcceptACustomDomain() throws IOException {
 		String shell = Files.readString(Path.of("scripts/production/quick-tunnel.sh"));
 		assertThat(shell).contains("set -Eeuo pipefail", "TESTING ONLY", "load_env",
-				"compose run --rm --no-deps cloudflared", "tunnel --no-autoupdate --url",
+				"compose --profile public run --rm --no-deps cloudflared", "tunnel --no-autoupdate --url",
 				"http://app:8080");
 		assertThat(shell).doesNotContain("host.docker.internal", "hostname", "--token",
 				"trycloudflare.com");

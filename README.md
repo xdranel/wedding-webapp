@@ -44,6 +44,8 @@ For a clean host, follow the [Ubuntu Server production installation](docs/instal
 
 - [Owner and staff event operations](docs/operations/event-operations.md)
 - [Ubuntu Server production installation](docs/installation/ubuntu-server.md)
+- [Cloudflare ingress](docs/installation/cloudflare.md)
+- [Production operations](docs/operations/production-operations.md)
 - [Guest guide / Panduan tamu](docs/guest-guide.md)
 - [Phase 6D manual acceptance checklist](docs/testing/phase-6d-manual-acceptance.md)
 

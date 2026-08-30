@@ -70,7 +70,7 @@ services:
     logging: *default-logging
 
   cloudflared:
-    image: cloudflare/cloudflared:2026.8.1
+    image: docker.io/cloudflare/cloudflared:2026.8.1
     profiles: [public]
     restart: unless-stopped
     depends_on:

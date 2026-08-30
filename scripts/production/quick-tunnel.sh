@@ -11,5 +11,5 @@ fi
 
 load_env
 printf 'TESTING ONLY: URL is temporary and cannot satisfy production acceptance.\n' >&2
-compose run --rm --no-deps cloudflared \
+compose --profile public run --rm --no-deps cloudflared \
 	tunnel --no-autoupdate --url http://app:8080
