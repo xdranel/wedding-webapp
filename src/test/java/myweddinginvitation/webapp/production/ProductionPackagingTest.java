@@ -21,4 +21,13 @@ class ProductionPackagingTest {
 		assertThat(Files.readString(Path.of("LICENSE")))
 				.contains("MIT License", "Copyright (c) 2026 xdranel");
 	}
+
+	@Test
+	void productionComposeDoesNotExposeDatabaseOrHealthPort() throws IOException {
+		String compose = Files.readString(Path.of("compose.production.yaml"));
+		assertThat(compose).contains("image: ${APP_IMAGE:?APP_IMAGE is required}",
+				"profiles: [public]", "localhost:8081", "read_only: true",
+				"no-new-privileges:true", "cap_drop:", "- ALL");
+		assertThat(compose).doesNotContain("3306:3306", "8081:8081");
+	}
 }
