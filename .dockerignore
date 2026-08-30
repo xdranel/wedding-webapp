@@ -1,0 +1,15 @@
+.git
+.worktrees
+.env
+data
+target
+.idea
+*.iml
+.vscode
+.agents
+.codex
+.specify
+.superpowers
+AGENTS.md
+skills-lock.json
+graphify-out

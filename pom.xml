@@ -11,20 +11,27 @@
 	<groupId>myweddinginvitation.webapp</groupId>
 	<artifactId>myweddinginvitation-webapp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
-	<url/>
+	<name>Wedding Invitation Web App</name>
+	<description>Self-hosted wedding invitation and guest management web application.</description>
+	<url>https://github.com/xdranel/wedding-webapp</url>
 	<licenses>
-		<license/>
+		<license>
+			<name>MIT License</name>
+			<url>https://opensource.org/license/mit/</url>
+			<distribution>repo</distribution>
+		</license>
 	</licenses>
 	<developers>
-		<developer/>
+		<developer>
+			<id>xdranel</id>
+			<name>xdranel</name>
+		</developer>
 	</developers>
 	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
+		<connection>scm:git:git://github.com/xdranel/wedding-webapp.git</connection>
+		<developerConnection>scm:git:ssh://github.com/xdranel/wedding-webapp.git</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/xdranel/wedding-webapp</url>
 	</scm>
 	<properties>
 		<java.version>21</java.version>
