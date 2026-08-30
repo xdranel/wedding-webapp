@@ -12,6 +12,8 @@ class ProductionPackagingTest {
 	void dockerfileUsesMultistageJava21AndNonRootRuntime() throws IOException {
 		String dockerfile = Files.readString(Path.of("Dockerfile"));
 		assertThat(dockerfile).contains("AS build", "./mvnw", "USER wedding",
+				"groupadd --system --gid 10001 wedding",
+				"useradd --system --uid 10001 --gid wedding wedding",
 				"EXPOSE 8080 8081", "ENTRYPOINT");
 		assertThat(dockerfile).doesNotContain("latest");
 	}

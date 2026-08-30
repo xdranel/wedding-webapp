@@ -12,7 +12,8 @@ release gates; they are not claimed by this local result.
 - CSP permits self-hosted scripts only; existing confirmation prompts use the
   shared external `data-confirm` handler.
 - The linux/amd64 runtime image contains Java 21 JRE, the application JAR,
-  minimal curl readiness support, and non-root user `wedding`.
+  minimal curl readiness support, and non-root user `wedding` with stable
+  UID/GID `10001:10001` for bind-mounted media ownership.
 - Core production Compose contains app plus MySQL; cloudflared is an explicit
   optional `public` profile. Only host port 8080 is published.
 - CI tests `main`; exact version tags belonging to `main` are scanned before
@@ -53,8 +54,10 @@ podman image inspect wedding-app:phase7a \
 ```
 
 Recorded build result: image
-`b5a9d1873e67cce3dab84457e41293389808c1fa81b85155425747742400d247`
-built successfully. Inspection must show `wedding`, `amd64`, and 8080/8081.
+`6a94d130310ca54f239f430b655f75f991bde83465fc92858813fb8adebb551d`
+built successfully. Runtime identity verification returned
+`uid=10001(wedding) gid=10001(wedding)`. Inspection must show `wedding`,
+`amd64`, and 8080/8081.
 Ports declared by an image are not host publications.
 
 ## Compose configuration and core boot
@@ -70,6 +73,7 @@ mkdir -p /tmp/wedding-phase7a-media
 # Edit /tmp/wedding-phase7a.env: replace every example secret,
 # set APP_IMAGE=localhost/wedding-app:phase7a, and
 # set MEDIA_DIRECTORY=/tmp/wedding-phase7a-media.
+# The media directory must be writable by UID/GID 10001:10001.
 
 podman compose --env-file .env.production.example \
   -f compose.production.yaml config

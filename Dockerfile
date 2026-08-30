@@ -10,8 +10,8 @@ FROM eclipse-temurin:21-jre-jammy
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/* \
-    && groupadd --system wedding \
-    && useradd --system --gid wedding wedding
+    && groupadd --system --gid 10001 wedding \
+    && useradd --system --uid 10001 --gid wedding wedding
 WORKDIR /app
 COPY --from=build /workspace/target/*.jar app.jar
 USER wedding

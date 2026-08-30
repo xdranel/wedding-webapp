@@ -412,6 +412,16 @@ example to `/tmp/wedding-phase7a.env`, replace every secret, set
 `APP_IMAGE=localhost/wedding-app:phase7a`, create its media directory, and use a
 dedicated project name:
 
+The runtime writes media as fixed UID/GID `10001:10001`. On the Ubuntu server,
+create the bind-mount directory with matching ownership before the first boot:
+
+```bash
+sudo install -d -o 10001 -g 10001 -m 0750 /var/lib/wedding/media
+```
+
+For a disposable local validation directory, grant the same ownership or use
+a directory already writable by UID/GID `10001:10001`.
+
 ```bash
 docker compose -p phase7a_validation --env-file /tmp/wedding-phase7a.env \
   -f compose.production.yaml up -d mysql app
