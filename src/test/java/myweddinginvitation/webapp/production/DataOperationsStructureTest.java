@@ -19,4 +19,16 @@ class DataOperationsStructureTest {
 		assertThat(shell).doesNotContain("set -x", "/var/lib/docker/volumes",
 				"rm -rf /", "source $ENV_FILE");
 	}
+
+	@Test
+	void backupHasAHardenedPersistentSystemdSchedule() throws IOException {
+		String service = Files.readString(Path.of("deployment/systemd/wedding-backup.service"));
+		String timer = Files.readString(Path.of("deployment/systemd/wedding-backup.timer"));
+		assertThat(service).contains("Type=oneshot", "User=root", "Group=root",
+				"ExecStart=/opt/wedding/scripts/production/backup.sh", "UMask=0077")
+				.doesNotContain("Environment=", "Password", "Token");
+		assertThat(timer).contains("OnCalendar=*-*-* 02:00:00 Asia/Jakarta", "Persistent=true",
+				"RandomizedDelaySec=5m", "Unit=wedding-backup.service",
+				"WantedBy=timers.target");
+	}
 }
