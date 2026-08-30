@@ -383,6 +383,58 @@ curl --fail http://localhost:8080/actuator/health
 The command exits successfully only when the endpoint returns HTTP 200; the
 response status should be `UP`.
 
+## Local production-package verification
+
+The Phase 7A package is intentionally separate from development Compose. Build
+and inspect the linux/amd64 image without starting another database:
+
+```bash
+docker build --platform linux/amd64 -t wedding-app:phase7a .
+docker image inspect wedding-app:phase7a \
+  --format 'user={{.Config.User}} architecture={{.Architecture}} ports={{json .Config.ExposedPorts}}'
+```
+
+Expected inspection includes `user=wedding`, `architecture=amd64`, and only
+8080/8081 declarations. Validate the core and optional public configurations:
+
+```bash
+docker compose --env-file .env.production.example -f compose.production.yaml config
+docker compose --env-file .env.production.example -f compose.production.yaml config --profiles
+```
+
+For Fedora/Podman, substitute `podman` for `docker`. The external
+`podman-compose` provider may not support the inspection-only `config
+--profiles` flag; use `podman compose --env-file .env.production.example
+--profile public -f compose.production.yaml config` instead.
+
+Never start production Compose with the committed example values. Copy the
+example to `/tmp/wedding-phase7a.env`, replace every secret, set
+`APP_IMAGE=localhost/wedding-app:phase7a`, create its media directory, and use a
+dedicated project name:
+
+```bash
+docker compose -p phase7a_validation --env-file /tmp/wedding-phase7a.env \
+  -f compose.production.yaml up -d mysql app
+docker compose -p phase7a_validation --env-file /tmp/wedding-phase7a.env \
+  -f compose.production.yaml ps
+docker compose -p phase7a_validation --env-file /tmp/wedding-phase7a.env \
+  -f compose.production.yaml exec -T app \
+  curl --fail --silent --show-error http://localhost:8081/actuator/health/readiness
+docker compose -p phase7a_validation --env-file /tmp/wedding-phase7a.env \
+  -f compose.production.yaml down
+```
+
+The expected `ps` output publishes only host port 8080. Do not run `down -v`:
+the named MySQL volume is deliberately persistent. Delete the temporary env
+file after the test. Complete evidence and cleanup checks are in the
+[Phase 7A acceptance guide](../testing/phase-7a-production-packaging.md).
+
+The GHCR release workflow is exercised only by an exact `vX.Y.Z` tag whose
+commit belongs to `main`. After its first successful publication, set the
+package to Public in GitHub Packages and prove an anonymous pull from a logged-
+out machine. Quick Tunnel, final domain, and server installation are handled in
+Phase 7B rather than this local development guide.
+
 ## Diagnostics
 
 ```bash

@@ -15,6 +15,29 @@ Sign in with the bootstrap credentials from `.env` and change the bootstrap
 password at the first login. See [the development guide](docs/installation/development.md)
 for prerequisites, diagnostics, and database reset instructions.
 
+## Production package
+
+Phase 7A provides a non-root Java 21 image, a hardened production Compose
+stack, CI, and a tag-only GHCR release workflow. Build and validate locally:
+
+```bash
+docker build --platform linux/amd64 -t wedding-app:phase7a .
+docker compose --env-file .env.production.example -f compose.production.yaml config
+```
+
+Copy `.env.production.example` to a protected untracked file and replace every
+`change-*` value before starting the core `app + mysql` stack. The optional
+Cloudflare connector starts only with the `public` profile. See the
+[Phase 7A acceptance guide](docs/testing/phase-7a-production-packaging.md) for
+the complete commands and evidence.
+
+Tagged `vX.Y.Z` releases publish `ghcr.io/xdranel/wedding-webapp` only after
+tests and Trivy pass. After the first successful publication, the repository
+owner must set that GHCR package visibility to **Public** and verify an
+anonymous pull; no broad personal access token is stored in this repository.
+Ubuntu installation, Cloudflare ingress, backup/restore/erasure, and final
+accessibility/performance/security acceptance remain Phase 7B–7D work.
+
 ## Operations guides
 
 - [Owner and staff event operations](docs/operations/event-operations.md)
@@ -152,9 +175,10 @@ camera, and multi-device acceptance is complete except for the still-pending
 physical USB scanner check.
 
 Phases 6A–6D and the presentation redesign are implemented and manually
-accepted. The final merged `main` verification on 2026-08-29 passed 79 suites /
-485 tests against MySQL/Flyway V1–V14 plus 5/5 JavaScript tests, with no
-failures, errors, or skips. The physical USB scanner remains deferred until
-hardware is available and does not block Phase 7. Production packaging,
-backup/restore/erasure, Cloudflare, accessibility/performance, and security
-verification remain Phase 7 work.
+accepted. Phase 7A production packaging is implemented and locally accepted:
+the 2026-08-30 serial regression passed 496 Java tests against MySQL/Flyway
+V1–V14 plus 6/6 JavaScript tests, and the linux/amd64 image and core Compose
+stack validated healthy. First tagged GHCR publication/public visibility,
+Ubuntu/Cloudflare installation, data operations, and final verification remain
+Phase 7B–7D work. The physical USB scanner remains deferred until hardware is
+available and is non-blocking.

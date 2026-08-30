@@ -254,6 +254,23 @@ offline queue or database synchronization.
 Docker Compose runs `app`, `mysql`, and `cloudflared`. Nginx and Tailscale are
 optional operational alternatives, not runtime dependencies.
 
+Phase 7A packages this topology in `compose.production.yaml`. The core profile
+contains only the non-root application image and MySQL 8.4.10; cloudflared
+2026.8.1 is opt-in through the `public` profile. Only application port 8080 is
+published for trusted LAN access. MySQL 3306 and management/readiness port 8081
+remain inside the Compose network. The application root filesystem is
+read-only except for a 64 MiB `/tmp` tmpfs and the mounted media directory.
+Container memory limits are 1.25 GiB each for app and MySQL and 256 MiB for
+cloudflared; the JVM heap is capped at 768 MiB.
+
+Pushes and pull requests to `main` run the serial Java/MySQL and JavaScript
+gates. An exact `vX.Y.Z` tag is publishable only when its commit belongs to
+`main`; the release builds linux/amd64, blocks fixable HIGH/CRITICAL Trivy
+findings before registry login/push, and attaches SBOM/provenance. GHCR package
+visibility is a one-time owner setting after first publication, followed by an
+anonymous-pull check. Production credentials remain external environment
+values and never enter the image or repository.
+
 ## Failure and recovery
 
 - Container health checks and restart policies recover ordinary process
@@ -274,6 +291,8 @@ clean run, the final clean suite passed 429 tests against Flyway V1-V13 on
 acceptance passed on 2026-08-23 with 2 tracked JavaScript syntax checks and a
 final clean MySQL/Flyway V1-V13 suite of 78 suites, 431 tests, and zero
 failures, errors, or skips. It adds no production feature, dependency, or
-migration. Phase 7 deployment, backup, Cloudflare, and hardening remain pending
-and separate; the Phase 5 physical USB scanner check remains deferred and
-non-blocking.
+migration. Phase 7A production profile, CSP, non-root image, hardened Compose,
+CI/release gates, and local acceptance completed on 2026-08-30 with 496 Java
+tests and 6 JavaScript tests passing. Phase 7B–7D installation/Cloudflare,
+backup/restore/erasure, and final verification remain separate; the Phase 5
+physical USB scanner check remains deferred and non-blocking.
