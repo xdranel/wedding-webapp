@@ -18,4 +18,15 @@ class ProductionOperationsTest {
 		assertThat(shell).doesNotContain("set -x", "eval ", "local url=",
 				"rm -rf \"$WEDDING_HOME\"");
 	}
+
+	@Test
+	void healthOperationKeepsManagementProbeInternalAndBounded() throws IOException {
+		String shell = Files.readString(Path.of("scripts/production/health-check.sh"));
+		assertThat(shell).contains("set -Eeuo pipefail", "[[ $# -le 1 ]]", "lib.sh", "--help", "--internal",
+				"load_env", "compose exec -T app", "localhost:8081/actuator/health/readiness",
+				"wait_for_health");
+		assertThat(Files.readString(Path.of("scripts/production/lib.sh")))
+				.contains("localhost:8080/login");
+		assertThat(shell).doesNotContain("8081:8081", "set -x");
+	}
 }
