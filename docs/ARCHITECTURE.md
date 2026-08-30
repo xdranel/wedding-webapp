@@ -256,9 +256,11 @@ optional operational alternatives, not runtime dependencies.
 
 Phase 7A packages this topology in `compose.production.yaml`. The core profile
 contains only the non-root application image and MySQL 8.4.10; cloudflared
-2026.8.1 is opt-in through the `public` profile. Only application port 8080 is
-published for trusted LAN access. MySQL 3306 and management/readiness port 8081
-remain inside the Compose network. The application root filesystem is
+2026.8.1 is opt-in through the `public` profile. Application port 8080 binds to
+the explicitly configured stable LAN address; persistent `DOCKER-USER` rules
+restrict it to the venue subnet because Docker-published ports can bypass UFW.
+UFW restricts SSH to the administrator subnet. MySQL 3306 and
+management/readiness port 8081 remain inside the Compose network. The application root filesystem is
 read-only except for a 64 MiB `/tmp` tmpfs and the mounted media directory.
 Container memory limits are 1.25 GiB each for app and MySQL and 256 MiB for
 cloudflared; the JVM heap is capped at 768 MiB.

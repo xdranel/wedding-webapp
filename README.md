@@ -38,9 +38,12 @@ anonymous pull; no broad personal access token is stored in this repository.
 Ubuntu installation, Cloudflare ingress, backup/restore/erasure, and final
 accessibility/performance/security acceptance remain Phase 7B–7D work.
 
+For a clean host, follow the [Ubuntu Server production installation](docs/installation/ubuntu-server.md).
+
 ## Operations guides
 
 - [Owner and staff event operations](docs/operations/event-operations.md)
+- [Ubuntu Server production installation](docs/installation/ubuntu-server.md)
 - [Guest guide / Panduan tamu](docs/guest-guide.md)
 - [Phase 6D manual acceptance checklist](docs/testing/phase-6d-manual-acceptance.md)
 

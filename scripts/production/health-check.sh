@@ -18,6 +18,8 @@ case "${1:-}" in
 			http://localhost:8081/actuator/health/readiness
 		;;
 	'')
+		load_env
+		[[ -n "$APP_BIND_ADDRESS_VALUE" ]] || die "missing validated application bind address"
 		wait_for_health || die "public application health check timed out"
 		printf 'Application health check passed.\n'
 		;;

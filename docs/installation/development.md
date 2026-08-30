@@ -434,9 +434,10 @@ docker compose -p phase7a_validation --env-file /tmp/wedding-phase7a.env \
   -f compose.production.yaml down
 ```
 
-The expected `ps` output publishes only host port 8080. Do not run `down -v`:
-the named MySQL volume is deliberately persistent. Delete the temporary env
-file after the test. Complete evidence and cleanup checks are in the
+The expected `ps` output publishes only port 8080 on the explicit
+`APP_BIND_ADDRESS`; the committed example uses loopback for safe local
+validation. Do not run `down -v`: the named MySQL volume is deliberately
+persistent. Delete the temporary env file after the test. Complete evidence and cleanup checks are in the
 [Phase 7A acceptance guide](../testing/phase-7a-production-packaging.md).
 
 The GHCR release workflow is exercised only by an exact `vX.Y.Z` tag whose

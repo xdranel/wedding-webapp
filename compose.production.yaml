@@ -45,7 +45,7 @@ services:
       MEDIA_DIRECTORY: /app/media
       JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60 -Xmx768m
     ports:
-      - "8080:8080"
+      - "${APP_BIND_ADDRESS:?APP_BIND_ADDRESS is required}:8080:8080"
     volumes:
       - type: bind
         source: ${MEDIA_DIRECTORY:?MEDIA_DIRECTORY is required}

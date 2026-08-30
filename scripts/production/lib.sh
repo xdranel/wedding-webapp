@@ -11,6 +11,7 @@ COMPOSE_FILE="$WEDDING_HOME/compose.production.yaml"
 ENV_FILE="$WEDDING_HOME/.env"
 LOCK_DIR="/run/lock/wedding"
 LOCK_FILE="$LOCK_DIR/operation.lock"
+APP_BIND_ADDRESS_VALUE=""
 
 die() {
 	printf 'ERROR: %s\n' "$*" >&2
@@ -31,10 +32,16 @@ load_env() {
 	[[ -f "$ENV_FILE" && ! -L "$ENV_FILE" ]] || die "missing regular environment file: $ENV_FILE"
 	read -r owner mode < <(stat -c '%u %a' "$ENV_FILE")
 	[[ "$owner" == 0 && "$mode" == 640 ]] || die "$ENV_FILE must be owned by root with mode 0640"
-	for name in APP_IMAGE MYSQL_DATABASE MYSQL_USER MYSQL_PASSWORD MYSQL_ROOT_PASSWORD \
+	for name in APP_IMAGE APP_BIND_ADDRESS MYSQL_DATABASE MYSQL_USER MYSQL_PASSWORD MYSQL_ROOT_PASSWORD \
 		DB_USERNAME DB_PASSWORD ADMIN_USERNAME ADMIN_PASSWORD INVITATION_BASE_URL \
 		INVITATION_SIGNING_SECRET MEDIA_DIRECTORY; do
 		grep -Eq "^${name}=.+$" "$ENV_FILE" || die "missing required environment name: $name"
+	done
+	APP_BIND_ADDRESS_VALUE="$(sed -n 's/^APP_BIND_ADDRESS=//p' "$ENV_FILE")"
+	[[ "$APP_BIND_ADDRESS_VALUE" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || die "APP_BIND_ADDRESS must be one IPv4 address"
+	local octet
+	for octet in ${APP_BIND_ADDRESS_VALUE//./ }; do
+		((10#$octet <= 255)) || die "APP_BIND_ADDRESS contains an invalid IPv4 octet"
 	done
 	[[ -f "$COMPOSE_FILE" && ! -L "$COMPOSE_FILE" ]] || die "missing production Compose file"
 	read -r owner mode < <(stat -c '%u %a' "$COMPOSE_FILE")
@@ -61,7 +68,7 @@ wait_for_health() {
 	local attempt
 	for ((attempt = 1; attempt <= 30; attempt++)); do
 		curl --fail --silent --show-error --connect-timeout 2 --max-time 5 \
-			http://localhost:8080/login >/dev/null 2>&1 && return 0
+			"http://$APP_BIND_ADDRESS_VALUE:8080/login" >/dev/null 2>&1 && return 0
 		sleep 2
 	done
 	return 1

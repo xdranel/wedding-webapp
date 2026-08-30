@@ -89,9 +89,11 @@ podman exec phase7a_validation_app_1 \
   http://localhost:8081/actuator/health/readiness
 ```
 
-Recorded result: MySQL and app became healthy. `ps` showed only
-`0.0.0.0:8080->8080/tcp`; MySQL 3306 and readiness 8081 remained internal.
-The app ran read-only and as user `wedding`.
+Recorded result: MySQL and app became healthy, with only application port 8080
+published; MySQL 3306 and readiness 8081 remained internal. Phase 7B further
+hardened that publication to the required `APP_BIND_ADDRESS`; configuration
+validation resolves the committed safe example to `127.0.0.1:8080`. The app
+ran read-only and as user `wedding`.
 
 Exercise restart/log behavior before cleanup:
 

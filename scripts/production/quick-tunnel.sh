@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+# shellcheck source=lib.sh
+source "$SCRIPT_DIR/lib.sh"
+
 if [[ $# -ne 0 ]]; then
-	printf 'ERROR: Quick Tunnel accepts no arguments or custom domain.\n' >&2
-	exit 2
+	die "Quick Tunnel accepts no arguments or custom domain"
 fi
 
+load_env
 printf 'TESTING ONLY: URL is temporary and cannot satisfy production acceptance.\n' >&2
-exec docker run --rm --add-host=host.docker.internal:host-gateway \
-	cloudflare/cloudflared:2026.8.1 \
-	tunnel --no-autoupdate --url http://host.docker.internal:8080
+compose run --rm --no-deps cloudflared \
+	tunnel --no-autoupdate --url http://app:8080
