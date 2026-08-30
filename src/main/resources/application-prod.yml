@@ -1,4 +1,5 @@
 server:
+  forward-headers-strategy: native
   shutdown: graceful
   servlet:
     session:
@@ -7,6 +8,8 @@ server:
         http-only: true
         same-site: lax
 spring:
+  datasource:
+    password: ${DB_PASSWORD}
   lifecycle:
     timeout-per-shutdown-phase: 30s
 management:
