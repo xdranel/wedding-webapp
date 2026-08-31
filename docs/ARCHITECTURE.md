@@ -285,6 +285,18 @@ values and never enter the image or repository.
   fails.
 - No write is accepted when the authoritative MySQL database is unavailable.
 
+All production data operations are root-only shell commands and share one host
+`flock`; they are not web endpoints. A backup stops only the app, creates a
+logical MySQL dump plus complete media archive below root-only
+`/var/backups/wedding`, verifies SHA-256, then atomically publishes the
+timestamp directory. Restore verifies paths, checksums, archives, database
+availability, and decompressed capacity before creating a safety backup or
+mutating live state. Media is restored through a sibling staging rename.
+Deployment accepts only immutable semantic-version tags and backs up/pulls
+before atomically replacing `APP_IMAGE`. Permanent erasure stops the app,
+commits one fixed FK-safe transaction, removes old backup children, and creates
+one clean baseline. No operation stores `.env` or exposes a browser endpoint.
+
 Phase 6B reminders/calendar implementation and manual acceptance are complete.
 Phase 6C functionality and its 118-test focused MySQL/Flyway V1-V13 suite are
 complete. After correcting stale V12/draft-event fixtures exposed by the first

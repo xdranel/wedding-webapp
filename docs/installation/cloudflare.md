@@ -9,8 +9,8 @@ flagged domain is not an endpoint or fallback.
 Start the healthy core stack first, then run from a second terminal:
 
 ```bash
-sudo /opt/wedding/scripts/health-check.sh --internal
-sudo /opt/wedding/scripts/quick-tunnel.sh
+sudo /opt/wedding/scripts/production/health-check.sh --internal
+sudo /opt/wedding/scripts/production/quick-tunnel.sh
 ```
 
 The helper joins the production Compose network and forwards the generated

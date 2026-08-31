@@ -1223,3 +1223,16 @@ with pending, approved, and hidden filters and individual approve/hide actions.
 **Answer:** No. Keep the exact seven-column template/import contract. Extend
 only administrator export with RSVP status/count, greeting, consent, moderation,
 private note, update source, and update time, retaining formula protection.
+
+## Phase 7C production data operations
+
+Production provides root-only, lock-serialized commands for daily local backup,
+checksum-gated restore, immutable version deployment, and permanent guest-data
+erasure. Backup contains the logical MySQL database and complete wedding media,
+but never `.env`; completed archives are checksum-verified and atomic. Restore
+requires an exact timestamp phrase and creates a safety backup before mutation.
+Deployment accepts only `vX.Y.Z` and never silently rolls back across a Flyway
+change. Erasure requires `ERASE ALL GUEST DATA`, intentionally creates no prior
+backup, preserves wedding/accounts/templates/media, removes every guest-bearing
+backup after commit, and finishes with one clean baseline. Local-only storage,
+roughly 24-hour recovery point, and no external alert are accepted constraints.

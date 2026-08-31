@@ -9,8 +9,8 @@ or edit a Flyway migration already applied to production.
 ```bash
 cd /opt/wedding
 sudo docker compose --env-file .env -f compose.production.yaml ps
-sudo /opt/wedding/scripts/health-check.sh --internal
-sudo /opt/wedding/scripts/health-check.sh
+sudo /opt/wedding/scripts/production/health-check.sh --internal
+sudo /opt/wedding/scripts/production/health-check.sh
 sudo docker compose --env-file .env -f compose.production.yaml logs --tail 100 app mysql
 df -h / /var/lib/wedding/media
 sudo docker system df
@@ -29,7 +29,7 @@ Restart only the failing service:
 
 ```bash
 sudo docker compose --env-file .env -f compose.production.yaml restart app
-sudo /opt/wedding/scripts/health-check.sh --internal
+sudo /opt/wedding/scripts/production/health-check.sh --internal
 ```
 
 If MySQL is unhealthy, inspect logs and disk first. Do not delete its volume or
@@ -41,27 +41,22 @@ writes and use the printed/CSV fallback until recovery is proven.
 Do not deploy an untagged image. Before changing versions, Phase 7C backup must
 finish successfully and its restore drill must already be accepted.
 
-1. Record the current `APP_IMAGE` tag and create the pre-deploy backup.
-2. Pull the exact new tag anonymously.
-3. Change only `APP_IMAGE` with `sudoedit`; never use `latest`.
-4. Render Compose, recreate app, and verify:
+1. Run the lock-serialized deployment command; never edit `APP_IMAGE` manually:
 
    ```bash
    cd /opt/wedding
-   sudo docker pull ghcr.io/xdranel/wedding-webapp:vX.Y.Z
-   sudo docker compose --env-file .env -f compose.production.yaml config --quiet
-   sudo docker compose --env-file .env -f compose.production.yaml up -d app
+   sudo /opt/wedding/scripts/production/deploy.sh vX.Y.Z
    sudo docker compose --env-file .env -f compose.production.yaml logs --tail 100 app
-   sudo /opt/wedding/scripts/health-check.sh --internal
-   sudo /opt/wedding/scripts/health-check.sh
+   sudo /opt/wedding/scripts/production/health-check.sh --internal
+   sudo /opt/wedding/scripts/production/health-check.sh
    ```
 
-5. Run administrator login, one test invitation, RSVP, and staff preview smoke
+2. Run administrator login, one test invitation, RSVP, and staff preview smoke
    tests. If they fail, stop application writes and inspect startup/Flyway logs.
    An image-only rollback is allowed only when logs prove the failed release
    never connected to or migrated the production database. If Flyway ran—or
    there is any doubt—restore the pre-deploy database and media together through
-   the Phase 7C runbook, then use the previous image. Never run an old JAR
+   the Phase 7C runbook, then follow the script's recovery guidance. Never run an old JAR
    against a forward-migrated schema and never reverse Flyway by hand.
 
 ## Venue readiness

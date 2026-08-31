@@ -281,3 +281,23 @@ non-blocking; Phase 7 may begin.
      identity resolution.
 153. Event closure blocks guest RSVP writes but does not block administrator
      RSVP corrections.
+154. Production backup, restore, deployment, and permanent erasure are root-only
+     server operations serialized by one non-blocking host lock; they have no
+     web endpoint.
+155. A completed backup contains a logical MySQL dump, complete media archive,
+     non-secret manifest, and verified checksums; `.env` and raw database
+     volumes are never archived.
+156. Backups are local-only, root-owned, atomically published after verification,
+     retained for 14 successful days by default, and scheduled daily at 02:00
+     Asia/Jakarta with persistent catch-up.
+157. Restore requires an exact timestamp phrase and must validate path,
+     checksum, archives, database access, and decompressed capacity before any
+     live mutation; it creates a safety backup first.
+158. Deployment accepts only exact `vX.Y.Z` images, creates a backup and pulls
+     before atomically changing `.env`, and never rolls an image backward when
+     Flyway changed the schema.
+159. Permanent erasure requires the exact phrase `ERASE ALL GUEST DATA`, has no
+     bypass or pre-erasure backup, commits guest-table deletion before removing
+     old backups, and is complete only after a verified clean baseline exists.
+160. Erasure receipts contain only timestamp, image, system operator, row counts,
+     and clean-baseline timestamp; they never contain guest identity or content.

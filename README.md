@@ -35,8 +35,10 @@ Tagged `vX.Y.Z` releases publish `ghcr.io/xdranel/wedding-webapp` only after
 tests and Trivy pass. After the first successful publication, the repository
 owner must set that GHCR package visibility to **Public** and verify an
 anonymous pull; no broad personal access token is stored in this repository.
-Ubuntu installation, Cloudflare ingress, backup/restore/erasure, and final
-accessibility/performance/security acceptance remain Phase 7B–7D work.
+Ubuntu installation and Cloudflare ingress are implemented in Phase 7B.
+Phase 7C provides local backup, restore, immutable deployment, and permanent
+guest erasure; its root-operated isolated drill remains an owner gate. Final
+accessibility/performance/security acceptance remains Phase 7D work.
 
 For a clean host, follow the [Ubuntu Server production installation](docs/installation/ubuntu-server.md).
 
@@ -46,6 +48,7 @@ For a clean host, follow the [Ubuntu Server production installation](docs/instal
 - [Ubuntu Server production installation](docs/installation/ubuntu-server.md)
 - [Cloudflare ingress](docs/installation/cloudflare.md)
 - [Production operations](docs/operations/production-operations.md)
+- [Backup, restore, deployment, and guest erasure](docs/operations/backup-restore-erasure.md)
 - [Guest guide / Panduan tamu](docs/guest-guide.md)
 - [Phase 6D manual acceptance checklist](docs/testing/phase-6d-manual-acceptance.md)
 
@@ -185,6 +188,8 @@ implementation are locally accepted. The final 2026-08-30 serial regression
 passed 499 Java tests against MySQL/Flyway V1–V14 plus 6/6 JavaScript tests;
 the linux/amd64 image, isolated core stack, and real Quick Tunnel HTTPS
 transport validated successfully. First tagged GHCR publication/public
-visibility, clean Ubuntu/fresh-device/new-domain owner checks, Phase 7C data
-operations, and Phase 7D final verification remain. The physical USB scanner
-remains deferred until hardware is available and is non-blocking.
+visibility and clean Ubuntu/fresh-device/new-domain owner checks remain. Phase
+7C data-operation implementation and automated contracts are complete; its
+root-operated isolated drill and Phase 7D final verification remain. The
+physical USB scanner remains deferred until hardware is available and is
+non-blocking.

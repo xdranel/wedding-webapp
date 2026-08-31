@@ -22,8 +22,10 @@ tagged GHCR publication/public visibility remain pending. Phase 7B scripts,
 Ubuntu/Cloudflare/runbook documentation, isolated core boot, and real Quick
 Tunnel HTTPS transport are locally accepted; clean Ubuntu, fresh-device,
 new-domain, and remotely-managed Tunnel checks remain owner-run gates. Phase
-7C–7D remain pending. The Phase 7B final serial gate passed 499 Java tests and
-6 JavaScript tests with no failures, errors, or skips.
+Phase 7C backup/restore/deploy/erasure implementation and automated contracts
+are complete; its root-operated isolated destructive drill remains an owner
+gate. Phase 7D remains pending. The Phase 7B final serial gate passed 499 Java
+tests and 6 JavaScript tests with no failures, errors, or skips.
 
 Detailed plans are written and executed one phase at a time. A phase must pass
 its tests and review before the next phase begins.
@@ -37,7 +39,7 @@ its tests and review before the next phase begins.
 | 5 | Restricted staff scan/search, atomic check-in, duplicate handling, and administrator corrections — implementation/automated tests complete; manual acceptance pending | Plan: `2026-08-02-phase-5-event-check-in.md`; design: `../specs/2026-08-02-phase-5-check-in-design.md` |
 | 6 | 6A gallery/audio/media accepted; 6B reminders/calendars accepted; 6C reports/print/CSV reuse/closure/status accepted; 6D accepted on 2026-08-23 after integration tests, 2,000-guest regression, selected gate, manual checklist, 2 tracked JavaScript syntax checks, and final MySQL/Flyway V1-V13 suite (78 suites, 431 tests, 0 failures/errors/skips); no Phase 6D production feature, dependency, or migration | Plans: `2026-08-11-phase-6a-wedding-media.md`, `2026-08-12-phase-6b-reminders-calendar.md`, `2026-08-18-phase-6c-reporting-status.md`, `2026-08-23-phase-6d-integration-acceptance.md`; designs: `../specs/2026-08-11-phase-6a-media-design.md`, `../specs/2026-08-11-phase-6b-reminders-calendar-design.md`, `../specs/2026-08-18-phase-6c-reporting-status-design.md`, `../specs/2026-08-23-phase-6d-integration-acceptance-design.md` |
 | Presentation refinement gate | Default Cinematic Photo guest, Balanced Workspace administrator, and Focused Confirmation staff presentations refined and owner-accepted; final merged `main` regression passed (79 suites / 485 tests, 0 failures/errors/skips) plus 5/5 standalone JavaScript tests; physical USB scanner still DEFERRED and non-blocking | [Design](../specs/2026-08-28-presentation-refinement-design.md); [plan](2026-08-28-presentation-refinement.md); [manual checklist](../../testing/phase-6d-manual-acceptance.md) |
-| 7 | 7A locally accepted; 7B implementation and local core/Quick Tunnel transport accepted with clean Ubuntu, fresh-device, new-domain, and managed-Tunnel owner gates pending; 7C backup/restore/erasure and 7D final verification pending | [Design](../specs/2026-08-30-phase-7-production-readiness-design.md); plans: [7A](2026-08-30-phase-7a-production-packaging.md), [7B](2026-08-30-phase-7b-installation-ingress.md), [7C](2026-08-30-phase-7c-data-operations.md), [7D](2026-08-30-phase-7d-verification-release.md) |
+| 7 | 7A locally accepted; 7B implementation and local core/Quick Tunnel transport accepted with clean Ubuntu, fresh-device, new-domain, and managed-Tunnel owner gates pending; 7C implementation/automated contracts complete with root-operated isolated drill pending; 7D final verification pending | [Design](../specs/2026-08-30-phase-7-production-readiness-design.md); plans: [7A](2026-08-30-phase-7a-production-packaging.md), [7B](2026-08-30-phase-7b-installation-ingress.md), [7C](2026-08-30-phase-7c-data-operations.md), [7D](2026-08-30-phase-7d-verification-release.md) |
 
 ## Progress rules
 

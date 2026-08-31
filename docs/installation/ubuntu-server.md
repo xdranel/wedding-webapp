@@ -96,8 +96,10 @@ directory remains root-owned and is never a Git working tree.
 ```bash
 getent group wedding >/dev/null || sudo groupadd --system wedding
 sudo install -d -o root -g wedding -m 0750 /opt/wedding
-sudo install -d -o root -g root -m 0755 /opt/wedding/scripts
+sudo install -d -o root -g root -m 0755 /opt/wedding/scripts/production
+sudo install -d -o root -g root -m 0755 /opt/wedding/scripts/production/sql
 sudo install -d -o 10001 -g 10001 -m 0750 /var/lib/wedding/media
+sudo install -d -o root -g root -m 0700 /var/backups/wedding
 ```
 
 From a trusted checkout of the exact release, install only deployment
@@ -105,9 +107,10 @@ artifacts:
 
 ```bash
 sudo install -o root -g root -m 0644 compose.production.yaml /opt/wedding/compose.production.yaml
-sudo install -o root -g root -m 0755 scripts/production/lib.sh /opt/wedding/scripts/lib.sh
-sudo install -o root -g root -m 0755 scripts/production/health-check.sh /opt/wedding/scripts/health-check.sh
-sudo install -o root -g root -m 0755 scripts/production/quick-tunnel.sh /opt/wedding/scripts/quick-tunnel.sh
+sudo install -o root -g root -m 0755 scripts/production/*.sh /opt/wedding/scripts/production/
+sudo install -o root -g root -m 0644 scripts/production/sql/erase-guests.sql /opt/wedding/scripts/production/sql/
+sudo install -o root -g root -m 0644 deployment/systemd/wedding-backup.service /etc/systemd/system/
+sudo install -o root -g root -m 0644 deployment/systemd/wedding-backup.timer /etc/systemd/system/
 sudo install -o root -g root -m 0640 .env.production.example /opt/wedding/.env
 sudoedit /opt/wedding/.env
 ```
@@ -186,8 +189,8 @@ start and verify the core stack:
 cd /opt/wedding
 sudo docker compose --env-file .env -f compose.production.yaml up -d mysql app
 sudo docker compose --env-file .env -f compose.production.yaml ps
-sudo /opt/wedding/scripts/health-check.sh --internal
-sudo /opt/wedding/scripts/health-check.sh
+sudo /opt/wedding/scripts/production/health-check.sh --internal
+sudo /opt/wedding/scripts/production/health-check.sh
 ```
 
 `ps` must show healthy `mysql` and `app`. Only `LAN_BIND_ADDRESS:8080` is
