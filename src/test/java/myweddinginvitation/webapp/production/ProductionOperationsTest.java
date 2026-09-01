@@ -12,7 +12,7 @@ class ProductionOperationsTest {
 	void sharedLibraryUsesStrictModeAndValidatedFixedDefaults() throws IOException {
 		String shell = Files.readString(Path.of("scripts/production/lib.sh"));
 		assertThat(shell).contains("set -Eeuo pipefail", "WEDDING_HOME:-/opt/wedding",
-				"realpath -e", "install -d -o 0 -g 0 -m 0755", "flock",
+				"realpath -e", "mode == 1777", "mkdir -m 0755", "lock_owner", "lock_mode", "flock",
 				"compose.production.yaml", "APP_BIND_ADDRESS", "load_env()", "wait_for_health()",
 				"--connect-timeout 2", "--max-time 5", "die()");
 		assertThat(shell).doesNotContain("set -x", "eval ", "local url=",

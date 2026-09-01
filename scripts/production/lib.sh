@@ -62,11 +62,17 @@ compose() {
 
 acquire_operation_lock() {
 	require_root
-	local owner mode
+	local owner mode lock_owner lock_mode
 	read -r owner mode < <(stat -c '%u %a' /run/lock)
-	[[ "$owner" == 0 && $((8#$mode & 022)) -eq 0 ]] || die "/run/lock must be root-owned and not group/world-writable"
-	[[ ! -L "$LOCK_DIR" ]] || die "operation lock directory must not be a symlink"
-	install -d -o 0 -g 0 -m 0755 "$LOCK_DIR"
+	[[ "$owner" == 0 ]] && (( (8#$mode & 022) == 0 || mode == 1777 )) || die "/run/lock must be a protected root-owned directory"
+	if [[ -e "$LOCK_DIR" ]]; then
+		[[ -d "$LOCK_DIR" && ! -L "$LOCK_DIR" ]] || die "operation lock directory is unsafe"
+		read -r lock_owner lock_mode < <(stat -c '%u %a' "$LOCK_DIR")
+		[[ "$lock_owner" == 0 && "$lock_mode" == 755 ]] || die "operation lock directory must be root-owned with mode 0755"
+	else
+		mkdir -m 0755 "$LOCK_DIR"
+	fi
+	[[ "$(realpath -e -- "$LOCK_DIR")" == "$LOCK_DIR" ]] || die "operation lock directory must be canonical"
 	[[ ! -L "$LOCK_FILE" ]] || die "operation lock file must not be a symlink"
 	exec 9>"$LOCK_FILE"
 	flock -n 9 || die "another operation is running"

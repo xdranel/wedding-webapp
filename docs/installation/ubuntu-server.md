@@ -98,7 +98,8 @@ getent group wedding >/dev/null || sudo groupadd --system wedding
 sudo install -d -o root -g wedding -m 0750 /opt/wedding
 sudo install -d -o root -g root -m 0755 /opt/wedding/scripts/production
 sudo install -d -o root -g root -m 0755 /opt/wedding/scripts/production/sql
-sudo install -d -o 10001 -g 10001 -m 0750 /var/lib/wedding/media
+sudo install -d -o root -g root -m 0750 /var/lib/wedding/media
+sudo chown 10001:10001 /var/lib/wedding/media
 sudo install -d -o root -g root -m 0700 /var/backups/wedding
 ```
 
