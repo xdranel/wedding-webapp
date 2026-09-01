@@ -262,6 +262,9 @@ restrict it to the venue subnet because Docker-published ports can bypass UFW.
 UFW restricts SSH to the administrator subnet. MySQL 3306 and
 management/readiness port 8081 remain inside the Compose network. The application root filesystem is
 read-only except for a 64 MiB `/tmp` tmpfs and the mounted media directory.
+The tmpfs permits executable mappings because the WebP encoder loads its
+packaged native library there; `no-new-privileges`, dropped capabilities, and
+the read-only root filesystem remain enforced.
 Container memory limits are 1.25 GiB each for app and MySQL and 256 MiB for
 cloudflared; the JVM heap is capped at 768 MiB.
 
