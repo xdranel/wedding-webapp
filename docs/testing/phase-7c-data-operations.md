@@ -1,6 +1,6 @@
 # Phase 7C data-operations acceptance
 
-Date: 2026-08-30  
+Date: 2026-09-01
 Scope: local backup, scheduled backup, restore, immutable deployment, and
 permanent guest-data erasure.
 
@@ -15,31 +15,43 @@ permanent guest-data erasure.
   service stub and installed production script path.
 - PASS — invalid deployment tags fail before root, Docker, or backup access.
 - PASS — independent destructive-safety review completed for every operation.
-- PASS — full serial MySQL/Flyway V1–V14 regression: 504 tests, zero
+- PASS — full serial MySQL/Flyway V1–V14 regression: 505 tests, zero
   failures/errors/skips.
 - PASS — both tracked JavaScript files: 6 tests, zero failures.
 - PASS — no Testcontainers-labeled container or Maven/Surefire process remained;
   the existing host `mysqld` was identified and deliberately left untouched.
 
-## Root-operated isolated drill
+## Root-operated Ubuntu VM drill
 
-Status: **PENDING OWNER EXECUTION**. The development account requires an
-interactive sudo password, which automation did not request or store. Run this
-on a dedicated Compose project and temporary Phase 7C roots—not production.
+Status: **PASS — OWNER EXECUTED** on Ubuntu Server at `192.168.122.77`, Docker
+29.1.3, Compose 5.5.0, MySQL 8.4.10, and the immutable
+`ghcr.io/xdranel/wedding-webapp:v0.9.0` image.
 
-- [ ] Successful backup: validate both archives, checksums, manifest, `0700`
-  permissions, app restart, and absence of `.env`.
-- [ ] Failed/low-space backup: no completed directory; app returns healthy;
-  `.partial` is reported.
-- [ ] Retention removes only expired completed direct children.
-- [ ] Concurrent operation is refused by the shared lock.
-- [ ] Restore known DB/media state after mutation; safety backup is retained.
-- [ ] Corrupt checksum refuses restore before app stop and preserves live data.
-- [ ] Erasure removes all five guest tables while preserving accounts, wedding
-  content, templates, and media.
-- [ ] Erasure removes old/partial backups, creates one verified clean baseline,
-  and emits counts without names, phone numbers, notes, or greetings.
-- [ ] Timer manual start succeeds and the journal contains no secret.
+- [x] Successful backup validated both archives, checksums, manifest, `0700`
+  permissions, application restart, and absence of `.env` from the artifacts.
+- [x] A forced low-space preflight created no completed or partial backup and
+  left the running application container unchanged.
+- [x] Retention removed only an expired completed direct child and preserved
+  every current completed backup.
+- [x] A concurrent operation was refused by the shared lock without stopping
+  the application or creating a backup.
+- [x] Restore recovered known database counts and byte-identical media after
+  destructive mutation, removed post-backup media, and retained a safety backup.
+- [x] A corrupt checksum refused restore before confirmation or application
+  stop and preserved live data.
+- [x] Erasure removed all five guest tables while preserving accounts, wedding
+  content, templates, Flyway history, and byte-identical media.
+- [x] Erasure removed guest-bearing backups, created exactly one verified clean
+  baseline, and emitted counts without names, phone numbers, notes, or greetings.
+- [x] Timer installation, enablement, manual start, and journal inspection
+  passed; the schedule resolved to 02:00 Asia/Jakarta plus its bounded jitter
+  and no secret appeared in the journal.
+
+The drill also exposed and verified fixes for Ubuntu's standard `1777`
+`/run/lock`, native WebP loading from the read-only container's executable
+temporary mount, cleanup after native writer linkage failure, and Flyway
+version ordering (`installed_rank` rather than lexical `MAX(version)`). The
+final clean baseline recorded `flyway_version=14`.
 
 ## Residual and deferred gates
 

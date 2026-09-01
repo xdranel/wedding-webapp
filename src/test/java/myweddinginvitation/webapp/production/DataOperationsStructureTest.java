@@ -14,7 +14,9 @@ class DataOperationsStructureTest {
 		assertThat(shell).contains("set -Eeuo pipefail", "acquire_operation_lock",
 				"flock -n 9", "backup_parent", "Incomplete backup", "trap",
 				"compose stop app", "mysqldump", "gzip -9", "tar --one-file-system",
-				"sha256sum --check", ".partial", "compose up -d app");
+				"sha256sum --check", ".partial", "compose up -d app",
+				"ORDER BY installed_rank DESC LIMIT 1");
+		assertThat(shell).doesNotContain("MAX(version)");
 		assertThat(shell).containsSubsequence("sha256sum --check", "find", "-mtime");
 		assertThat(shell).doesNotContain("set -x", "/var/lib/docker/volumes",
 				"rm -rf /", "source $ENV_FILE");

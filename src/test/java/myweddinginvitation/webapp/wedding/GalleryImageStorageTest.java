@@ -144,6 +144,19 @@ class GalleryImageStorageTest {
 		assertThat(countFiles(mediaDirectory.resolve("gallery"))).isZero();
 	}
 
+	@Test
+	void removesTemporaryOutputWhenNativeWriterCannotLoad() throws IOException {
+		GalleryImageStorage storage = new GalleryImageStorage(mediaDirectory, (image, path) -> {
+			throw new UnsatisfiedLinkError("native WebP writer unavailable");
+		});
+
+		org.assertj.core.api.Assertions.assertThatThrownBy(
+				() -> storage.store(file("image.png", "PNG", image(800, 400, true))))
+				.isInstanceOf(UnsatisfiedLinkError.class);
+
+		assertThat(countFiles(mediaDirectory.resolve("gallery"))).isZero();
+	}
+
 	static Stream<Arguments> imageFixtures() {
 		return Stream.of(
 				Arguments.of("camera.jpg", "JPEG", image(2000, 1000, false)),

@@ -99,7 +99,7 @@ compose exec -T mysql sh -c \
 tar --one-file-system --directory "$media_root" -czf "$partial/media.tar.gz" .
 
 flyway_version="$(compose exec -T mysql sh -c \
-	'exec mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --batch --skip-column-names "$MYSQL_DATABASE" --execute="SELECT COALESCE(MAX(version), '\''none'\'') FROM flyway_schema_history"')"
+	'exec mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --batch --skip-column-names "$MYSQL_DATABASE" --execute="SELECT COALESCE((SELECT version FROM flyway_schema_history WHERE success = 1 ORDER BY installed_rank DESC LIMIT 1), '\''none'\'')"')"
 database_bytes="$(stat -c %s "$partial/database.sql.gz")"
 media_bytes="$(stat -c %s "$partial/media.tar.gz")"
 

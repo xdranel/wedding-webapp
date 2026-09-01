@@ -86,12 +86,13 @@ public class GalleryImageStorage {
             }
             return new StoredGalleryImage(relative(main), thumbnailRequired ? relative(thumbnail) : null);
         } catch (IOException | RuntimeException exception) {
-            deletePath(mainTemporary);
-            deletePath(thumbnailTemporary);
             deletePath(main);
             deletePath(thumbnail);
             if (exception instanceof IllegalArgumentException argumentException) throw argumentException;
             throw new IllegalArgumentException("Could not process gallery image", exception);
+        } finally {
+            deletePath(mainTemporary);
+            deletePath(thumbnailTemporary);
         }
     }
 
