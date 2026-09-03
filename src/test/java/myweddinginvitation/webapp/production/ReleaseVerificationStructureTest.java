@@ -58,6 +58,18 @@ class ReleaseVerificationStructureTest {
 				.allMatch(line -> !line.contains("\tIGNORE\t") || line.matches(".*ASSESS-[0-9]+.*"));
 	}
 
+	@Test
+	void manualWorkflowVerifiesOnlyImmutableImagesAndRetainsEvidence() throws IOException {
+		String workflow = read(".github/workflows/production-verification.yml");
+		assertThat(workflow).contains("workflow_dispatch:", "permissions:", "contents: read",
+				"actions/checkout@v6.0.2", "actions/setup-java@v5.6.0",
+				"actions/setup-node@v6.2.0", "actions/upload-artifact@v6.0.0",
+				"retention-days: 14", "scripts/production/verify-release.sh --image",
+				"^ghcr\\.io/.+:v[0-9]+\\.[0-9]+\\.[0-9]+$", "if: always()");
+		assertThat(workflow).doesNotContain("packages: write", "latest", "gendhiramona.site",
+				"docker/build-push-action", "set -x");
+	}
+
 	private String read(String file) throws IOException {
 		return Files.readString(Path.of(file));
 	}
