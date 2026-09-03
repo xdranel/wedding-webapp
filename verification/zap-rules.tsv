@@ -1,0 +1,3 @@
+# ZAP baseline policy. FAIL/WARN retain findings for review.
+# HIGH findings require ASSESS-<number> before any IGNORE entry is accepted.
+10096	WARN	Timestamp disclosure is reviewed in the release evidence.
