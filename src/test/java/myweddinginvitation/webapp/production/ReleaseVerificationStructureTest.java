@@ -29,6 +29,19 @@ class ReleaseVerificationStructureTest {
 				"\"axe-core\": \"4.13.0\"", "\"playwright\": \"1.55.0\"");
 	}
 
+	@Test
+	void loadProfilesSeparateReadersFromStaffWrites() throws IOException {
+		String readers = read("verification/k6/invitation-read.js");
+		assertThat(readers).contains("vus: 100", "http_req_failed: ['rate==0']", "GET invitation");
+		assertThat(readers).doesNotContain("http.post");
+
+		String staff = read("verification/k6/staff-check-in.js");
+		assertThat(staff).contains("vus: 5", "fixtures[__VU - 1]", "preview check-in",
+				"confirm check-in", "http_req_failed: ['rate==0']",
+				"guest_search_duration: ['p(95)<=1000']",
+				"confirmed_check_in_duration: ['p(95)<=1000']");
+	}
+
 	private String read(String file) throws IOException {
 		return Files.readString(Path.of(file));
 	}
