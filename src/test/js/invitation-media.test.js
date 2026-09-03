@@ -40,6 +40,7 @@ class Element {
         this.open = false;
         this.fire('close');
     }
+    closest() { return this.section; }
 }
 
 function fixture(overrides = {}) {
@@ -57,6 +58,7 @@ function fixture(overrides = {}) {
         '#gallery-close': null,
         '#preview-form': null,
         '#language': null,
+        '[data-auto-open]': null,
         ...overrides.elements
     };
     const documentElement = { classList: new Set() };
@@ -70,6 +72,23 @@ function fixture(overrides = {}) {
     vm.runInNewContext(script, context);
     return { elements, document, documentElement };
 }
+
+test('post-PIN result reopens its section without restarting music', () => {
+    const audio = new Element();
+    let playCalls = 0;
+    audio.play = () => { playCalls++; return Promise.resolve(); };
+    const result = new Element();
+    const section = new Element();
+    result.section = section;
+    const { elements } = fixture({
+        elements: { '#background-audio': audio, '[data-auto-open]': result }
+    });
+
+    assert.equal(elements['#invitation'].classList.has('is-open'), true);
+    assert.equal(elements['#open-invitation'].getAttribute('aria-expanded'), 'true');
+    assert.equal(section.scrollOptions.behavior, 'smooth');
+    assert.equal(playCalls, 0);
+});
 
 test('opening remains usable when audio playback is rejected', async () => {
     const audio = new Element();

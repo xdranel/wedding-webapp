@@ -176,8 +176,8 @@
         <section id="rsvp" class="invitation-section rsvp rsvp-card" aria-labelledby="rsvp-title">
             <p class="section-eyebrow" th:text="${language == 'EN'} ? 'Kindly respond' : 'Konfirmasi kehadiran'">Konfirmasi kehadiran</p>
             <h2 id="rsvp-title" class="section-heading">RSVP</h2>
-            <p th:if="${qrError != null}" role="alert" th:text="${qrError}">PIN tidak cocok.</p>
-            <p th:if="${param.rsvpSaved}" role="status"
+            <p th:if="${qrError != null}" data-auto-open role="alert" th:text="${qrError}">PIN tidak cocok.</p>
+            <p th:if="${param.rsvpSaved}" data-auto-open role="status"
                th:text="${language == 'EN'} ? 'Your RSVP has been saved.' : 'RSVP Anda telah disimpan.'">
                 RSVP Anda telah disimpan.
             </p>
@@ -197,7 +197,7 @@
 
             <form th:if="${rsvpWritable}" th:action="${invitationPath + '/rsvp'}" method="post"
                   th:object="${rsvpForm}" class="rsvp-form">
-                <div th:if="${rsvpErrors != null && !rsvpErrors.empty}" class="form-errors" role="alert" aria-live="polite">
+                <div th:if="${rsvpErrors != null && !rsvpErrors.empty}" data-auto-open class="form-errors" role="alert" aria-live="polite">
                     <p th:each="error : ${rsvpErrors}" th:text="${error}">Data tidak valid</p>
                 </div>
 
@@ -265,11 +265,11 @@
                  class="invitation-section qr-card" aria-labelledby="qr-access-title">
             <h2 id="qr-access-title" class="section-heading"
                 th:text="${language == 'EN'} ? 'Check-in QR' : 'QR check-in'">QR check-in</h2>
-            <p th:if="${param.qrPinRequired}" role="alert"
+            <p th:if="${param.qrPinRequired}" data-auto-open role="alert"
                th:text="${language == 'EN'} ? 'Verify your PIN to view the QR.' : 'Verifikasi PIN untuk melihat QR.'">
                 Verifikasi PIN untuk melihat QR.
             </p>
-            <p th:if="${qrVerified}" role="status"
+            <p th:if="${qrVerified}" data-auto-open role="status"
                th:text="${language == 'EN'} ? 'PIN verified.' : 'PIN terverifikasi.'">PIN terverifikasi.</p>
             <div th:if="${qrVerified}">
                 <img th:src="${invitationPath + '/qr.png?language=' + language}" width="320" height="320"

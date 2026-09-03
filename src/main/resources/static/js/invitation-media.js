@@ -15,16 +15,19 @@
 
     if (invitation && open) {
         document.documentElement.classList.add('js');
-        open.addEventListener('click', () => {
+        const showInvitation = (target, startMusic = false) => {
             invitation.classList.add('is-open');
             document.body?.classList.add('invitation-open');
             open.setAttribute('aria-expanded', 'true');
-            if (welcome) {
-                welcome.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
-                welcome.focus({ preventScroll: true });
+            if (target) {
+                target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
             }
-            if (audio) playAudio();
-        });
+            if (startMusic && welcome) welcome.focus({ preventScroll: true });
+            if (audio && startMusic) playAudio();
+        };
+        open.addEventListener('click', () => showInvitation(welcome, true));
+        const autoOpen = document.querySelector('[data-auto-open]');
+        if (autoOpen) showInvitation(autoOpen.closest('.invitation-section'));
     }
 
     document.querySelectorAll('[data-scroll-target]').forEach(link => {
