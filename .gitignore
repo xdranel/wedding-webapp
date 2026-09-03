@@ -39,6 +39,10 @@ build/
 ### VS Code ###
 .vscode/
 
+### Release verification ###
+verification/node_modules/
+verification-results/
+
 ### Agent Req ###
 .agents/
 .codex/
