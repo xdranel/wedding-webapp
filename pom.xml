@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.0</version>
+		<version>4.1.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>myweddinginvitation.webapp</groupId>
@@ -73,7 +73,7 @@
 		<dependency>
 			<groupId>com.googlecode.libphonenumber</groupId>
 			<artifactId>libphonenumber</artifactId>
-			<version>9.0.20</version>
+			<version>9.0.39</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -88,7 +88,7 @@
 		<dependency>
 			<groupId>com.github.usefulness</groupId>
 			<artifactId>webp-imageio</artifactId>
-			<version>0.10.0</version>
+			<version>0.11.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.webjars.npm</groupId>
