@@ -47,7 +47,7 @@ class ReleaseVerificationStructureTest {
 		String runner = read("scripts/production/verify-release.sh");
 		assertThat(runner).contains("set -Eeuo pipefail", "umask 077", "/tmp/wedding-phase7d",
 				"COMPOSE_PROJECT_NAME=wedding-phase7d", "trap cleanup EXIT", "wait_for_health",
-				"phase-7d-synthetic.sql", "zaproxy/zap-stable:2.17.0", "zap-baseline.py",
+				"phase-7d-synthetic.sql", "zaproxy/zap-stable:2.17.0", "--workdir /zap/wrk", "zap-baseline.py",
 				"grafana/k6:1.8.0", "lighthouse@13.3.0", "axe-core@4.13.0",
 				"aquasec/trivy:0.69.1");
 		assertThat(runner).doesNotContain("zap-full-scan.py", "gendhiramona.site");
