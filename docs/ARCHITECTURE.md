@@ -1,10 +1,8 @@
 # Architecture
 
-Status: implemented and accepted through Phase 6D and the presentation
-refinement. Final merged `main` verification passed on 2026-08-29 with 79
-suites / 485 tests against MySQL/Flyway V1–V14 plus 5/5 JavaScript tests. The
-Phase 5 physical USB scanner check remains deferred and non-blocking; Phase 7
-may begin.
+Status: application and Phase 7 production-readiness implementation complete.
+The `v0.9.0` evidence run and new-domain `v1.0.0` gate remain pending. The
+physical USB scanner check remains deferred and non-blocking.
 
 ## Selected approach
 
@@ -313,3 +311,16 @@ CI/release gates, and local acceptance completed on 2026-08-30 with 496 Java
 tests and 6 JavaScript tests passing. Phase 7B–7D installation/Cloudflare,
 backup/restore/erasure, and final verification remain separate; the Phase 5
 physical USB scanner check remains deferred and non-blocking.
+
+## Phase 7D verification boundary
+
+Release tools run outside the application image and Maven runtime. A dedicated
+`wedding-phase7d` Compose project uses disposable MySQL/media storage and a SQL
+fixture containing synthetic data only. Lighthouse 13.3.0, axe-core 4.13.0,
+ZAP 2.17.0, k6 1.8.0, and Trivy 0.69.1 run serially; reports are temporary CI
+artifacts retained for 14 days. Runtime migrations remain Flyway V1–V14.
+
+`v0.9.0` is an evidence-backed candidate after local/LAN/Quick Tunnel and data
+operation drills pass. `v1.0.0` additionally requires a new clean domain with
+DNS, Tunnel, HTTPS, fresh-device, and reputation evidence. Off-site backup,
+external monitoring, and point-in-time recovery remain outside this topology.

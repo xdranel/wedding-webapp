@@ -1,10 +1,8 @@
 # Business Rules
 
-Status: implemented and accepted through Phase 6D and the presentation
-refinement. Final merged `main` evidence on 2026-08-29: 79 suites / 485 tests
-against MySQL/Flyway V1–V14 plus 5/5 JavaScript tests, with no failures, errors,
-or skips. The Phase 5 physical USB scanner check remains deferred and
-non-blocking; Phase 7 may begin.
+Status: application and Phase 7 production-readiness implementation complete.
+Candidate evidence, new-domain release acceptance, and physical USB scanner
+hardware acceptance remain pending.
 
 1. An invitation belongs to one named primary guest.
 2. An invitation may optionally allow one unnamed companion.
@@ -301,3 +299,12 @@ non-blocking; Phase 7 may begin.
      old backups, and is complete only after a verified clean baseline exists.
 160. Erasure receipts contain only timestamp, image, system operator, row counts,
      and clean-baseline timestamp; they never contain guest identity or content.
+161. Release verification must use only synthetic data in the dedicated
+     `wedding-phase7d` project and must never store credentials, sessions,
+     invitation tokens, personal data, or full machine reports in Git.
+162. Verification tools remain outside the application runtime and execute
+     serially with immutable pinned versions and bounded cleanup.
+163. `v0.9.0` requires all automated and operator gates; `v1.0.0` additionally
+     requires a newly purchased clean domain and fresh-device reputation checks.
+164. A flagged retired domain and its subdomains are forbidden in release
+     configuration, examples, and official evidence.

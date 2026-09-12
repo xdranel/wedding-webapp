@@ -1,8 +1,7 @@
 # Data Schema
 
-Status: accepted through Phase 6D and the presentation refinement. Flyway
-V1–V14 is current. Final merged `main` verification passed on 2026-08-29 with
-79 suites / 485 tests and no failures, errors, or skips; Phase 7 may begin.
+Status: application and Phase 7 production-readiness implementation complete.
+Flyway V1–V14 remains current; Phase 7D adds no production schema migration.
 
 Database target: MySQL 8.4 LTS.
 
@@ -224,3 +223,7 @@ The database/application enforce exactly one administrator account.
 - Daily backup covers this database and the complete media volume, including
   gallery WebP and audio MP3 files referenced by V11 state.
 - Post-event bulk guest-data erasure is an explicit server-side operation.
+
+Phase 7D adds no application table or migration. Its SQL fixture is used only
+after Flyway V1–V14 in a disposable verification database and contains no real
+guest or account data. It is not installed into production migration history.

@@ -1,10 +1,8 @@
 # Product Design
 
-Status: implemented and accepted through Phase 6D. The default presentation
-redesign and its 2026-08-28 refinement passed owner browser/device acceptance
-on 2026-08-29. The final merged `main` gate passed 79 suites / 485 tests against
-MySQL/Flyway V1–V14 plus 5/5 JavaScript tests. The Phase 5 physical USB scanner
-check remains DEFERRED and non-blocking. Phase 7 may begin.
+Status: product presentation is owner-accepted and Phase 7 verification tooling
+is implemented. Candidate evidence, the new-domain gate, and physical USB
+scanner hardware acceptance remain pending.
 
 ## Presentation redesign
 
@@ -238,3 +236,10 @@ manually accepted. The final merged `main` regression passed on 2026-08-29 with
 tests, with no failures, errors, or skips. Commands and cleanup audits are
 recorded in the linked manual checklist. The Phase 5 physical USB scanner
 check remains separately DEFERRED and non-blocking; Phase 7 may begin.
+
+## Release verification presentation
+
+Phase 7D does not change guest, administrator, or staff presentation. It checks
+the real production candidate with a mobile Lighthouse profile and axe journeys
+across guest, login, administrator, and check-in views. Machine reports stay in
+14-day artifacts; the repository stores only concise, redacted evidence.

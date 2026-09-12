@@ -37,8 +37,9 @@ owner must set that GHCR package visibility to **Public** and verify an
 anonymous pull; no broad personal access token is stored in this repository.
 Ubuntu installation and Cloudflare ingress are implemented in Phase 7B.
 Phase 7C provides local backup, restore, immutable deployment, and permanent
-guest erasure; its root-operated isolated drill remains an owner gate. Final
-accessibility/performance/security acceptance remains Phase 7D work.
+guest erasure. Phase 7D adds the manual release-verification workflow and local
+runner; `v0.9.0` remains gated by its automated and operator acceptance checks,
+while `v1.0.0` additionally requires a newly purchased clean domain.
 
 For a clean host, follow the [Ubuntu Server production installation](docs/installation/ubuntu-server.md).
 
@@ -51,6 +52,8 @@ For a clean host, follow the [Ubuntu Server production installation](docs/instal
 - [Backup, restore, deployment, and guest erasure](docs/operations/backup-restore-erasure.md)
 - [Guest guide / Panduan tamu](docs/guest-guide.md)
 - [Phase 6D manual acceptance checklist](docs/testing/phase-6d-manual-acceptance.md)
+- [Phase 7D production acceptance](docs/testing/phase-7d-production-acceptance.md)
+- [Release evidence template](docs/releases/release-evidence-template.md)
 
 ## Wedding content
 
@@ -189,7 +192,8 @@ passed 499 Java tests against MySQL/Flyway V1–V14 plus 6/6 JavaScript tests;
 the linux/amd64 image, isolated core stack, and real Quick Tunnel HTTPS
 transport validated successfully. First tagged GHCR publication/public
 visibility and clean Ubuntu/fresh-device/new-domain owner checks remain. Phase
-7C data-operation implementation and automated contracts are complete; its
-root-operated isolated drill and Phase 7D final verification remain. The
+7C data-operation implementation and automated contracts are complete. Phase
+7D verification tooling is implemented; candidate evidence and the new-domain
+gate remain operator work. The
 physical USB scanner remains deferred until hardware is available and is
 non-blocking.

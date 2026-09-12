@@ -1,10 +1,8 @@
 # Product Requirements
 
-Status: implemented and accepted through Phase 6D and the presentation
-refinement. Final merged `main` verification passed on 2026-08-29 with 79
-suites / 485 tests against MySQL/Flyway V1–V14 plus 5/5 JavaScript tests. The
-Phase 5 physical USB scanner check remains deferred and non-blocking; Phase 7
-may begin.
+Status: application and Phase 7 production-readiness implementation complete.
+The `v0.9.0` evidence run, new-domain `v1.0.0` gate, and physical USB scanner
+hardware acceptance remain pending.
 
 ## Implementation status — 2026-08-23
 
@@ -1236,3 +1234,14 @@ change. Erasure requires `ERASE ALL GUEST DATA`, intentionally creates no prior
 backup, preserves wedding/accounts/templates/media, removes every guest-bearing
 backup after commit, and finishes with one clean baseline. Local-only storage,
 roughly 24-hour recovery point, and no external alert are accepted constraints.
+
+## Phase 7D release verification
+
+The application provides a manual CI workflow and local serial runner for an
+immutable `vX.Y.Z` GHCR image. Verification uses synthetic disposable data and
+pinned external Lighthouse, axe, ZAP baseline, k6, and Trivy tools without
+adding runtime dependencies. Passing automated, LAN, Quick Tunnel, and data
+operation gates qualifies `v0.9.0`; `v1.0.0` remains blocked until a newly
+purchased clean domain passes DNS/Tunnel/HTTPS and reputation checks. Physical
+USB scanner acceptance, off-site backup, external monitoring, and PITR remain
+explicitly deferred.
