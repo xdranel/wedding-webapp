@@ -9,6 +9,7 @@ if (required('VERIFY_FIXTURE_KIND') !== 'synthetic') throw new Error('Only a syn
 const baseUrl = required('VERIFY_BASE_URL').replace(/\/$/, '');
 const output = process.env.VERIFY_REPORT || 'verification-results/accessibility.json';
 const browser = await chromium.launch({ headless: true });
+const context = await browser.newContext({ bypassCSP: true });
 const findings = [];
 
 async function scan(page, name) {
@@ -33,20 +34,20 @@ async function login(page, username, password) {
 }
 
 try {
-  const guest = await browser.newPage();
+  const guest = await context.newPage();
   await guest.goto(required('VERIFY_GUEST_URL'));
   await scan(guest, 'guest');
 
-  const loginPage = await browser.newPage();
+  const loginPage = await context.newPage();
   await loginPage.goto(`${baseUrl}/login`);
   await scan(loginPage, 'login');
 
-  const admin = await browser.newPage();
+  const admin = await context.newPage();
   await login(admin, required('VERIFY_ADMIN_USERNAME'), required('VERIFY_ADMIN_PASSWORD'));
   await admin.goto(`${baseUrl}/admin`);
   await scan(admin, 'admin');
 
-  const staff = await browser.newPage();
+  const staff = await context.newPage();
   await login(staff, required('VERIFY_STAFF_USERNAME'), required('VERIFY_STAFF_PASSWORD'));
   await staff.goto(`${baseUrl}/check-in`);
   await scan(staff, 'check-in');
