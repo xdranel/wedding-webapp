@@ -99,8 +99,8 @@ VERIFY_FIXTURE_KIND=synthetic VERIFY_BASE_URL=http://127.0.0.1:8080 VERIFY_GUEST
 VERIFY_REPORT="$WORK_DIR/reports/accessibility.json" node "$ROOT_DIR/verification/accessibility.mjs"
 
 cp "$ROOT_DIR/verification/zap-rules.tsv" "$WORK_DIR/reports/zap-rules.tsv"
-docker run --rm --network host --user "$(id -u):$(id -g)" \
-	--tmpfs "/home/zap:rw,exec,uid=$(id -u),gid=$(id -g),mode=0700" \
+chmod 0777 "$WORK_DIR/reports"
+docker run --rm --network host \
 	-v "$WORK_DIR/reports:/zap/wrk:rw" "$ZAP_IMAGE" zap-baseline.py \
 	-t http://127.0.0.1:8080/login -c zap-rules.tsv -J zap.json -r zap.html
 
