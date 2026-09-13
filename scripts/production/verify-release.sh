@@ -96,10 +96,11 @@ jq -e '.categories.performance.score >= 0.80 and .categories.accessibility.score
 VERIFY_FIXTURE_KIND=synthetic VERIFY_BASE_URL=http://127.0.0.1:8080 VERIFY_GUEST_URL="$guest_url" \
 	VERIFY_ADMIN_USERNAME=phase7d-owner VERIFY_ADMIN_PASSWORD=phase7d-owner-password \
 	VERIFY_STAFF_USERNAME=phase7d-staff-1 VERIFY_STAFF_PASSWORD=phase7d-staff-password \
-	VERIFY_REPORT="$WORK_DIR/reports/accessibility.json" node "$ROOT_DIR/verification/accessibility.mjs"
+VERIFY_REPORT="$WORK_DIR/reports/accessibility.json" node "$ROOT_DIR/verification/accessibility.mjs"
 
-docker run --rm --network host --user "$(id -u):$(id -g)" --env HOME=/zap/wrk \
-	-v "$ROOT_DIR/verification/zap-rules.tsv:/zap/wrk/zap-rules.tsv:ro" \
+cp "$ROOT_DIR/verification/zap-rules.tsv" "$WORK_DIR/reports/zap-rules.tsv"
+docker run --rm --network host --user "$(id -u):$(id -g)" \
+	--tmpfs "/home/zap:rw,exec,uid=$(id -u),gid=$(id -g),mode=0700" \
 	-v "$WORK_DIR/reports:/zap/wrk:rw" "$ZAP_IMAGE" zap-baseline.py \
 	-t http://127.0.0.1:8080/login -c zap-rules.tsv -J zap.json -r zap.html
 
